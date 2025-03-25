@@ -163,11 +163,11 @@ resourcePackRepo: "WOFTNW/Dragonspeak"
 # Default: 10826
 whitelistPort: 10826
 
-# The maximum amount of flight energy
+# The maximum amount of flight energy.
 # Default: 400
 flightEnergyCapacity: 400
 
-# The point after energy depletion that flight is possible again
+# The point after energy depletion that flight is possible again.
 # Default: 200.00
 flightRegenerationPoint: 200.00
 
@@ -182,3 +182,7 @@ flightEnergyDepletionXYMultiplier: 4.00
 # The rate at which movement on the Y axes depletes energy while flying.
 # Default: 10.00
 flightEnergyDepletionYMultiplier: 10.00
+
+# The message sent if a Wither is built in a region where the wither flag is denied.
+# Default: "Withers cannot be spawned here. You can only spawn Withers in the Wither chamber."
+noWitherNotice: "Withers cannot be spawned here. You can only spawn Withers in the Wither chamber."

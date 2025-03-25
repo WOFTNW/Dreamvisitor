@@ -16,6 +16,7 @@ import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.commands.CmdChatback;
 import io.github.stonley890.dreamvisitor.functions.*;
 import io.github.stonley890.dreamvisitor.functions.worldguard.DragonFlightFlag;
+import io.github.stonley890.dreamvisitor.functions.worldguard.WitherFlag;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.luckperms.api.LuckPerms;
@@ -55,12 +56,13 @@ public class Dreamvisitor extends JavaPlugin {
     public static Location hubLocation;
     public static boolean webWhitelistEnabled;
     public static boolean debugMode;
-    public static boolean restartScheduled = false;
     public static boolean botFailed = true;
     private static ConsoleLogger appender;
     public final String VERSION = getDescription().getVersion();
 
+    // WorldGuard flags
     public static StateFlag DRAGON_FLIGHT;
+    public static StateFlag WITHER;
 
     public static Dreamvisitor getPlugin() {
         return PLUGIN;
@@ -110,6 +112,24 @@ public class Dreamvisitor extends JavaPlugin {
                     // types don't match - this is bad news! some other plugin conflicts with you
                     // hopefully this never actually happens
                     getLogger().severe("A flag with the name dragon-flight already exists! Some other plugin claimed it already :(");
+                }
+            }
+            try {
+                // create a flag with the name "wither", defaulting to true
+                StateFlag flag = new StateFlag("wither", true);
+                registry.register(flag);
+                WITHER = flag; // only set our field if there was no error
+
+            } catch (FlagConflictException e) {
+                // some other plugin registered a flag by the same name already.
+                // you can use the existing flag, but this may cause conflicts - be sure to check type
+                Flag<?> existing = registry.get("wither");
+                if (existing instanceof StateFlag) {
+                    WITHER = (StateFlag) existing;
+                } else {
+                    // types don't match - this is bad news! some other plugin conflicts with you
+                    // hopefully this never actually happens
+                    getLogger().severe("A flag with the name wither already exists! Some other plugin claimed it already :(");
                 }
             }
         } catch (NoClassDefFoundError e) {
@@ -164,6 +184,7 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdParcel());
             commands.add(new CmdDreamvisitor());
             commands.add(new CmdChatback());
+            commands.add(new CmdVelocity());
 
             debug("Initializing commands...");
             CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
@@ -212,6 +233,7 @@ public class Dreamvisitor extends JavaPlugin {
             SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
             // second param allows for ordering of handlers - see the JavaDocs
             sessionManager.registerHandler(DragonFlightFlag.FACTORY, null);
+            sessionManager.registerHandler(WitherFlag.FACTORY, null);
 
             // Start message
             getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
@@ -322,7 +344,8 @@ public class Dreamvisitor extends JavaPlugin {
                 @Override
                 public void run() {
                     // Restart if requested and no players are online
-                    if (restartScheduled && Bukkit.getOnlinePlayers().isEmpty()) {
+                    if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().isEmpty()) {
+                        AutoRestart.sendAutoRestartMessage();
                         Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
                         Bot.sendLog("**Restarting the server as scheduled.**");
                         getServer().spigot().restart();
@@ -333,7 +356,7 @@ public class Dreamvisitor extends JavaPlugin {
                     long freeMemory = Runtime.getRuntime().freeMemory();
                     double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
                     if (freeMemoryPercent <= 10) {
-                        restartScheduled = true;
+                        AutoRestart.enableAutoRestart(null);
                         Bukkit.getLogger().info("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
                     }
                 }
@@ -446,6 +469,7 @@ public class Dreamvisitor extends JavaPlugin {
         pluginManager.registerEvents(new ListenEntityToggleGlideEvent(), this);
         pluginManager.registerEvents(new ListenPlayerChangedWorld(), this);
         pluginManager.registerEvents(new ListenPlayerRespawn(), this);
+        pluginManager.registerEvents(new ListenCreatureSpawn(), this);
     }
 
     private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {

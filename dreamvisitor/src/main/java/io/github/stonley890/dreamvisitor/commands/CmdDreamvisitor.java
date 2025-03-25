@@ -334,6 +334,69 @@ public class CmdDreamvisitor implements DVCommand {
                                         .executes((sender, args) -> {
                                             @Nullable String key = "resourcePackRepo";
                                             configString(sender, args, key);
+                                        }),
+                                new CommandAPICommand("whitelistPort")
+                                        .withHelp("Set whitelistPort.", """
+                                                The port to use to accept web whitelist requests.
+                                                Default: 10826""")
+                                        .withOptionalArguments(new IntegerArgument("whitelistPort", 0))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "whitelistPort";
+                                            configInt(sender, args, key);
+                                        }),
+                                new CommandAPICommand("flightEnergyCapacity")
+                                        .withHelp("Set flightEnergyCapacity.", """
+                                                The maximum amount of flight energy.
+                                                Default: 400""")
+                                        .withOptionalArguments(new IntegerArgument("flightEnergyCapacity", 0))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "flightEnergyCapacity";
+                                            configInt(sender, args, key);
+                                        }),
+                                new CommandAPICommand("flightRegenerationPoint")
+                                        .withHelp("Set flightRegenerationPoint.", """
+                                                The point after energy depletion that flight is possible again.
+                                                Default: 200.00""")
+                                        .withOptionalArguments(new DoubleArgument("flightRegenerationPoint", 0))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "flightRegenerationPoint";
+                                            configDouble(sender, args, key);
+                                        }),
+                                new CommandAPICommand("flightEnergyRegeneration")
+                                        .withHelp("Set flightEnergyRegeneration.", """
+                                                The rate at which energy is regenerated per tick.
+                                                Default: 1.00""")
+                                        .withOptionalArguments(new DoubleArgument("flightEnergyRegeneration", 0))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "flightEnergyRegeneration";
+                                            configDouble(sender, args, key);
+                                        }),
+                                new CommandAPICommand("flightEnergyDepletionXYMultiplier")
+                                        .withHelp("Set flightEnergyDepletionXYMultiplier.", """
+                                                The rate at which movement on the X and Y axes depletes energy while flying.
+                                                Default: 4.00""")
+                                        .withOptionalArguments(new DoubleArgument("flightEnergyDepletionXYMultiplier", 0))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "flightEnergyDepletionXYMultiplier";
+                                            configDouble(sender, args, key);
+                                        }),
+                                new CommandAPICommand("flightEnergyDepletionYMultiplier")
+                                        .withHelp("Set flightEnergyDepletionYMultiplier.", """
+                                                The rate at which movement on the Y axes depletes energy while flying.
+                                                Default: 10.00""")
+                                        .withOptionalArguments(new DoubleArgument("flightEnergyDepletionYMultiplier", 0))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "flightEnergyDepletionYMultiplier";
+                                            configDouble(sender, args, key);
+                                        }),
+                                new CommandAPICommand("noWitherNotice")
+                                        .withHelp("Set noWitherNotice", """
+                                                The message sent if a Wither is built in a region where the wither flag is denied.
+                                                Default: "Withers cannot be spawned here. You can only spawn Withers in the Wither chamber.""")
+                                        .withOptionalArguments(new TextArgument("noWitherNotice"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "noWitherNotice";
+                                            configString(sender, args, key);
                                         })
                         )
                 );
@@ -356,6 +419,16 @@ public class CmdDreamvisitor implements DVCommand {
             plugin.getConfig().set(key, value);
             plugin.saveConfig();
             sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getInt(key));
+        }
+    }
+
+    private void configDouble(CommandSender sender, @NotNull CommandArguments args, String key) {
+        Double value = (Double) args.get(key);
+        if (value == null) sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + plugin.getConfig().getDouble(key));
+        else {
+            plugin.getConfig().set(key, value);
+            plugin.saveConfig();
+            sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getDouble(key));
         }
     }
 

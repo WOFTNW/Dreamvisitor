@@ -107,3 +107,6 @@ permissions:
   dreamvisitor.fly:
     description: Allows dragon flight
     default: true
+  dreamvisitor.velocity:
+    description: Allows using the velocity command.
+    default: op

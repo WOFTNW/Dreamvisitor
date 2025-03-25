@@ -507,18 +507,6 @@ Let's see if you remember this one.
                 default -> event.reply("Unexpected request: " + button.getId()).setEphemeral(true).queue();
             }
 
-        } else if (button.getId().equals("schedulerestart")) {
-
-            Button undoButton = Button.primary("schedulerestart", "Undo");
-
-            if (Dreamvisitor.restartScheduled) {
-                Dreamvisitor.restartScheduled = false;
-                event.reply("✅ Canceled server restart.").addActionRow(undoButton).queue();
-            } else {
-                Dreamvisitor.restartScheduled = true;
-                event.reply("✅ The server will restart when there are no players online").addActionRow(undoButton).queue();
-            }
-
         } else if (button.getId().startsWith("infraction-")) {
             if (button.getId().startsWith("infraction-expire-")) {
 

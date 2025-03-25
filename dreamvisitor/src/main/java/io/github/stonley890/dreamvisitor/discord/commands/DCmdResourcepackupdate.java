@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.AutoRestart;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -78,10 +79,10 @@ public class DCmdResourcepackupdate implements DiscordCommand {
                     writer.close();
 
                     Dreamvisitor.debug("Success.");
-                    Dreamvisitor.restartScheduled = true;
                     event.getHook().editOriginal("The resource pack URL has been updated to " + resourcePackURL +
                             ". The SHA1 hash has been updated to " + newHash + ". The server must restart for changes to take effect. " +
-                            "I will restart it automatically when 0 players are online. You can cancel this with `/schedulerestart`.").queue();
+                            "I will restart it automatically when 0 players are online. You can cancel this with `/autorestart`.").queue();
+                    event.getHook().retrieveOriginal().queue(AutoRestart::enableAutoRestart);
 
                 } catch (IOException e) {
                     event.reply("Dreamvisitor encountered an while modifying server.properties: " + e.getMessage()).queue();

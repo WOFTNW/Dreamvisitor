@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor;
 
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.discord.DiscEventListener;
+import io.github.stonley890.dreamvisitor.discord.commands.DCmdAutorestart;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Role;
@@ -69,6 +70,7 @@ public class Bot {
         if (!Dreamvisitor.botFailed) {
             jda.addEventListener(new DiscCommandsManager());
             jda.addEventListener(new DiscEventListener());
+            jda.addEventListener(new DCmdAutorestart());
 
             // Wait for bot ready
             try {

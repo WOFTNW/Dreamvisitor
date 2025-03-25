@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -112,7 +111,7 @@ public class DCmdResourcepackupdate implements DiscordCommand {
     @Contract("_ -> new")
     private static URL getLatestReleaseURL(String repo) throws IOException {
         // Create a URL object
-        URL url = new URL("https://api.github.com/repos/WOFTNW/Dragonspeak/releases/latest");
+        URL url = new URL("https://api.github.com/repos/" + repo + "/releases/latest");
         Dreamvisitor.debug("Finding latest artifact at " + url);
 
         // Open a connection to the URL

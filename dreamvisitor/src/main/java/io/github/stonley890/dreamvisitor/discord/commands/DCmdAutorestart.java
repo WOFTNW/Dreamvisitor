@@ -50,9 +50,7 @@ public class DCmdAutorestart extends ListenerAdapter implements DiscordCommand {
         } else {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setDescription("✅ The server will restart when there are no players online.").setColor(Color.GREEN).setTimestamp(Instant.now());
-            event.replyEmbeds(embedBuilder.build()).addActionRow(button).queue(hook -> {
-                hook.retrieveOriginal().queue(AutoRestart::enableAutoRestart);
-            });
+            event.replyEmbeds(embedBuilder.build()).addActionRow(button).queue(hook -> hook.retrieveOriginal().queue(AutoRestart::enableAutoRestart));
         }
     }
 }

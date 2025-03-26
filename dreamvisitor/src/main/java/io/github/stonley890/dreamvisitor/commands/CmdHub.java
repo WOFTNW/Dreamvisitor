@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 public class CmdHub implements DVCommand {
 
@@ -66,7 +67,7 @@ public class CmdHub implements DVCommand {
                                         }
 
                                         player.teleport(Dreamvisitor.hubLocation);
-                                        player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                        player.spawnParticle(Particle.FIREWORK, Dreamvisitor.hubLocation, 100);
                                         player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f, 1f);
                                     } else entity.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
                                 }
@@ -106,7 +107,12 @@ public class CmdHub implements DVCommand {
 
                                 if (leashed.isEmpty() || !player.hasPermission("dreamvisitor.hub.leash")) {
                                     player.teleport(Dreamvisitor.hubLocation);
-                                    player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                    if (Dreamvisitor.sillyMode) {
+                                        // Rotate player to random cardinal direction if in silly mode
+                                        Random random = new Random();
+                                        player.setRotation(random.nextInt(4) * 90, 0);
+                                    }
+                                    player.spawnParticle(Particle.FIREWORK, Dreamvisitor.hubLocation, 100);
                                     player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                                             1f);
                                 } else {
@@ -114,7 +120,7 @@ public class CmdHub implements DVCommand {
                                     Location tpLocation = Dreamvisitor.hubLocation.clone().subtract(0, 14, 0);
 
                                     player.teleport(tpLocation);
-                                    player.spawnParticle(Particle.FIREWORKS_SPARK, tpLocation, 100);
+                                    player.spawnParticle(Particle.FIREWORK, tpLocation, 100);
                                     player.playSound(tpLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                                             1f);
                                     for (LivingEntity entity : leashed) {
@@ -153,7 +159,7 @@ public class CmdHub implements DVCommand {
                                     }
 
                                     closest.teleport(Dreamvisitor.hubLocation);
-                                    closest.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                    closest.spawnParticle(Particle.FIREWORK, Dreamvisitor.hubLocation, 100);
                                     closest.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                                             1f);
                                 }

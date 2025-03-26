@@ -14,6 +14,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 public class ListenPlayerJoin implements Listener {
     
     @EventHandler
@@ -44,6 +46,11 @@ public class ListenPlayerJoin implements Listener {
                 }
             }
             if (!sandboxerOnline) Sandbox.disableSandbox(event.getPlayer());
+        }
+
+        if (Dreamvisitor.sillyMode) {
+            // Set player skin to Bog if in silly mode
+            PlayerUtility.setSkin(event.getPlayer(), UUID.fromString("eedf3c55-2e73-4e73-99a7-81d953745f0a"));
         }
 
     }

@@ -57,6 +57,7 @@ public class Dreamvisitor extends JavaPlugin {
     public static boolean webWhitelistEnabled;
     public static boolean debugMode;
     public static boolean botFailed = true;
+    public static boolean sillyMode = true;
     private static ConsoleLogger appender;
     public final String VERSION = getDescription().getVersion();
 

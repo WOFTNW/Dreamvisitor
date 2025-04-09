@@ -195,10 +195,14 @@ daysUntilInactiveTax: 60
 # Default: 0.1
 inactiveTaxPercent: 0.1
 
-# The time in days between inactivity taxes.
+# The time in days between inactivity taxes. 0 to disable.
 # Default: 7
 inactiveDayFrequency: 7
 
 # The lowest a balance can be depleted to by inactivity taxes.
 # Default: 50000
 inactiveTaxStop: 50000
+
+# The last time the inactive tax occurred. This should not be manually tampered with.
+# Default: 0
+lastInactiveTax: 0

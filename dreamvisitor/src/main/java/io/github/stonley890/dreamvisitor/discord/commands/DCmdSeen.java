@@ -31,11 +31,8 @@ public class DCmdSeen implements DiscordCommand {
 
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
-        Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-        if (ess == null) {
-            event.reply("EssentialsX is not currently active!").setEphemeral(true).queue();
-            return;
-        }
+
+
         User user = event.getOption("user", OptionMapping::getAsUser);
         if (user == null) {
             event.reply("user cannot be null!").setEphemeral(true).queue();
@@ -49,13 +46,19 @@ public class DCmdSeen implements DiscordCommand {
         Dreamvisitor.debug("UUID: " + uuid);
         boolean online = Bukkit.getPlayer(uuid) != null;
         Dreamvisitor.debug("Online? " + online);
-        long time;
-        if (online) time = ess.getUser(uuid).getLastLogin();
-        else {
-            String username = PlayerUtility.getUsernameOfUuid(uuid);
-            time = ess.getOfflineUser(username).getLastLogout();
+        Instant time;
+        try {
+            if (online) {
+                time = PlayerUtility.getLastLogin(uuid);
+            } else {
+                time = PlayerUtility.getLastLogout(uuid);
+            }
+        } catch (Exception e) {
+            event.reply("EssentialsX is not currently active!").setEphemeral(true).queue();
+            return;
         }
-        Duration duration = Duration.between(Instant.ofEpochMilli(time), Instant.ofEpochMilli(System.currentTimeMillis()));
+
+        Duration duration = Duration.between(time, Instant.ofEpochMilli(System.currentTimeMillis()));
 
         EmbedBuilder embed = new EmbedBuilder();
         String status = "offline";

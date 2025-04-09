@@ -405,6 +405,8 @@ public class Dreamvisitor extends JavaPlugin {
                 }
             };
 
+            Runnable checkInactivityTax = InactivityTax::tax;
+
             Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 
             // Push console every two seconds
@@ -418,6 +420,9 @@ public class Dreamvisitor extends JavaPlugin {
 
             // Check for banned items every ten seconds
             Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20*10);
+
+            // Check inactivity tax every 12 hours (to account for slowdown)
+            Bukkit.getScheduler().runTaskTimer(this, checkInactivityTax, 20*60, 20*60*60*12);
 
             debug("Enable finished.");
         } catch (Exception e) {

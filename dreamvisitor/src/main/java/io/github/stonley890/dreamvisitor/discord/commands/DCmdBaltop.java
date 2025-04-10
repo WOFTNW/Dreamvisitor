@@ -1,5 +1,15 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
+
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Economy;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -8,9 +18,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
 
 public class DCmdBaltop implements DiscordCommand {
     @NotNull
@@ -60,7 +67,7 @@ public class DCmdBaltop implements DiscordCommand {
         if (sortedConsumers.size() < numberShown) numberShown = sortedConsumers.size();
         Dreamvisitor.debug("Consumer list size: " + sortedConsumers.size());
 
-        final List<Long> retrieveIds = new ArrayList<>(sortedConsumers.subList(0, numberShown - 1).stream().map(Economy.Consumer::getId).toList());
+        final List<Long> retrieveIds = new ArrayList<>(sortedConsumers.subList(0, numberShown).stream().map(Economy.Consumer::getId).toList());
         if (aboveSender != null) retrieveIds.add(aboveSender.getId());
         if (belowSender != null) retrieveIds.add(belowSender.getId());
 
@@ -70,7 +77,7 @@ public class DCmdBaltop implements DiscordCommand {
         Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(retrieveIds).onSuccess(members -> {
 
             Map<Long, Member> memberMap = new HashMap<>();
-            List<Member> topMembers = members.subList(0, finalNumberShown - 1);
+            List<Member> topMembers = members.subList(0, finalNumberShown);
             for (Member member : topMembers) {
                 memberMap.put(member.getIdLong(), member);
             }
@@ -88,7 +95,7 @@ public class DCmdBaltop implements DiscordCommand {
             for (int i = 0; i < finalNumberShown; i++) {
                 balanceList.append(i + 1).append(". ")
                         .append(currencySymbol).append(Economy.formatDouble(sortedConsumers.get(i).getBalance())).append(": ");
-                if (sortedMembers.get(i) == null) balanceList.append("<@").append(sortedConsumers.get(i).getId()).append(">");
+                if (sortedMembers.get(i) == null) balanceList.append("<@").append(sortedConsumers.get(i).getId()).append(">\n");
                 else balanceList.append(sortedMembers.get(i).getAsMention()).append("\n");
             }
 

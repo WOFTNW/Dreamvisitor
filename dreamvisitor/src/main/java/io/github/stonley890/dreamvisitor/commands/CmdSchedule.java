@@ -280,11 +280,8 @@ public class CmdSchedule implements DVCommand {
                   int index = (int) args.get("index") - 1; // Convert to 0-based index
                   int delayTicks = (int) args.get("delay-ticks");
 
-                  // Convert ticks to seconds for the backend (assuming CommandScheduler still
-                  // works with seconds)
-                  int delaySeconds = (int) Math.ceil(delayTicks / 20.0);
-
-                  if (CommandScheduler.getInstance().addDelay(name, index, delaySeconds)) {
+                  // Pass ticks directly to CommandScheduler without conversion
+                  if (CommandScheduler.getInstance().addDelay(name, index, delayTicks)) {
                     sender.sendMessage(Dreamvisitor.PREFIX + "Added " + delayTicks + " tick" +
                         (delayTicks == 1 ? "" : "s") + " delay before command "
                         + (index + 1) + " in schedule '" + name + "'. (" +

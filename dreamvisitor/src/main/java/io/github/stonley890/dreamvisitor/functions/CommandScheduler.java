@@ -130,7 +130,9 @@ public class CommandScheduler {
 
     Schedule schedule;
     if (timeSpec instanceof Integer intervalMinutes) {
-      schedule = new Schedule(name, intervalMinutes, commandList, delays);
+      // Convert minutes to ticks (20 ticks/second * 60 seconds/minute)
+      int intervalTicks = intervalMinutes * 20 * 60;
+      schedule = new Schedule(name, intervalTicks, commandList, delays);
     } else if (timeSpec instanceof LocalTime time) {
       schedule = new Schedule(name, time, commandList, delays);
     } else if (timeSpec instanceof CronPattern pattern) {
@@ -158,6 +160,7 @@ public class CommandScheduler {
       switch (schedule.getType()) {
         case INTERVAL -> {
           config.set(path + ".type", "interval");
+          // Convert ticks back to minutes for config storage for backward compatibility
           config.set(path + ".interval-minutes", schedule.getIntervalMinutes());
         }
         case DAILY -> {
@@ -246,10 +249,10 @@ public class CommandScheduler {
       final int index = i;
       final String command = commands.get(i);
 
-      // Get delay in ticks directly (no conversion needed)
+      // Get delay for this command in ticks (no conversion needed now)
       int delayTicks = 0;
       if (delays.containsKey(index)) {
-        delayTicks = delays.get(index) * 20; // Convert seconds to ticks
+        delayTicks = delays.get(index);
       }
 
       Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> {
@@ -298,14 +301,16 @@ public class CommandScheduler {
    * @param name            The name of the schedule
    * @param intervalMinutes The interval in minutes
    * @param commands        The commands to run
-   * @param delays          Map of command index to delay in seconds
+   * @param delays          Map of command index to delay in ticks
    * @return The created schedule
    */
   public Schedule addSchedule(String name, int intervalMinutes, List<String> commands, Map<Integer, Integer> delays) {
     // Remove existing schedule with the same name
     removeSchedule(name);
 
-    Schedule schedule = new Schedule(name, intervalMinutes, commands, delays);
+    // Convert minutes to ticks (20 ticks/second * 60 seconds/minute)
+    int intervalTicks = intervalMinutes * 20 * 60;
+    Schedule schedule = new Schedule(name, intervalTicks, commands, delays);
     schedules.add(schedule);
     saveConfig();
     return schedule;
@@ -341,7 +346,7 @@ public class CommandScheduler {
    * @param name     The name of the schedule
    * @param time     The time of day to run
    * @param commands The commands to run
-   * @param delays   Map of command index to delay in seconds
+   * @param delays   Map of command index to delay in ticks
    * @return The created schedule
    */
   public Schedule addDailySchedule(String name, LocalTime time, List<String> commands, Map<Integer, Integer> delays) {
@@ -384,12 +389,11 @@ public class CommandScheduler {
    * @param name     The name of the schedule
    * @param pattern  The cron pattern
    * @param commands The commands to run
-   * @param delays   Map of command index to delay in seconds
+   * @param delays   Map of command index to delay in ticks
    * @return The created schedule
    */
   public Schedule addCronSchedule(String name, String pattern, List<String> commands, Map<Integer, Integer> delays) {
     // Remove existing schedule with the same name
-
     removeSchedule(name);
 
     try {
@@ -467,16 +471,16 @@ public class CommandScheduler {
    *
    * @param name         The schedule name
    * @param commandIndex The command index (0-based)
-   * @param delaySeconds The delay in seconds
+   * @param delayTicks   The delay in ticks (20 ticks = 1 second)
    * @return True if successful, false if schedule not found or index invalid
    */
-  public boolean addDelay(String name, int commandIndex, int delaySeconds) {
+  public boolean addDelay(String name, int commandIndex, int delayTicks) {
     Schedule schedule = getSchedule(name);
     if (schedule == null || commandIndex < 0 || commandIndex >= schedule.getCommands().size()) {
       return false;
     }
 
-    schedule.addDelay(commandIndex, delaySeconds);
+    schedule.addDelay(commandIndex, delayTicks);
     saveConfig();
     return true;
   }
@@ -683,22 +687,22 @@ public class CommandScheduler {
   public static class Schedule {
     private final String name;
     private final ScheduleType type;
-    private final int intervalMinutes;
+    private final int intervalTicks; // Now storing interval in ticks instead of minutes
     private final LocalTime dailyTime;
     private final CronPattern cronPattern;
     private final List<String> commands;
-    private final Map<Integer, Integer> delays; // Command index -> delay in seconds
+    private final Map<Integer, Integer> delays; // Command index -> delay in ticks
     private LocalDateTime lastRun;
 
     public enum ScheduleType {
       INTERVAL, DAILY, CRON
     }
 
-    // Interval constructor
-    public Schedule(String name, int intervalMinutes, List<String> commands, Map<Integer, Integer> delays) {
+    // Interval constructor - now accepts ticks instead of minutes
+    public Schedule(String name, int intervalTicks, List<String> commands, Map<Integer, Integer> delays) {
       this.name = name;
       this.type = ScheduleType.INTERVAL;
-      this.intervalMinutes = intervalMinutes;
+      this.intervalTicks = intervalTicks;
       this.dailyTime = null;
       this.cronPattern = null;
       this.commands = new ArrayList<>(commands);
@@ -710,7 +714,7 @@ public class CommandScheduler {
     public Schedule(String name, LocalTime time, List<String> commands, Map<Integer, Integer> delays) {
       this.name = name;
       this.type = ScheduleType.DAILY;
-      this.intervalMinutes = 0;
+      this.intervalTicks = 0;
       this.dailyTime = time;
       this.cronPattern = null;
       this.commands = new ArrayList<>(commands);
@@ -722,7 +726,7 @@ public class CommandScheduler {
     public Schedule(String name, CronPattern pattern, List<String> commands, Map<Integer, Integer> delays) {
       this.name = name;
       this.type = ScheduleType.CRON;
-      this.intervalMinutes = 0;
+      this.intervalTicks = 0;
       this.dailyTime = null;
       this.cronPattern = pattern;
       this.commands = new ArrayList<>(commands);
@@ -738,8 +742,22 @@ public class CommandScheduler {
       return type;
     }
 
+    /**
+     * Get the interval in minutes (converted from ticks for backward compatibility)
+     * 
+     * @return The interval in minutes
+     */
     public int getIntervalMinutes() {
-      return intervalMinutes;
+      return intervalTicks / (20 * 60); // Convert ticks to minutes
+    }
+
+    /**
+     * Get the interval in ticks
+     * 
+     * @return The interval in ticks
+     */
+    public int getIntervalTicks() {
+      return intervalTicks;
     }
 
     public LocalTime getDailyTime() {
@@ -794,8 +812,8 @@ public class CommandScheduler {
       return true;
     }
 
-    public void addDelay(int commandIndex, int delaySeconds) {
-      delays.put(commandIndex, delaySeconds);
+    public void addDelay(int commandIndex, int delayTicks) {
+      delays.put(commandIndex, delayTicks);
     }
 
     public boolean removeDelay(int commandIndex) {
@@ -815,7 +833,9 @@ public class CommandScheduler {
             return true; // Never run before
           }
           Duration duration = Duration.between(lastRun, now);
-          return duration.toMinutes() >= intervalMinutes;
+          // Convert duration to ticks and compare with intervalTicks
+          long durationTicks = duration.toSeconds() * 20;
+          return durationTicks >= intervalTicks;
 
         case DAILY:
           if (lastRun != null && lastRun.toLocalDate().equals(now.toLocalDate())) {
@@ -852,7 +872,9 @@ public class CommandScheduler {
             return "Ready to run";
           }
 
-          LocalDateTime nextRun = lastRun.plusMinutes(intervalMinutes);
+          // Calculate next run time using ticks
+          long durationSeconds = intervalTicks / 20;
+          LocalDateTime nextRun = lastRun.plusSeconds(durationSeconds);
           Duration duration = Duration.between(now, nextRun);
 
           if (duration.isNegative()) {
@@ -861,11 +883,14 @@ public class CommandScheduler {
 
           long hours = duration.toHours();
           long minutes = duration.toMinutesPart();
+          long seconds = duration.toSecondsPart();
 
           if (hours > 0) {
-            return hours + "h " + minutes + "m";
+            return hours + "h " + minutes + "m " + seconds + "s";
+          } else if (minutes > 0) {
+            return minutes + "m " + seconds + "s";
           } else {
-            return minutes + "m";
+            return seconds + "s";
           }
 
         case DAILY:
@@ -917,7 +942,15 @@ public class CommandScheduler {
       StringBuilder sb = new StringBuilder("Schedule{name='").append(name).append("', type=").append(type);
 
       switch (type) {
-        case INTERVAL -> sb.append(", interval=").append(intervalMinutes).append("m");
+        case INTERVAL -> {
+          int minutes = intervalTicks / (20 * 60);
+          int remainingSeconds = (intervalTicks % (20 * 60)) / 20;
+          if (remainingSeconds > 0) {
+            sb.append(", interval=").append(minutes).append("m ").append(remainingSeconds).append("s");
+          } else {
+            sb.append(", interval=").append(minutes).append("m");
+          }
+        }
         case DAILY -> sb.append(", time=").append(dailyTime);
         case CRON -> sb.append(", pattern='").append(cronPattern.getPattern()).append("'");
       }

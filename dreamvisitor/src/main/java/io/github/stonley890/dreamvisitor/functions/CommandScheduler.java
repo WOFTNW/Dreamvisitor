@@ -69,8 +69,8 @@ public class CommandScheduler {
 
                     switch (type) {
                         case "interval" -> {
-                            int intervalMinutes = scheduleSection.getInt("interval-minutes");
-                            loadCommands(name, intervalMinutes, scheduleSection);
+                            int intervalTicks = scheduleSection.getInt("interval-ticks");
+                            loadCommands(name, intervalTicks, scheduleSection);
                         }
                         case "daily" -> {
                             String timeString = scheduleSection.getString("time");
@@ -123,9 +123,8 @@ public class CommandScheduler {
         long lastRun = section.getLong("last-run", 0);
 
         Schedule schedule;
-        if (timeSpec instanceof Integer intervalMinutes) {
-            // Convert minutes to ticks (20 ticks/second * 60 seconds/minute)
-            int intervalTicks = intervalMinutes * 20 * 60;
+        if (timeSpec instanceof Integer intervalTicks) {
+            // Use ticks
             schedule = new Schedule(name, intervalTicks, commandList, delays);
         } else if (timeSpec instanceof LocalTime time) {
             schedule = new Schedule(name, time, commandList, delays);
@@ -165,10 +164,8 @@ public class CommandScheduler {
             switch (schedule.getType()) {
                 case INTERVAL -> {
                     config.set(path + ".type", "interval");
-                    // Convert ticks back to minutes for config storage for backward compatibility
-                    // This allows older versions to read the configuration correctly
-                    // TODO: Fix this as it cause losses in time units
-                    config.set(path + ".interval-minutes", schedule.getIntervalMinutes());
+                    // Save as ticks
+                    config.set(path + ".interval-ticks", schedule.getIntervalTicks());
                 }
                 case DAILY -> {
                     config.set(path + ".type", "daily");

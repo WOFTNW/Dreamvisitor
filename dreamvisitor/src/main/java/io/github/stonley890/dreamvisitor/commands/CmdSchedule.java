@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
@@ -272,6 +273,10 @@ public class CmdSchedule implements DVCommand {
                                     index --; // Convert to 0-based index
                                     Integer delayTicks = (Integer) args.get("delay-ticks");
                                     assert delayTicks != null;
+
+                                    if (delayTicks < 0) {
+                                        throw CommandAPI.failWithString("delay-ticks cannot be negative.");
+                                    }
 
                                     // Pass ticks directly to CommandScheduler without conversion
                                     if (CommandScheduler.getInstance().addDelay(name, index, delayTicks)) {

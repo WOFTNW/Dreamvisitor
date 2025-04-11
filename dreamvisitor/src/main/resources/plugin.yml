@@ -11,7 +11,7 @@ softdepend:
   - WorldGuard
 
 permissions:
-  
+
   dreamvisitor.userset:
     description: Allow user settings configuration.
     default: true
@@ -109,4 +109,7 @@ permissions:
     default: true
   dreamvisitor.velocity:
     description: Allows using the velocity command.
+    default: op
+  dreamvisitor.schedule:
+    description: Allows managing scheduled commands.
     default: op

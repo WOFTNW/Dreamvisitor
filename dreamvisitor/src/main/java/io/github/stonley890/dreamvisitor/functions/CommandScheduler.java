@@ -261,7 +261,7 @@ public class CommandScheduler {
             // Get delay for this command in ticks (no conversion needed)
             int delayTicks = 0;
             if (delays.containsKey(index)) {
-                delayTicks = delays.get(index);
+                delayTicks += delays.get(index);
             }
 
             Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> {

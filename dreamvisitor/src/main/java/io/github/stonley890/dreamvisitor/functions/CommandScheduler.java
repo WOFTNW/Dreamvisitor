@@ -16,7 +16,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.regex.PatternSyntaxException;
 
@@ -71,14 +70,14 @@ public class CommandScheduler {
                     switch (type) {
                         case "interval" -> {
                             int intervalMinutes = scheduleSection.getInt("interval-minutes");
-                            loadCommands(name, type, intervalMinutes, scheduleSection);
+                            loadCommands(name, intervalMinutes, scheduleSection);
                         }
                         case "daily" -> {
                             String timeString = scheduleSection.getString("time");
                             if (timeString != null) {
                                 try {
                                     LocalTime time = LocalTime.parse(timeString);
-                                    loadCommands(name, type, time, scheduleSection);
+                                    loadCommands(name, time, scheduleSection);
                                 } catch (DateTimeParseException e) {
                                     Dreamvisitor.getPlugin().getLogger()
                                             .warning("Invalid time format for schedule " + name + ": " + timeString);
@@ -90,7 +89,7 @@ public class CommandScheduler {
                             if (pattern != null) {
                                 try {
                                     CronPattern cronPattern = new CronPattern(pattern);
-                                    loadCommands(name, type, cronPattern, scheduleSection);
+                                    loadCommands(name, cronPattern, scheduleSection);
                                 } catch (PatternSyntaxException e) {
                                     Dreamvisitor.getPlugin().getLogger()
                                             .warning("Invalid cron pattern for schedule " + name + ": " + pattern);
@@ -104,7 +103,7 @@ public class CommandScheduler {
         }
     }
 
-    private void loadCommands(String name, String type, Object timeSpec, @NotNull ConfigurationSection section) {
+    private void loadCommands(String name, Object timeSpec, @NotNull ConfigurationSection section) {
         List<String> commandList = section.getStringList("commands");
         Map<Integer, Integer> delays = new HashMap<>();
 
@@ -249,10 +248,9 @@ public class CommandScheduler {
      *
      * @param schedule The schedule to execute
      */
-    private void executeSchedule(Schedule schedule) {
+    private void executeSchedule(@NotNull Schedule schedule) {
         Dreamvisitor.debug("Executing scheduled commands for: " + schedule.getName());
 
-        final AtomicBoolean success = new AtomicBoolean(true);
         List<String> commands = schedule.getCommands();
         Map<Integer, Integer> delays = schedule.getDelays();
 
@@ -275,11 +273,9 @@ public class CommandScheduler {
                     boolean result = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                     if (!result) {
                         Dreamvisitor.getPlugin().getLogger().warning("Failed to execute scheduled command: " + command);
-                        success.set(false);
                     }
                 } catch (Exception e) {
                     Dreamvisitor.getPlugin().getLogger().log(Level.SEVERE, "Error executing scheduled command: " + command, e);
-                    success.set(false);
                 }
             }, delayTicks);
         }
@@ -650,15 +646,15 @@ public class CommandScheduler {
             return pattern;
         }
 
-        public boolean matches(LocalDateTime dateTime) {
-            return matchesField(minutePattern, dateTime.getMinute(), 0, 59)
-                    && matchesField(hourPattern, dateTime.getHour(), 0, 23)
-                    && matchesField(dayOfMonthPattern, dateTime.getDayOfMonth(), 1, 31)
-                    && matchesField(monthPattern, dateTime.getMonthValue(), 1, 12)
-                    && matchesField(dayOfWeekPattern, dateTime.getDayOfWeek().getValue() % 7, 0, 6);
+        public boolean matches(@NotNull LocalDateTime dateTime) {
+            return matchesField(minutePattern, dateTime.getMinute(), 0)
+                    && matchesField(hourPattern, dateTime.getHour(), 0)
+                    && matchesField(dayOfMonthPattern, dateTime.getDayOfMonth(), 1)
+                    && matchesField(monthPattern, dateTime.getMonthValue(), 1)
+                    && matchesField(dayOfWeekPattern, dateTime.getDayOfWeek().getValue() % 7, 0);
         }
 
-        private boolean matchesField(String pattern, int value, int min, int max) {
+        private boolean matchesField(@NotNull String pattern, int value, int min) {
             if (pattern.equals("*")) {
                 return true;
             }
@@ -671,13 +667,13 @@ public class CommandScheduler {
                 if (range.equals("*")) {
                     return (value - min) % step == 0;
                 } else {
-                    return matchesField(range, value, min, max) && (value - min) % step == 0;
+                    return matchesField(range, value, min) && (value - min) % step == 0;
                 }
             }
 
             if (pattern.contains(",")) {
                 for (String part : pattern.split(",")) {
-                    if (matchesField(part, value, min, max)) {
+                    if (matchesField(part, value, min)) {
                         return true;
                     }
                 }

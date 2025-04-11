@@ -27,6 +27,10 @@ public class CommandScheduler {
   private final File configFile;
   private FileConfiguration config;
   private int taskId = -1;
+  // how frequent to run the Scheduler checks
+  // unit is in Game Tick
+  // For 20 game ticks is one sec
+  private long updateTick = 20L * 5L;
 
   private CommandScheduler() {
     // Initialize config file
@@ -197,7 +201,7 @@ public class CommandScheduler {
     }
 
     taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Dreamvisitor.getPlugin(), this::checkSchedules, 20L,
-        20L * 10L); // Check every 10 seconds
+        updateTick);
   }
 
   /**
@@ -225,7 +229,7 @@ public class CommandScheduler {
 
   /**
    * Execute a scheduled command
-   * 
+   *
    * @param schedule The schedule to execute
    */
   private void executeSchedule(Schedule schedule) {
@@ -266,7 +270,7 @@ public class CommandScheduler {
 
   /**
    * Add a new interval-based schedule
-   * 
+   *
    * @param name            The name of the schedule
    * @param intervalMinutes The interval in minutes
    * @param commands        The commands to run
@@ -278,7 +282,7 @@ public class CommandScheduler {
 
   /**
    * Add a new interval-based schedule
-   * 
+   *
    * @param name            The name of the schedule
    * @param intervalMinutes The interval in minutes
    * @param command         Single command to run
@@ -290,7 +294,7 @@ public class CommandScheduler {
 
   /**
    * Add a new interval-based schedule with delays
-   * 
+   *
    * @param name            The name of the schedule
    * @param intervalMinutes The interval in minutes
    * @param commands        The commands to run
@@ -309,7 +313,7 @@ public class CommandScheduler {
 
   /**
    * Add a new daily schedule
-   * 
+   *
    * @param name     The name of the schedule
    * @param time     The time of day to run
    * @param commands The commands to run
@@ -321,7 +325,7 @@ public class CommandScheduler {
 
   /**
    * Add a new daily schedule
-   * 
+   *
    * @param name    The name of the schedule
    * @param time    The time of day to run
    * @param command Single command to run
@@ -333,7 +337,7 @@ public class CommandScheduler {
 
   /**
    * Add a new daily schedule with delays
-   * 
+   *
    * @param name     The name of the schedule
    * @param time     The time of day to run
    * @param commands The commands to run
@@ -352,7 +356,7 @@ public class CommandScheduler {
 
   /**
    * Add a new cron-style schedule
-   * 
+   *
    * @param name     The name of the schedule
    * @param pattern  The cron pattern
    * @param commands The commands to run
@@ -364,7 +368,7 @@ public class CommandScheduler {
 
   /**
    * Add a new cron-style schedule
-   * 
+   *
    * @param name    The name of the schedule
    * @param pattern The cron pattern
    * @param command Single command to run
@@ -376,7 +380,7 @@ public class CommandScheduler {
 
   /**
    * Add a new cron-style schedule with delays
-   * 
+   *
    * @param name     The name of the schedule
    * @param pattern  The cron pattern
    * @param commands The commands to run
@@ -401,7 +405,7 @@ public class CommandScheduler {
 
   /**
    * Remove a schedule
-   * 
+   *
    * @param name The name of the schedule
    * @return True if removed, false if not found
    */
@@ -418,7 +422,7 @@ public class CommandScheduler {
 
   /**
    * Get all schedules
-   * 
+   *
    * @return An unmodifiable list of schedules
    */
   public List<Schedule> getSchedules() {
@@ -427,7 +431,7 @@ public class CommandScheduler {
 
   /**
    * Run a schedule immediately
-   * 
+   *
    * @param name The name of the schedule to run
    * @return True if run, false if not found
    */
@@ -443,7 +447,7 @@ public class CommandScheduler {
 
   /**
    * Get a schedule by name
-   * 
+   *
    * @param name The name of the schedule
    * @return The schedule or null if not found
    */
@@ -459,7 +463,7 @@ public class CommandScheduler {
 
   /**
    * Add a delay to a command in a schedule
-   * 
+   *
    * @param name         The schedule name
    * @param commandIndex The command index (0-based)
    * @param delaySeconds The delay in seconds
@@ -478,7 +482,7 @@ public class CommandScheduler {
 
   /**
    * Remove a delay from a command in a schedule
-   * 
+   *
    * @param name         The schedule name
    * @param commandIndex The command index (0-based)
    * @return True if successful, false if schedule not found or no delay was set
@@ -498,7 +502,7 @@ public class CommandScheduler {
 
   /**
    * Add a command to an existing schedule
-   * 
+   *
    * @param name    The schedule name
    * @param command The command to add
    * @return True if successful, false if schedule not found
@@ -516,7 +520,7 @@ public class CommandScheduler {
 
   /**
    * Remove a command from a schedule
-   * 
+   *
    * @param name         The schedule name
    * @param commandIndex The command index (0-based)
    * @return True if successful, false if schedule not found or index invalid
@@ -799,7 +803,7 @@ public class CommandScheduler {
 
     /**
      * Check if this schedule should run
-     * 
+     *
      * @param now The current time
      * @return True if it should run
      */
@@ -835,7 +839,7 @@ public class CommandScheduler {
 
     /**
      * Get a user-friendly string representation of time until next run
-     * 
+     *
      * @return Time until next run as a string
      */
     public String getTimeUntilNextRun() {

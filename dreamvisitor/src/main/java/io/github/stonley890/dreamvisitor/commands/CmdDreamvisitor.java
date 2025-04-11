@@ -391,6 +391,51 @@ public class CmdDreamvisitor implements DVCommand {
                                         .executes((sender, args) -> {
                                             @Nullable String key = "noWitherNotice";
                                             configString(sender, args, key);
+                                        }),
+                                new CommandAPICommand("daysUntilInactiveTax")
+                                        .withHelp("Set daysUntilInactiveTax", """
+                                                The days a player can be offline until the inactivity tax applies.
+                                                Default: 60""")
+                                        .withOptionalArguments(new TextArgument("daysUntilInactiveTax"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "daysUntilInactiveTax";
+                                            configInt(sender, args, key);
+                                        }),
+                                new CommandAPICommand("inactiveTaxPercent")
+                                        .withHelp("Set inactiveTaxPercent", """
+                                                The percent to tax inactive players, between 0.0 and 1.0.
+                                                Default: 0.1""")
+                                        .withOptionalArguments(new TextArgument("inactiveTaxPercent"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "inactiveTaxPercent";
+                                            configDouble(sender, args, key);
+                                        }),
+                                new CommandAPICommand("inactiveDayFrequency")
+                                        .withHelp("Set inactiveDayFrequency", """
+                                                The time in days between inactivity taxes. 0 to disable.
+                                                Default: 7""")
+                                        .withOptionalArguments(new TextArgument("inactiveDayFrequency"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "inactiveDayFrequency";
+                                            configInt(sender, args, key);
+                                        }),
+                                new CommandAPICommand("inactiveTaxStop")
+                                        .withHelp("Set inactiveTaxStop", """
+                                                The lowest a balance can be depleted to by inactivity taxes.
+                                                Default: 50000""")
+                                        .withOptionalArguments(new TextArgument("inactiveTaxStop"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "inactiveTaxStop";
+                                            configInt(sender, args, key);
+                                        }),
+                                new CommandAPICommand("lastInactiveTax")
+                                        .withHelp("Set lastInactiveTax", """
+                                                The last time the inactive tax occurred. This should not be manually tampered with.
+                                                Default: 0""")
+                                        .withOptionalArguments(new TextArgument("lastInactiveTax"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "lastInactiveTax";
+                                            configInt(sender, args, key);
                                         })
                         )
                 );

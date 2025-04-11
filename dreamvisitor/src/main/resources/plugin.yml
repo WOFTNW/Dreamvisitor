@@ -1,9 +1,14 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: '${project.version}'
+version: "${project.version}"
 api-version: 1.20
 description: A plugin created by Bog for WOFTNW to add various features.
-author: Stonley890
+authors: [
+           BogTheMudWing,
+           iHeron,
+           Mustfa-IT,
+           Brijeshthummar02
+]
 softdepend:
   - EyeOfOnyx
   - Essentials
@@ -11,7 +16,6 @@ softdepend:
   - WorldGuard
 
 permissions:
-  
   dreamvisitor.userset:
     description: Allow user settings configuration.
     default: true
@@ -69,7 +73,7 @@ permissions:
     description: Allows the radio command.
     default: op
   dreamvisitor.unwax:
-    description:  Allows the unwax command.
+    description: Allows the unwax command.
     default: op
   dreamvisitor.invswap:
     description: Allows the invswap command.
@@ -109,4 +113,7 @@ permissions:
     default: true
   dreamvisitor.velocity:
     description: Allows using the velocity command.
+    default: op
+  dreamvisitor.schedule:
+    description: Allows managing scheduled commands.
     default: op

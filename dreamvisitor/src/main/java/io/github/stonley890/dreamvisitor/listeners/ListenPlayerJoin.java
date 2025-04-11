@@ -6,6 +6,7 @@ import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.luckperms.api.model.user.User;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,13 +20,21 @@ public class ListenPlayerJoin implements Listener {
     @EventHandler
     public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
 
+        final Player player = event.getPlayer();
+
+        final User lpUser = Dreamvisitor.getLuckPerms().getUserManager().getUser(player.getUniqueId());
+        if (lpUser != null) {
+            String prefix = lpUser.getCachedData().getMetaData().getPrefix();
+            if (prefix != null) player.setPlayerListName(prefix.replace('&', '§') + player.getName());
+        }
+
         // Enable flight
-        if (event.getPlayer().hasPermission("dreamvisitor.fly")) {
-            event.getPlayer().setAllowFlight(true);
+        if (player.hasPermission("dreamvisitor.fly")) {
+            player.setAllowFlight(true);
         }
 
         // Send join messages
-        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(event.getPlayer().getName())) + " joined the game**";
+        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getName())) + " joined the game**";
         try {
             Bot.getGameChatChannel().sendMessage(chatMessage).queue();
         } catch (InsufficientPermissionException e) {
@@ -33,17 +42,17 @@ public class ListenPlayerJoin implements Listener {
         }
         Bot.sendLog(chatMessage);
 
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
+        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
         if (memory.sandbox) {
             boolean sandboxerOnline = false;
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
                     sandboxerOnline = true;
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer().getName() + " is currently in sandbox mode.");
+                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + player.getName() + " is currently in sandbox mode.");
                 }
             }
-            if (!sandboxerOnline) Sandbox.disableSandbox(event.getPlayer());
+            if (!sandboxerOnline) Sandbox.disableSandbox(player);
         }
 
     }

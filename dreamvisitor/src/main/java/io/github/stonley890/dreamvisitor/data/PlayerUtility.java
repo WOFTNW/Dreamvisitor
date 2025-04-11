@@ -2,11 +2,14 @@ package io.github.stonley890.dreamvisitor.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.earth2me.essentials.Essentials;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.Contract;
@@ -99,6 +102,7 @@ public class PlayerUtility {
         return mojang.getPlayerProfile(uuid).getUsername();
     }
 
+
     public static @Nullable UUID getUUIDOfUsername(@NotNull String username) {
         Mojang mojang = new Mojang();
         String uuid = mojang.getUUIDOfUsername(username);
@@ -108,5 +112,33 @@ public class PlayerUtility {
         } catch (IllegalArgumentException NullPointerException) {
             return null;
         }
+    }
+
+    /**
+     * Get the {@link Instant} of player's last login by UUID.
+     * @param uuid the UUID of the player.
+     * @return the {@link Instant} this player last logged in.
+     * @throws Exception if Essentials is not enabled.
+     */
+    public static @NotNull Instant getLastLogin(@NotNull UUID uuid) throws Exception {
+        Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+        if (ess == null) {
+            throw new Exception("EssentialsX is not enabled.");
+        }
+        return Instant.ofEpochMilli(ess.getUser(uuid).getLastLogin());
+    }
+
+    /**
+     * Get the {@link Instant} of player's last logout by UUID.
+     * @param uuid the UUID of the player.
+     * @return the {@link Instant} this player last logged out.
+     * @throws Exception if Essentials is not enabled.
+     */
+    public static @NotNull Instant getLastLogout(@NotNull UUID uuid) throws Exception {
+        Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+        if (ess == null) {
+            throw new Exception("EssentialsX is not enabled.");
+        }
+        return Instant.ofEpochMilli(ess.getUser(uuid).getLastLogout());
     }
 }

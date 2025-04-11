@@ -53,10 +53,8 @@ public class CommandScheduler {
    */
   public void loadConfig() {
     schedules.clear();
-
     if (!configFile.exists()) {
       try {
-        // noinspection ResultOfMethodCallIgnored
         configFile.createNewFile();
       } catch (IOException e) {
         Dreamvisitor.getPlugin().getLogger().log(Level.SEVERE, "Could not create schedules.yml", e);
@@ -149,26 +147,41 @@ public class CommandScheduler {
   }
 
   /**
-   * Save schedules to configuration
+   * Saves the current schedules to the configuration file.
+   * <p>
+   * This method serializes all schedule objects to YAML format and writes them to
+   * the schedules.yml file. Different schedule types (interval, daily, cron) are
+   * handled with appropriate type-specific properties. The method also saves
+   * metadata
+   * such as commands, delays, and last execution time.
+   * <p>
+   * If the save operation fails, an error is logged, but execution continues.
    */
   public void saveConfig() {
+    // Clear existing schedules section to prevent stale data
     config.set("schedules", null);
 
+    // Iterate through all schedules and save each one
     for (Schedule schedule : schedules) {
       String path = "schedules." + schedule.getName();
 
+      // Save type-specific properties based on schedule type
       switch (schedule.getType()) {
         case INTERVAL -> {
           config.set(path + ".type", "interval");
           // Convert ticks back to minutes for config storage for backward compatibility
+          // This allows older versions to read the configuration correctly
+          // TODO: Fix this as it cause losses in time units
           config.set(path + ".interval-minutes", schedule.getIntervalMinutes());
         }
         case DAILY -> {
           config.set(path + ".type", "daily");
+          // Format time using standard HH:mm:ss format for consistency
           config.set(path + ".time", schedule.getDailyTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         }
         case CRON -> {
           config.set(path + ".type", "cron");
+          // Store the raw cron pattern string
           config.set(path + ".pattern", schedule.getCronPattern().getPattern());
         }
       }
@@ -249,7 +262,7 @@ public class CommandScheduler {
       final int index = i;
       final String command = commands.get(i);
 
-      // Get delay for this command in ticks (no conversion needed now)
+      // Get delay for this command in ticks (no conversion needed)
       int delayTicks = 0;
       if (delays.containsKey(index)) {
         delayTicks = delays.get(index);
@@ -744,7 +757,7 @@ public class CommandScheduler {
 
     /**
      * Get the interval in minutes (converted from ticks for backward compatibility)
-     * 
+     *
      * @return The interval in minutes
      */
     public int getIntervalMinutes() {
@@ -753,7 +766,7 @@ public class CommandScheduler {
 
     /**
      * Get the interval in ticks
-     * 
+     *
      * @return The interval in ticks
      */
     public int getIntervalTicks() {

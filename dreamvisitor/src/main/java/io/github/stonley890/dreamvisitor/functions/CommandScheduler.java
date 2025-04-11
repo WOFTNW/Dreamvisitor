@@ -246,7 +246,7 @@ public class CommandScheduler {
       final int index = i;
       final String command = commands.get(i);
 
-      // Calculate delay for this command
+      // Get delay in ticks directly (no conversion needed)
       int delayTicks = 0;
       if (delays.containsKey(index)) {
         delayTicks = delays.get(index) * 20; // Convert seconds to ticks
@@ -389,6 +389,7 @@ public class CommandScheduler {
    */
   public Schedule addCronSchedule(String name, String pattern, List<String> commands, Map<Integer, Integer> delays) {
     // Remove existing schedule with the same name
+
     removeSchedule(name);
 
     try {

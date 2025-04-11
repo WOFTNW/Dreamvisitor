@@ -267,22 +267,28 @@ public class CmdSchedule implements DVCommand {
             new CommandAPICommand("add-delay")
                 .withPermission(CommandPermission.fromString("dreamvisitor.schedule"))
                 .withHelp("Add a delay before executing a command in a schedule.",
-                    "Add a delay before executing a command in a schedule.")
+                    "Add a delay before executing a command in a schedule (in game ticks, 20 ticks = 1 second).")
                 .withArguments(new StringArgument("name")
                     .replaceSuggestions(
                         ArgumentSuggestions.strings(info -> CommandScheduler.getInstance().getSchedules().stream()
                             .map(Schedule::getName)
                             .toArray(String[]::new))))
                 .withArguments(new IntegerArgument("index", 1))
-                .withArguments(new IntegerArgument("delay-seconds", 1))
+                .withArguments(new IntegerArgument("delay-ticks", 1))
                 .executesNative((sender, args) -> {
                   String name = (String) args.get("name");
                   int index = (int) args.get("index") - 1; // Convert to 0-based index
-                  int delay = (int) args.get("delay-seconds");
+                  int delayTicks = (int) args.get("delay-ticks");
 
-                  if (CommandScheduler.getInstance().addDelay(name, index, delay)) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Added " + delay + " second delay before command "
-                        + (index + 1) + " in schedule '" + name + "'.");
+                  // Convert ticks to seconds for the backend (assuming CommandScheduler still
+                  // works with seconds)
+                  int delaySeconds = (int) Math.ceil(delayTicks / 20.0);
+
+                  if (CommandScheduler.getInstance().addDelay(name, index, delaySeconds)) {
+                    sender.sendMessage(Dreamvisitor.PREFIX + "Added " + delayTicks + " tick" +
+                        (delayTicks == 1 ? "" : "s") + " delay before command "
+                        + (index + 1) + " in schedule '" + name + "'. (" +
+                        String.format("%.1f", delayTicks / 20.0) + " seconds)");
                   } else {
                     sender.sendMessage(
                         Dreamvisitor.PREFIX + ChatColor.RED + "No schedule with name '" + name

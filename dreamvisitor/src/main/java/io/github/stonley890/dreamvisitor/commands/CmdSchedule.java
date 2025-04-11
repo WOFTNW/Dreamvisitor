@@ -6,6 +6,7 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.GreedyStringArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.TextArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.CommandScheduler;
 import io.github.stonley890.dreamvisitor.functions.CommandScheduler.Schedule;
@@ -65,7 +66,7 @@ public class CmdSchedule implements DVCommand {
                 .withPermission(CommandPermission.fromString("dreamvisitor.schedule"))
                 .withHelp("Add a new daily schedule.", "Add a new schedule that runs once per day at a specific time.")
                 .withArguments(new StringArgument("name"))
-                .withArguments(new StringArgument("time").includeSuggestions(
+                .withArguments(new TextArgument("time").includeSuggestions(
                     ArgumentSuggestions.strings("00:00:00", "06:00:00", "12:00:00", "18:00:00")))
                 .withArguments(new GreedyStringArgument("command"))
                 .executesNative((sender, args) -> {
@@ -108,7 +109,7 @@ public class CmdSchedule implements DVCommand {
                 .withHelp("Add a new cron-style schedule.",
                     "Add a new schedule using cron pattern (minute hour day-of-month month day-of-week).")
                 .withArguments(new StringArgument("name"))
-                .withArguments(new StringArgument("pattern").includeSuggestions(
+                .withArguments(new TextArgument("pattern").includeSuggestions(
                     ArgumentSuggestions.strings("0 * * * *", "0 0 * * *", "0 0 * * 0", "*/5 * * * *")))
                 .withArguments(new GreedyStringArgument("command"))
                 .executesNative((sender, args) -> {

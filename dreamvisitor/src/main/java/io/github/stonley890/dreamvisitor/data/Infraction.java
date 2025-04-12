@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Infraction implements ConfigurationSerializable {
 
-    public static final String actionBan = "ban"; // regualar MC temp-ban or ban & notify
+    public static final String actionBan = "ban"; // regualar MC suspension or ban & notify
     public static final String actionUserBan = "user_ban"; // notify only
     public static final String actionNoBan = "no_ban"; // no ban, no notify
     public static final String actionAllBan = "all_ban"; // ban from all
@@ -282,7 +282,7 @@ public class Infraction implements ConfigurationSerializable {
 
                 if (!banPoint) {
                     if (!hasTempban)
-                        description.append("\n\n**You do not have a previous temp-ban. You will receive a temp-ban after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
+                        description.append("\n\n**You do not have a previous suspension. You will receive a suspension after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
                     else
                         description.append("\n\n**You have previously been temp-banned. You will be permanently banned after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
                 }

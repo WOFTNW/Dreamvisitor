@@ -97,8 +97,8 @@ public class DCmdWarn extends ListenerAdapter implements DiscordCommand {
                     );
                     else actionRow = ActionRow.of(
                             Button.danger(Infraction.actionBan, "Ban them for two weeks."),
-                            Button.primary(Infraction.actionUserBan, "No, but mention a temp-ban in the message."),
-                            Button.secondary(Infraction.actionNoBan, "No, don't mention a temp-ban.")
+                            Button.primary(Infraction.actionUserBan, "No, but mention a suspension in the message."),
+                            Button.secondary(Infraction.actionNoBan, "No, don't mention a suspension.")
                     );
                 } else {
                     if (silent) actionRow = ActionRow.of(

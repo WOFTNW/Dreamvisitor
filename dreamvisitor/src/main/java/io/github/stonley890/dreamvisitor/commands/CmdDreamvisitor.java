@@ -436,6 +436,16 @@ public class CmdDreamvisitor implements DVCommand {
                                         .executes((sender, args) -> {
                                             @Nullable String key = "lastInactiveTax";
                                             configInt(sender, args, key);
+                                        }),
+                                new CommandAPICommand("autoRestartMaxPlayers")
+                                        .withHelp("Set autoRestartMaxPlayers", """
+                                                The default maximum number of players for an auto restart.
+                                                This can be bypassed on a per-command basis by including the "max-players" argument.
+                                                Default: 0""")
+                                        .withOptionalArguments(new TextArgument("autoRestartMaxPlayers"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "autoRestartMaxPlayers";
+                                            configInt(sender, args, key);
                                         })
                         )
                 );

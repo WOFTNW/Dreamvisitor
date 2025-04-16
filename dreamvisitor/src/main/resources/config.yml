@@ -139,21 +139,6 @@ mailDeliveryLocationSelectionDistanceWeightMultiplier: 1.00
 # Default: 0.05
 mailDistanceToRewardMultiplier: 0.05
 
-# The current in-universe year.
-# This will be incremented by Dreamvisitor automatically.
-# Default: 0
-currentYear: 0
-
-# The number of minutes in an in-universe year.
-# Default: 43200
-minutesPerYear: 43200
-
-# The last time the year was updated.
-# This is used to keep time accurately, even if the server goes offline.
-# Do not change this value.
-# Default: 0
-lastUpdateMilli: 0
-
 # The repository path of the server resource pack.
 # Dreamvisitor will pull the first artifact from the latest release on pack update.
 # Default: "WOFTNW/Dragonspeak"

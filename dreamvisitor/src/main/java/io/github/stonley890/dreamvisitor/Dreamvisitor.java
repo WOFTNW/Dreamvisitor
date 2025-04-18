@@ -174,7 +174,6 @@ public class Dreamvisitor extends JavaPlugin {
       commands.add(new CmdSethub());
       commands.add(new CmdSoftwhitelist());
       commands.add(new CmdTagRadio());
-      commands.add(new CmdTogglepvp());
       commands.add(new CmdZoop());
       commands.add(new CmdItemBanList());
       commands.add(new CmdUser());

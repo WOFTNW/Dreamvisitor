@@ -2,8 +2,11 @@ package io.github.stonley890.dreamvisitor.listeners;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import io.github.stonley890.dreamvisitor.data.BadWords;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Chatback;
@@ -43,6 +46,21 @@ public class ListenPlayerChat implements Listener {
                 return;
             }
         }
+
+        List<String> badWords = BadWords.getBadWords();
+
+        String message = event.getMessage();
+
+        for (String badWord : badWords) {
+
+            Pattern pattern = Pattern.compile(".*\\b" + badWord + "\\b.*");
+
+            if (pattern.matcher(message).matches()) {
+                event.getPlayer().sendMessage(ChatColor.RED + "You can't say " + ChatColor.YELLOW + badWord + ChatColor.RED + "!");
+                event.setCancelled(true);
+                return;
+            }
+        }
         
         /*
         Send chat messages to Discord
@@ -51,6 +69,8 @@ public class ListenPlayerChat implements Listener {
         */
 
         String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + "**: " + event.getMessage();
+
+
 
         if (!Dreamvisitor.chatPaused || event.isCancelled()) {
             if (event.isCancelled()) return;

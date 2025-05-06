@@ -37,6 +37,16 @@ public class ListenPlayerCmdPreprocess implements Listener {
         String cmd = event.getMessage();
         Player player = event.getPlayer();
 
+        // Don't allow /tw facts reset because it is very destructive.
+        if (
+                cmd.stripTrailing().equalsIgnoreCase("/tw facts reset") ||
+                        cmd.stripTrailing().equalsIgnoreCase("/typewriter facts reset")
+        ) {
+            player.sendMessage(ChatColor.RED + "Dreamvisitor stopped you from running that command because it's too destructive <3");
+            event.setCancelled(true);
+            return;
+        }
+
         // '/me' and '/rp' pass through
         if ((cmd.startsWith("/me " ) || cmd.startsWith("/rp" )) && !event.isCancelled()) {
 

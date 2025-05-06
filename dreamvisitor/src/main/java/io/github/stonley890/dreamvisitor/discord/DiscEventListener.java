@@ -156,6 +156,21 @@ public class DiscEventListener extends ListenerAdapter {
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
+
+                List<String> badWords = BadWords.getBadWords();
+
+                Message chatMessage = event.getMessage();
+
+                for (String badWord : badWords) {
+
+                    Pattern pattern = Pattern.compile(".*\\b" + badWord + "\\b.*");
+
+                    if (pattern.matcher(chatMessage.getContentRaw()).matches()) {
+                        chatMessage.addReaction(Emoji.fromFormatted("\uD83D\uDEAB")).queue();
+                        return;
+                    }
+                }
+
                 // Build message
                 Member author = event.getMessage().getMember();
                 assert author != null;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import io.github.stonley890.dreamvisitor.data.BadWords;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Chatback;
@@ -46,11 +47,7 @@ public class ListenPlayerChat implements Listener {
             }
         }
 
-        List<String> badWords = new ArrayList<>();
-
-        badWords.add("heron");
-        badWords.add("dino");
-        badWords.add("silver");
+        List<String> badWords = BadWords.getBadWords();
 
         String message = event.getMessage();
 

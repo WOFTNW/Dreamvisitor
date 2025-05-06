@@ -157,11 +157,7 @@ public class DiscEventListener extends ListenerAdapter {
 
             Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
 
-                List<String> badWords = new ArrayList<>();
-
-                badWords.add("heron");
-                badWords.add("dino");
-                badWords.add("silver");
+                List<String> badWords = BadWords.getBadWords();
 
                 Message chatMessage = event.getMessage();
 

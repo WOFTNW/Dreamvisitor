@@ -237,6 +237,10 @@ public class Dreamvisitor extends JavaPlugin {
       debug("Initializing command scheduler");
       CommandScheduler.getInstance().loadConfig();
 
+      // Init bad words
+      debug("Initializing badwords.yml");
+      BadWords.init();
+
       // LuckPerms API
       RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
       if (provider != null)

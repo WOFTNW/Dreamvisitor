@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.discord;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.*;
+import io.github.stonley890.dreamvisitor.data.Infraction;
 import io.github.stonley890.dreamvisitor.functions.Whitelist;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;

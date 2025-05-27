@@ -37,19 +37,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 
-/*
- * The main ticking thread.
-*/
-
 @SuppressWarnings({ "null" })
 public class Dreamvisitor extends JavaPlugin {
 
   public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] "
       + ChatColor.RESET;
-  // private
   private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager
       .getRootLogger();
-  // public
   public static Dreamvisitor PLUGIN;
   public static LuckPerms luckperms;
   public static String MOTD = null;
@@ -62,7 +56,6 @@ public class Dreamvisitor extends JavaPlugin {
   private static ConsoleLogger appender;
   public final String VERSION = getDescription().getVersion();
 
-  // WorldGuard flags
   public static StateFlag DRAGON_FLIGHT;
   public static StateFlag WITHER;
 
@@ -94,48 +87,32 @@ public class Dreamvisitor extends JavaPlugin {
 
   @Override
   public void onLoad() {
-    // Called after a plugin is loaded but before it has been enabled.
-    // When multiple plugins are loaded, the onLoad() for all plugins is called
-    // before any onEnable() is called.
-    // Init WorldGuard flags
     try {
       FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
       try {
-        // create a flag with the name "dragon-flight", defaulting to true
         StateFlag flag = new StateFlag("dragon-flight", true);
         registry.register(flag);
-        DRAGON_FLIGHT = flag; // only set our field if there was no error
+        DRAGON_FLIGHT = flag;
 
       } catch (FlagConflictException e) {
-        // some other plugin registered a flag by the same name already.
-        // you can use the existing flag, but this may cause conflicts - be sure to
-        // check type
         Flag<?> existing = registry.get("dragon-flight");
         if (existing instanceof StateFlag) {
           DRAGON_FLIGHT = (StateFlag) existing;
         } else {
-          // types don't match - this is bad news! some other plugin conflicts with you
-          // hopefully this never actually happens
           getLogger()
               .severe("A flag with the name dragon-flight already exists! Some other plugin claimed it already :(");
         }
       }
       try {
-        // create a flag with the name "wither", defaulting to true
         StateFlag flag = new StateFlag("wither", true);
         registry.register(flag);
-        WITHER = flag; // only set our field if there was no error
+        WITHER = flag;
 
       } catch (FlagConflictException e) {
-        // some other plugin registered a flag by the same name already.
-        // you can use the existing flag, but this may cause conflicts - be sure to
-        // check type
         Flag<?> existing = registry.get("wither");
         if (existing instanceof StateFlag) {
           WITHER = (StateFlag) existing;
         } else {
-          // types don't match - this is bad news! some other plugin conflicts with you
-          // hopefully this never actually happens
           getLogger().severe("A flag with the name wither already exists! Some other plugin claimed it already :(");
         }
       }
@@ -152,12 +129,14 @@ public class Dreamvisitor extends JavaPlugin {
   public void onEnable() {
 
     try {
-      // Initialize variables
       PLUGIN = this;
 
       debugMode = getConfig().getBoolean("debug");
 
       checkConfig();
+
+      debug("Initializing PocketBase config loader...");
+      PBConfigLoader.init();
 
       debug("Registering listeners...");
       registerListeners();
@@ -191,7 +170,7 @@ public class Dreamvisitor extends JavaPlugin {
       commands.add(new CmdDreamvisitor());
       commands.add(new CmdChatback());
       commands.add(new CmdVelocity());
-      commands.add(new CmdSchedule()); // Add the new schedule command
+      commands.add(new CmdSchedule());
 
       debug("Initializing commands...");
       CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
@@ -199,72 +178,55 @@ public class Dreamvisitor extends JavaPlugin {
       registerCommands(commands);
 
       debug("Creating data folder...");
-      // Create config if needed
       boolean directoryCreated = getDataFolder().mkdir();
       if (!directoryCreated)
         debug("Dreamvisitor did not create a data folder. It may already exist.");
       saveDefaultConfig();
 
-      // Initialize account link
       debug("Initializing accountLink.txt");
       AccountLink.init();
 
-      // Initialize infractions
       debug("Initializing infractions.yml");
       Infraction.init();
 
-      // Init alts
       debug("Initializing alts.yml");
       AltFamily.init();
 
-      // Init eco
       debug("Initializing economy.yml");
       Economy.init();
 
-      // Init mail
       debug("Initializing mail.yml");
       Mail.init();
 
-      // Init tribes
       debug("Initializing player-tribes.yml");
       PlayerTribe.setup();
 
-      // Init energy
       debug("Initializing energy");
       Flight.init();
 
-      // Init command scheduler
       debug("Initializing command scheduler");
       CommandScheduler.getInstance().loadConfig();
 
-      // Init bad words
       debug("Initializing badwords.yml");
       BadWords.init();
 
-      // LuckPerms API
       RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
       if (provider != null)
         luckperms = provider.getProvider();
 
-      // WorldGuard flags
       SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
-      // second param allows for ordering of handlers - see the JavaDocs
       sessionManager.registerHandler(DragonFlightFlag.FACTORY, null);
       sessionManager.registerHandler(WitherFlag.FACTORY, null);
 
-      // Start message
       getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
 
-      // Bot
       debug("Starting Dreamvisitor bot...");
       Bot.startBot(getConfig());
 
       if (!botFailed) {
-        // Get saved data
         debug("Fetching recorded channels and roles from config.");
         DiscCommandsManager.init();
 
-        // Send server start message
         try {
           Bot.getGameLogChannel().sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
         } catch (InsufficientPermissionException e) {
@@ -275,7 +237,6 @@ public class Dreamvisitor extends JavaPlugin {
 
       }
 
-      // If chat was previously paused, restore and notify in console\
       debug("Restoring chat pause...");
       if (getConfig().getBoolean("chatPaused")) {
         chatPaused = true;
@@ -283,13 +244,11 @@ public class Dreamvisitor extends JavaPlugin {
             "Chat is currently paused from last session! Use /pausechat to allow users to chat.");
       }
 
-      // Restore player limit override
       debug("Restoring player limit override...");
       playerLimit = getConfig().getInt("playerlimit");
       getServer().getLogger().info(PREFIX +
           "Player limit override is currently set to " + playerLimit);
 
-      // Create item banlist if empty
       debug("Restoring item banlist...");
       if (PLUGIN.getConfig().get("itemBlacklist") != null) {
         ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) PLUGIN.getConfig().getList("itemBlacklist");
@@ -299,28 +258,24 @@ public class Dreamvisitor extends JavaPlugin {
         }
       }
 
-      // Console logging
       debug("Setting up console logging...");
       appender = new ConsoleLogger();
       logger.addAppender(appender);
 
-      // Set up web whitelist if enabled
       webWhitelistEnabled = getConfig().getBoolean("web-whitelist");
       if (webWhitelistEnabled)
         Whitelist.startWeb(getConfig().getInt("whitelistPort"));
 
       Runnable pushConsole = new BukkitRunnable() {
-        // Push console log to Discord every 2 seconds
         @Override
         public void run() {
           if (Dreamvisitor.getPlugin().getConfig().getBoolean("log-console")) {
 
-            // If there are no messages in the queue, return
             if (ConsoleLogger.messageBuilder.isEmpty())
               return;
 
             try {
-              Bot.getGameLogChannel().sendMessage(ConsoleLogger.messageBuilder.toString()).queue(); // send message
+              Bot.getGameLogChannel().sendMessage(ConsoleLogger.messageBuilder.toString()).queue();
             } catch (InsufficientPermissionException e) {
               Bukkit.getLogger().warning(
                   "Dreamvisitor Bot does not have the necessary permissions to send messages in game log channel.");
@@ -328,23 +283,18 @@ public class Dreamvisitor extends JavaPlugin {
               Bukkit.getLogger().severe("Console logger tried to send an invalid message!");
             }
 
-            ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length()); // delete queued messages
+            ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
 
-            // If there are no overflow messages, return
             if (ConsoleLogger.overFlowMessages.isEmpty())
               return;
 
             StringBuilder overFlowMessageBuilder = new StringBuilder();
-            // First is safe, so add now
             overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(0));
 
-            // For each message in overflow
             for (int i = 1; i < ConsoleLogger.overFlowMessages.size(); i++) {
 
-              // Check that it fits
               if ((overFlowMessageBuilder.toString().length() + ConsoleLogger.overFlowMessages.get(i).length()
                   + "\n".length()) >= 2000) {
-                // if not, queue current message and clear string builder
                 try {
                   Bot.getGameLogChannel().sendMessage(overFlowMessageBuilder.toString()).queue();
                 } catch (InsufficientPermissionException e) {
@@ -368,7 +318,8 @@ public class Dreamvisitor extends JavaPlugin {
       Runnable scheduledRestarts = new BukkitRunnable() {
         @Override
         public void run() {
-          // Restart if requested and no players are online
+          PBConfigLoader.loadConfig();
+
           if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().isEmpty()) {
             AutoRestart.sendAutoRestartMessage();
             Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
@@ -376,7 +327,6 @@ public class Dreamvisitor extends JavaPlugin {
             getServer().spigot().restart();
           }
 
-          // also check if memory usage is high and schedule restart
           long maxMemory = Runtime.getRuntime().maxMemory();
           long freeMemory = Runtime.getRuntime().freeMemory();
           double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
@@ -436,17 +386,13 @@ public class Dreamvisitor extends JavaPlugin {
 
       Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 
-      // Push console every two seconds
       if (!botFailed)
         Bukkit.getScheduler().runTaskTimer(this, pushConsole, 0, 40);
 
-      // Check for scheduled restart every minute
       Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
 
-      // Check for warns that need to be reminded every hour
       Bukkit.getScheduler().runTaskTimer(this, remindWarns, 200, 20 * 60 * 60);
 
-      // Check for banned items every ten seconds
       Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20 * 10);
 
       debug("Enable finished.");
@@ -457,7 +403,6 @@ public class Dreamvisitor extends JavaPlugin {
       e.printStackTrace();
 
       if (!botFailed) {
-        // Send startup crashes.
         StringBuilder builder = new StringBuilder();
 
         builder.append(e.getMessage());
@@ -470,13 +415,10 @@ public class Dreamvisitor extends JavaPlugin {
               .sendMessage(builder.toString()).complete();
         } catch (net.dv8tion.jda.api.exceptions.ErrorResponseException ex) {
           if (ex.getErrorCode() == 50007) {
-            // Cannot send messages to this user
             Bukkit.getLogger().warning("Unable to send Discord DM to user: " + ex.getMessage() +
                 ". User may have DMs disabled or is not in a shared server.");
-            // Log the error message to console instead
             Bukkit.getLogger().severe("Error message that would have been sent: " + builder.toString());
           } else {
-            // For other Discord API errors, re-throw
             throw ex;
           }
         }
@@ -496,6 +438,20 @@ public class Dreamvisitor extends JavaPlugin {
       getConfig().set("playerlimit", -1);
     if (getConfig().getInt("infraction-expire-time-days") < 1)
       throw new InvalidConfigurationException("infraction-expire-time-days must be at least 1.");
+
+    if (!getConfig().contains("pocketbase-url")) {
+      getConfig().set("pocketbase-url", "http://your-pocketbase-server.com");
+    }
+    if (!getConfig().contains("pocketbase-config-id")) {
+      getConfig().set("pocketbase-config-id", "record_id_here");
+    }
+    if (!getConfig().contains("pocketbase-token")) {
+      getConfig().set("pocketbase-token", "your_admin_token_here");
+    }
+    if (!getConfig().contains("pocketbase-use-realtime")) {
+      getConfig().set("pocketbase-use-realtime", true);
+    }
+
     saveConfig();
   }
 
@@ -537,8 +493,10 @@ public class Dreamvisitor extends JavaPlugin {
 
     CommandAPI.onDisable();
 
+    // Shutdown the realtime updater
+    RealtimeConfigUpdater.shutdown();
+
     if (!botFailed) {
-      // Shutdown messages
       getLogger().info("Closing bot instance.");
       int requestsCanceled = Bot.getJda().cancelRequests();
       if (requestsCanceled > 0)
@@ -547,7 +505,6 @@ public class Dreamvisitor extends JavaPlugin {
       Bot.getJda().shutdownNow();
     }
 
-    // remove moon globes
     for (Moonglobe moonglobe : Moonglobe.activeMoonglobes)
       moonglobe.remove(null);
 
@@ -562,7 +519,6 @@ public class Dreamvisitor extends JavaPlugin {
       }
     }
 
-    // Save command scheduler
     CommandScheduler.getInstance().saveConfig();
     CommandScheduler.getInstance().stopScheduler();
 

@@ -29,7 +29,7 @@ public class RealtimeConfigUpdater {
   private static final AtomicBoolean isConnecting = new AtomicBoolean(false);
   private static int retryCount = 0;
   private static final int MAX_RETRIES = 5;
-  private static final int RETRY_DELAY_MS = 5000; // 5 seconds between retries
+  private static final int RETRY_DELAY_MS = 3000; // 5 seconds between retries
 
   public static void init(String pbBaseUrl, String pbConfigId, String pbToken) {
     baseUrl = pbBaseUrl;
@@ -68,7 +68,7 @@ public class RealtimeConfigUpdater {
     URL url = new URL(baseUrl + "/api/realtime");
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod("GET");
-    connection.setReadTimeout(60000); // 1 minute timeout
+    connection.setReadTimeout(6000); // 1 minute timeout
 
     // Add authentication if token is provided
     if (token != null && !token.isEmpty()) {
@@ -170,7 +170,7 @@ public class RealtimeConfigUpdater {
         if (record.has("autoRestart")) {
           boolean autoRestart = record.getBoolean("autoRestart");
           Dreamvisitor.debug("Received real-time update: autoRestart = " + autoRestart);
-            
+
           // Schedule update on main thread
           Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
             PBConfigLoader.updateLocalConfig(record);

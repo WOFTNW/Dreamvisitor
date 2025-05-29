@@ -87,6 +87,9 @@ fabric.properties
 # modules.xml
 # .idea/misc.xml
 # *.ipr
+# Plugin Config (token and other sensitive data)
+config.yaml
+config.yml
 
 # Sonarlint plugin
 # https://plugins.jetbrains.com/plugin/7973-sonarlint

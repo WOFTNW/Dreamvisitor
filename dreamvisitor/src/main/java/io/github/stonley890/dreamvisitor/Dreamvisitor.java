@@ -392,6 +392,7 @@ public class Dreamvisitor extends JavaPlugin {
         @Override
         public void run() {
           Moonglobe.tick();
+          Flight.tick();
         }
       };
 
@@ -515,7 +516,6 @@ public class Dreamvisitor extends JavaPlugin {
     pluginManager.registerEvents(new ListenTimeSkip(), this);
     pluginManager.registerEvents(new ListenSignChangeEvent(), this);
     pluginManager.registerEvents(new ListenPlayerToggleFlightEvent(), this);
-    pluginManager.registerEvents(new ListenPlayerMoveEvent(), this);
     pluginManager.registerEvents(new ListenEntityToggleGlideEvent(), this);
     pluginManager.registerEvents(new ListenPlayerChangedWorld(), this);
     pluginManager.registerEvents(new ListenPlayerRespawn(), this);

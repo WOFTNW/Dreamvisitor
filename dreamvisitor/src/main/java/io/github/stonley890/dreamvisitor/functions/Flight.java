@@ -5,11 +5,13 @@ import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Input;
 import org.bukkit.NamespacedKey;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInputEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -143,5 +145,49 @@ public class Flight {
      */
     public static boolean inFlightGameMode(@NotNull Player player) {
         return (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR);
+    }
+
+    public static void tick() {
+
+        for (final Player player : Bukkit.getOnlinePlayers()) {
+            final Input input = player.getCurrentInput();
+
+            if (player.isFlying() && !inFlightGameMode(player)) {
+                // Remove energy if flying
+                try {
+                    Double energy = Flight.energy.get(player);
+
+                    // Check planar movement
+                    double movement2d = 0;
+                    // If pressing movement key, remove 1
+                    if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) movement2d = 1;
+                    // If sprinting, multiply that by 2
+                    if (player.isSprinting()) movement2d *= 2;
+
+                    // Check vertical movement
+                    double movementY = 0;
+                    // If pressing jump, remove 1
+                    if (input.isJump()) movementY = 1;
+
+                    // Get multiplication factors from config
+                    final double flightEnergyDepletionXYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionXYMultiplier");
+                    final double flightEnergyDepletionYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionYMultiplier");
+                    // Calculate the total energy to remove
+                    final double energyToRemove = movement2d * flightEnergyDepletionXYMultiplier + movementY * flightEnergyDepletionYMultiplier;
+
+                    // Calculate what the player's energy should be
+                    energy -= energyToRemove;
+
+                    // Ensure energy is not below zero
+                    if (energy < 0) energy = 0.0;
+                    // Save new energy state to player
+                    Flight.energy.put(player, energy);
+                } catch (NullPointerException e) {
+                    // If the energy for the player doesn't exist for some reason, set it to full
+                    energy.put(player, energyCapacity);
+                }
+            }
+        }
+
     }
 }

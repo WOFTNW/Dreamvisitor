@@ -161,12 +161,12 @@ flightRegenerationPoint: 200.00
 flightEnergyRegeneration: 1.00
 
 # The rate at which movement on the X and Y axes depletes energy while flying.
-# Default: 4.00
-flightEnergyDepletionXYMultiplier: 4.00
+# Default: 1.00
+flightEnergyDepletionXYMultiplier: 1.00
 
 # The rate at which movement on the Y axes depletes energy while flying.
-# Default: 10.00
-flightEnergyDepletionYMultiplier: 10.00
+# Default: 2.00
+flightEnergyDepletionYMultiplier: 2.00
 
 # The message sent if a Wither is built in a region where the wither flag is denied.
 # Default: "Withers cannot be spawned here. You can only spawn Withers in the Wither chamber."

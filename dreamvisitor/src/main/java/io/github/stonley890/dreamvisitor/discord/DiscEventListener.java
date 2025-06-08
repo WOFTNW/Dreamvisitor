@@ -22,6 +22,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -488,7 +489,13 @@ Let's see if you remember this one.
                 }
                 BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
                 assert username != null;
-                banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
+                BanEntry<PlayerProfile> banEntry = banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
+                assert banEntry != null;
+                banEntry.save();
+
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null && player.isOnline()) player.kickPlayer("Banned by Dreamvisitor.");
+
                 event.reply("Banned `" + username + "`.").queue();
 
             } catch (IOException e) {

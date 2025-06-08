@@ -53,10 +53,11 @@ public class ListenPlayerChat implements Listener {
 
         for (String badWord : badWords) {
 
-            Pattern pattern = Pattern.compile(".*\\b" + badWord + "\\b.*");
+            Pattern pattern = Pattern.compile(".*\\b" + badWord + "\\b.*", Pattern.CASE_INSENSITIVE);
 
             if (pattern.matcher(message).matches()) {
                 event.getPlayer().sendMessage(ChatColor.RED + "You can't say " + ChatColor.YELLOW + badWord + ChatColor.RED + "!");
+
                 event.setCancelled(true);
                 return;
             }

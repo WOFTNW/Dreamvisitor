@@ -12,10 +12,12 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInputEvent;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Flight {
     public static double energyCapacity = Dreamvisitor.getPlugin().getConfig().getInt("flightEnergyCapacity");
@@ -23,6 +25,7 @@ public class Flight {
     public static final Map<Player, Double> energy = new HashMap<>();
     private static final Map<Player, Boolean> energyDepletion = new HashMap<>();
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
+    private static final Map<Player, Vector> lastPosition = new HashMap<>();
 
     public static void init() {
         Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
@@ -156,6 +159,8 @@ public class Flight {
                 // Remove energy if flying
                 try {
                     Double energy = Flight.energy.get(player);
+                    Vector lastLoc = lastPosition.get(player);
+                    Vector currentLoc = player.getLocation().toVector();
 
                     // Check planar movement
                     double movement2d = 0;
@@ -163,11 +168,15 @@ public class Flight {
                     if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) movement2d = 1;
                     // If sprinting, multiply that by 2
                     if (player.isSprinting()) movement2d *= 2;
+                    // If not actually moving, don't remove energy
+                    if (lastLoc != null && Objects.equals(currentLoc.getX(), lastLoc.getX()) && Objects.equals(currentLoc.getZ(), lastLoc.getZ())) movement2d = 0;
 
                     // Check vertical movement
                     double movementY = 0;
                     // If pressing jump, remove 1
                     if (input.isJump()) movementY = 1;
+                    // If not actually moving up, don't remove energy
+                    if (lastLoc != null && Objects.equals(currentLoc.getY(), lastLoc.getY())) movementY = 0;
 
                     // Get multiplication factors from config
                     final double flightEnergyDepletionXYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionXYMultiplier");
@@ -182,6 +191,7 @@ public class Flight {
                     if (energy < 0) energy = 0.0;
                     // Save new energy state to player
                     Flight.energy.put(player, energy);
+                    Flight.lastPosition.put(player, currentLoc);
                 } catch (NullPointerException e) {
                     // If the energy for the player doesn't exist for some reason, set it to full
                     energy.put(player, energyCapacity);

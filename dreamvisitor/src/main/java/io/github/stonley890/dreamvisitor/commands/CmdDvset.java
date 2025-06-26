@@ -117,7 +117,7 @@ public class CmdDvset implements DVCommand {
         }))
         .then(new StringArgument("option")
             .setOptional(true)
-            .executesNative((NativeCommandExecutor) ((sender, args) -> {
+            .executesNative((sender, args) -> {
               String option = (String) args.get("option");
 
               CommandSender callee = sender.getCallee();
@@ -165,7 +165,7 @@ public class CmdDvset implements DVCommand {
                 default ->
                   throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
               }
-            }))
+            })
             .then(new StringArgument("modification")
                 .setOptional(true)
                 .executesNative(((sender, args) -> {

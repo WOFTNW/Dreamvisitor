@@ -339,7 +339,7 @@ public class Dreamvisitor extends JavaPlugin {
         public void run() {
           Messager.debug("Checking warns to be reminded.");
           Map<Long, List<Infraction>> infractions = Infraction.getAllInfractions();
-          Messager.debug("Got list of " + infractions.keySet().size() + " members.");
+          Messager.debug("Got list of " + infractions.size() + " members.");
           for (Long l : infractions.keySet()) {
             Messager.debug("Checking infractions of user " + l);
             List<Infraction> userInfractions = Infraction.getInfractions(l);
@@ -406,7 +406,7 @@ public class Dreamvisitor extends JavaPlugin {
           if (ex.getErrorCode() == 50007) {
             getLogger().warning("Unable to send Discord DM to user: " + ex.getMessage() +
                 ". User may have DMs disabled or is not in a shared server.");
-            getLogger().severe("Error message that would have been sent: " + builder.toString());
+            getLogger().severe("Error message that would have been sent: " + builder);
           } else {
             throw ex;
           }

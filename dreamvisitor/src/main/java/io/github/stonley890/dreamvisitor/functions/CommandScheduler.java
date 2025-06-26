@@ -29,7 +29,7 @@ public class CommandScheduler {
   // how frequent to run the Scheduler checks
   // unit is in Game Tick
   // For 20 game ticks is one sec
-  private long updateTick = 20L * 5L;
+  private final long updateTick = 20L * 5L;
 
   private CommandScheduler() {
     // Initialize config file

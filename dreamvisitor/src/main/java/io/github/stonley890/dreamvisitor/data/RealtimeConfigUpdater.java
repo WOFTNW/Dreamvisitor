@@ -19,11 +19,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RealtimeConfigUpdater {
-  private static ExecutorService executor = Executors.newSingleThreadExecutor();
+  private static final ExecutorService executor = Executors.newSingleThreadExecutor();
   private static String baseUrl;
   private static String configId;
   private static String token;
-  private static String collectionName = "dreamvisitor_config";
+  private static final String collectionName = "dreamvisitor_config";
   private static String clientId;
   private static final AtomicBoolean isRunning = new AtomicBoolean(false);
   private static final AtomicBoolean isConnecting = new AtomicBoolean(false);
@@ -149,7 +149,7 @@ public class RealtimeConfigUpdater {
             while ((line = br.readLine()) != null) {
               errorResponse.append(line);
             }
-            Messager.debug("Error response: " + errorResponse.toString());
+            Messager.debug("Error response: " + errorResponse);
           }
         }
       } else {

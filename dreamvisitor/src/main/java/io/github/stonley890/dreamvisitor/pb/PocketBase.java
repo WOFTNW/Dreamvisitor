@@ -100,7 +100,7 @@ public class PocketBase {
         requestBuilder.patch(body != null ? body : RequestBody.create(new byte[0], null));
         break;
       case "DELETE":
-        requestBuilder.delete(body != null ? body : null);
+        requestBuilder.delete(body);
         break;
       default:
         throw new IllegalArgumentException("Unsupported HTTP method: " + method);

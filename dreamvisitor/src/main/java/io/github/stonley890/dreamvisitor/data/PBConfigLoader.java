@@ -71,7 +71,7 @@ public class PBConfigLoader {
       String jsonString = record.toString();
       config = new JSONObject(jsonString);
 
-      Messager.debug("Loaded PocketBase configuration: " + config.toString());
+      Messager.debug("Loaded PocketBase configuration: " + config);
 
       // Apply config values to the system
       applyConfig();

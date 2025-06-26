@@ -81,7 +81,7 @@ public class CmdHub implements DVCommand {
                         }
 
                     } else {
-                        if (callee instanceof Player) {
+                        if (callee instanceof Player player) {
                             if (plugin.getConfig().getLocation("hubLocation") == null) {
                                 throw CommandAPI.failWithString("No hub is currently set!");
                             } else {
@@ -89,7 +89,6 @@ public class CmdHub implements DVCommand {
                                 Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
                                 assert Dreamvisitor.hubLocation != null;
 
-                                Player player = (Player) callee;
                                 if (Mail.isPLayerDeliverer(player)) Mail.cancel(player);
 
                                 Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");

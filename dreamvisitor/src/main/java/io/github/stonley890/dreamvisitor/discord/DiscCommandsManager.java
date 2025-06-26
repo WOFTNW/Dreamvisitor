@@ -1,8 +1,8 @@
 package io.github.stonley890.dreamvisitor.discord;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.commands.*;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -26,7 +26,7 @@ public class DiscCommandsManager extends ListenerAdapter {
     @SuppressWarnings({"null"})
     public static void init() {
 
-        Dreamvisitor.debug("Initializing commands...");
+        Messager.debug("Initializing commands...");
 
         List<DiscordCommand> addList = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class DiscCommandsManager extends ListenerAdapter {
         addList.add(new DCmdBaltop());
         addList.add(new DCmdSeen());
 
-        Dreamvisitor.debug("Ready to add to guild.");
+        Messager.debug("Ready to add to guild.");
 
         addCommands(addList);
 
@@ -84,7 +84,7 @@ public class DiscCommandsManager extends ListenerAdapter {
 
     public static void addCommands(@NotNull List<DiscordCommand> commands) {
 
-        Dreamvisitor.debug("Request to add " + commands.size() + " commands.");
+        Messager.debug("Request to add " + commands.size() + " commands.");
 
         if (commands.isEmpty()) return;
 
@@ -101,7 +101,7 @@ public class DiscCommandsManager extends ListenerAdapter {
                 try {
                     jda.addEventListener(command);
                 } catch (IllegalArgumentException ignored) {}
-                Dreamvisitor.debug("Added command " + command.getName());
+                Messager.debug("Added command " + command.getName());
             }
         }
 
@@ -112,7 +112,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             }
         }
 
-        Dreamvisitor.debug("Updated commands for " + jda.getGuilds().size() + " guild(s).");
+        Messager.debug("Updated commands for " + jda.getGuilds().size() + " guild(s).");
 
         commands.removeIf(Objects::isNull);
         DiscCommandsManager.commands.addAll(commands);

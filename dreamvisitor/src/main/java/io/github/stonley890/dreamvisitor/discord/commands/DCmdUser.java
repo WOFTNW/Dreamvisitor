@@ -1,8 +1,8 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -26,9 +26,9 @@ public class DCmdUser implements DiscordCommand {
 
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
-        Dreamvisitor.debug("Command requested.");
+        Messager.debug("Command requested.");
         User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
-        Dreamvisitor.debug("Target user: " + targetUser.getId());
+        Messager.debug("Target user: " + targetUser.getId());
 
         // UUID from AccountLink.yml
         UUID uuid;

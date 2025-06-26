@@ -1,6 +1,7 @@
 package io.github.stonley890.dreamvisitor.data;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -27,7 +28,7 @@ public class AltFamily implements ConfigurationSerializable {
     public static void init() throws IOException {
         // If the file does not exist, create one
         if (!file.exists()) {
-            Dreamvisitor.debug("alts.yml does not exist. Creating one now...");
+            Messager.debug("alts.yml does not exist. Creating one now...");
             try {
                 if (!file.createNewFile()) throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
             } catch (IOException e) {
@@ -57,14 +58,14 @@ public class AltFamily implements ConfigurationSerializable {
     }
 
     private static void saveToDisk(@NotNull YamlConfiguration config) {
-        Dreamvisitor.debug("Saving alts.yml...");
+        Messager.debug("Saving alts.yml...");
         try {
             config.save(file);
         } catch (IOException e) {
             Bukkit.getLogger().severe("alts.yml cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
-        Dreamvisitor.debug("Done!");
+        Messager.debug("Done!");
     }
 
     /**

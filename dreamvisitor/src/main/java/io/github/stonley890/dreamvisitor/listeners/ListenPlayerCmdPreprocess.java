@@ -6,6 +6,7 @@ import java.util.List;
 
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Mail;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -118,7 +119,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     if (Mail.isPLayerDeliverer(player)) Mail.cancel(player);
                     for (Player sandboxer : Bukkit.getOnlinePlayers()) {
                         if (PlayerUtility.getPlayerMemory(sandboxer.getUniqueId()).sandbox && cmd.contains(sandboxer.getName())) {
-                            player.sendMessage(Dreamvisitor.PREFIX + "That player is currently in Sandbox Mode. Teleportation is not allowed.");
+                            Messager.send(player, "That player is currently in Sandbox Mode. Teleportation is not allowed.");
                             event.setCancelled(true);
                         }
                     }

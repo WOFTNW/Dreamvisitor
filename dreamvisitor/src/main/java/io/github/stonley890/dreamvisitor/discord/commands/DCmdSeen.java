@@ -1,9 +1,8 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
-import com.earth2me.essentials.Essentials;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -43,9 +42,9 @@ public class DCmdSeen implements DiscordCommand {
             event.reply(user.getAsMention() + " does not have a linked Minecraft account.").setEphemeral(true).queue();
             return;
         }
-        Dreamvisitor.debug("UUID: " + uuid);
+        Messager.debug("UUID: " + uuid);
         boolean online = Bukkit.getPlayer(uuid) != null;
-        Dreamvisitor.debug("Online? " + online);
+        Messager.debug("Online? " + online);
         Instant time;
         try {
             if (online) {

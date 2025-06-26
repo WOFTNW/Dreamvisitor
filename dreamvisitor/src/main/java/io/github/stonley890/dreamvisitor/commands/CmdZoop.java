@@ -7,6 +7,7 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -43,7 +44,7 @@ public class CmdZoop implements DVCommand {
 
                         PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
 
-                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.vanished + ".");
+                        Messager.send(sender, "Discord vanish toggled to " + memory.vanished + ".");
                     } else throw CommandAPI.failWithString("This command must be executed as a player!");
 
                 });

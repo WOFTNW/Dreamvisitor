@@ -8,6 +8,7 @@ import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.Mail;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.*;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -72,10 +73,10 @@ public class CmdHub implements DVCommand {
                                 }
                             }
                             if (entitySelect.size() == 1) {
-                                callee.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entitySelect.stream().findFirst().get().getName() + " to the hub.");
+                                Messager.send(callee, "Teleported " + entitySelect.stream().findFirst().get().getName() + " to the hub.");
                             }
                             else {
-                                callee.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entitySelect.size() + " entities to the hub.");
+                                Messager.send(callee, "Teleported " + entitySelect.size() + " entities to the hub.");
                             }
                         }
 

@@ -5,6 +5,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.*;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +48,7 @@ public class CmdVelocity implements DVCommand {
                         } else {
                             entity.setVelocity(entity.getVelocity().add(force.toVector()));
                         }
-                        sender.sendMessage(Dreamvisitor.PREFIX + "Applied velocity to " + entities.size() + " entities.");
+                        Messager.send(sender, "Applied velocity to " + entities.size() + " entities.");
                     }
 
                 });

@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.data;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -30,7 +31,7 @@ public class Economy {
     public static void init() throws IOException {
         // If the file does not exist, create one
         if (!file.exists()) {
-            Dreamvisitor.debug(file.getName() + " does not exist. Creating one now...");
+            Messager.debug(file.getName() + " does not exist. Creating one now...");
             try {
                 if (!file.createNewFile())
                     throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);

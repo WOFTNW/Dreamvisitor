@@ -18,7 +18,6 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class CommandScheduler {
@@ -249,7 +248,7 @@ public class CommandScheduler {
    * @param schedule The schedule to execute
    */
   private void executeSchedule(Schedule schedule) {
-    Dreamvisitor.debug("Executing scheduled commands for: " + schedule.getName());
+    Messager.debug("Executing scheduled commands for: " + schedule.getName());
 
     final AtomicBoolean success = new AtomicBoolean(true);
     List<String> commands = schedule.getCommands();
@@ -269,7 +268,7 @@ public class CommandScheduler {
       }
 
       Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> {
-        Dreamvisitor.debug("Executing command " + (index + 1) + "/" + commands.size() + ": " + command);
+        Messager.debug("Executing command " + (index + 1) + "/" + commands.size() + ": " + command);
         try {
           boolean result = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
           if (!result) {

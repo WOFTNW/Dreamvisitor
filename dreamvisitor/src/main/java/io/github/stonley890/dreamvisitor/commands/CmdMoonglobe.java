@@ -10,6 +10,7 @@ import dev.jorel.commandapi.arguments.LongArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import dev.jorel.commandapi.wrappers.NativeProxyCommandSender;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import io.github.stonley890.dreamvisitor.functions.Moonglobe;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -40,7 +41,7 @@ public class CmdMoonglobe implements DVCommand {
             if (!alreadyHasGlobe) new Moonglobe(player.getUniqueId(), location, maxDistance);
         }
 
-        return (Dreamvisitor.PREFIX + "Created moon globes for " + players.size() + " players.");
+        return ("Created moon globes for " + players.size() + " players.");
 
     }
 
@@ -66,7 +67,7 @@ public class CmdMoonglobe implements DVCommand {
                                 }
                             }
 
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Removed moon globes of " + targets.size() + " players.");
+                            Messager.send(sender, "Removed moon globes of " + targets.size() + " players.");
                         })
                 )
                 .withSubcommand(new CommandAPICommand("create")
@@ -87,7 +88,7 @@ public class CmdMoonglobe implements DVCommand {
                             Object maxDistanceArg = args.get("maxDistance");
                             if (maxDistanceArg != null) maxDistance = (float) maxDistanceArg;
 
-                            sender.sendMessage(create(targets, location, maxDistance));
+                            Messager.send(sender, create(targets, location, maxDistance));
                         })
                         .executesNative((sender, args) -> {
 
@@ -128,7 +129,7 @@ public class CmdMoonglobe implements DVCommand {
                             Object maxDistanceArg = args.get("maxDistance");
                             if (maxDistanceArg != null) maxDistance = (float) maxDistanceArg;
 
-                            sender.sendMessage(create(targets, location, maxDistance));
+                            Messager.send(sender, create(targets, location, maxDistance));
                         })
                 );
     }

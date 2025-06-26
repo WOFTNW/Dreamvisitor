@@ -7,6 +7,7 @@ import dev.jorel.commandapi.arguments.OfflinePlayerArgument;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +42,7 @@ public class CmdUser implements DVCommand {
 
                     }
 
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Local data for player " + player.getName() + ":" +
+                    Messager.send(sender, "Local data for player " + player.getName() + ":" +
                             "\nUUID: " + player.getUniqueId() +
                             "\nDiscord Username: " + discordUsername +
                             "\nDiscord ID: " + discordID

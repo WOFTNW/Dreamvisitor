@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Economy;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
@@ -245,7 +245,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                     }
                     case "add" -> {
 
-                        Dreamvisitor.debug("Call to add.");
+                        Messager.debug("Call to add.");
 
                         String name = event.getOption("name", OptionMapping::getAsString);
                         if (name == null) {
@@ -257,28 +257,28 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                             event.reply("description cannot be null!").setEphemeral(true).queue();
                             return;
                         }
-                        Dreamvisitor.debug("Got args.");
+                        Messager.debug("Got args.");
 
                         if (Economy.getItems().size() >= 25) {
                             event.reply("Only 25 items can exist at a time!").setEphemeral(true).queue();
                             return;
                         }
                         Economy.ShopItem shopItem = new Economy.ShopItem(name, description);
-                        Dreamvisitor.debug("Created new item.");
+                        Messager.debug("Created new item.");
                         shopItem.ensureUniqueId();
-                        Dreamvisitor.debug("ID is unique.");
+                        Messager.debug("ID is unique.");
                         int itemId = shopItem.getId();
                         shopItem.setEnabled(false);
-                        Dreamvisitor.debug("Disabled.");
+                        Messager.debug("Disabled.");
                         Economy.saveItem(shopItem);
-                        Dreamvisitor.debug("Saves.");
+                        Messager.debug("Saves.");
 
                         EmbedBuilder embed = getEditEmbed(shopItem, Objects.requireNonNull(event.getGuild()));
-                        Dreamvisitor.debug("Got embed.");
+                        Messager.debug("Got embed.");
 
                         event.reply("The item has been created, but not enabled. Edit it below and set it to enabled when ready.")
                                 .addEmbeds(embed.build()).setEphemeral(true).addActionRow(getEditDropdown(itemId).build()).queue();
-                        Dreamvisitor.debug("Reply queued..");
+                        Messager.debug("Reply queued..");
 
                     }
                     case "remove" -> {
@@ -652,7 +652,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
         String id = event.getComponentId();
         String[] splitId = id.split("-");
 
-        Dreamvisitor.debug("Got string select menu with id " + id);
+        Messager.debug("Got string select menu with id " + id);
 
         if (event.getSelectedOptions().isEmpty()) return;
         SelectOption selectedOption = event.getSelectedOptions().get(0);
@@ -751,7 +751,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
         String id = event.getComponentId();
         String[] splitId = id.split("-");
 
-        Dreamvisitor.debug("Got string select menu with id " + id);
+        Messager.debug("Got string select menu with id " + id);
 
         String type = splitId[0];
         if (type.equals("item")) {
@@ -810,7 +810,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
         assert id != null;
         String[] splitId = id.split("-");
 
-        Dreamvisitor.debug("Got button with id " + id);
+        Messager.debug("Got button with id " + id);
 
         String type = splitId[0];
         if (type.equals("item")) {
@@ -837,7 +837,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
         String id = event.getModalId();
         String[] splitId = id.split("-");
 
-        Dreamvisitor.debug("Got modal with id " + id);
+        Messager.debug("Got modal with id " + id);
 
         String type = splitId[0];
         if (type.equals("item")) {

@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.AutoRestart;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -34,21 +35,21 @@ public class DCmdResourcepackupdate implements DiscordCommand {
         URL resourcePackURL;
         try {
             resourcePackURL = getLatestReleaseURL(Dreamvisitor.getPlugin().getConfig().getString("resourcePackRepo"));
-            Dreamvisitor.debug("Found URL.");
+            Messager.debug("Found URL.");
         } catch (IOException e) {
             event.reply("Dreamvisitor was unable to find the resource pack URL: " + e.getMessage()).queue();
             return;
         }
 
         try {
-            Dreamvisitor.debug("Attempting to download the resource pack.");
+            Messager.debug("Attempting to download the resource pack.");
             HttpURLConnection connection = (HttpURLConnection) resourcePackURL.openConnection();
             connection.setRequestMethod("GET");
             connection.setReadTimeout(10000); // timeout
             connection.connect();
 
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                Dreamvisitor.debug("Generating hash.");
+                Messager.debug("Generating hash.");
                 InputStream is = connection.getInputStream();
                 MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
                 byte[] buffer = new byte[1024];
@@ -66,8 +67,8 @@ public class DCmdResourcepackupdate implements DiscordCommand {
                 }
 
                 String newHash = hash.toString();
-                Dreamvisitor.debug("New hash: " + newHash);
-                Dreamvisitor.debug("Writing changes to server.properties.");
+                Messager.debug("New hash: " + newHash);
+                Messager.debug("Writing changes to server.properties.");
 
                 try {
                     Properties properties = getProperties(resourcePackURL, newHash);
@@ -77,7 +78,7 @@ public class DCmdResourcepackupdate implements DiscordCommand {
                     properties.store(writer, null);
                     writer.close();
 
-                    Dreamvisitor.debug("Success.");
+                    Messager.debug("Success.");
                     event.getHook().editOriginal("The resource pack URL has been updated to " + resourcePackURL +
                             ". The SHA1 hash has been updated to " + newHash + ". The server must restart for changes to take effect. " +
                             "I will restart it automatically when 0 players are online. You can cancel this with `/autorestart`.").queue();
@@ -112,7 +113,7 @@ public class DCmdResourcepackupdate implements DiscordCommand {
     private static URL getLatestReleaseURL(String repo) throws IOException {
         // Create a URL object
         URL url = new URL("https://api.github.com/repos/" + repo + "/releases/latest");
-        Dreamvisitor.debug("Finding latest artifact at " + url);
+        Messager.debug("Finding latest artifact at " + url);
 
         // Open a connection to the URL
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -120,9 +121,9 @@ public class DCmdResourcepackupdate implements DiscordCommand {
         connection.setRequestProperty("Accept", "application/json");
 
         // Read the response
-        Dreamvisitor.debug("Sending request.");
+        Messager.debug("Sending request.");
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        Dreamvisitor.debug("Parsing response.");
+        Messager.debug("Parsing response.");
         String inputLine;
         StringBuilder content = new StringBuilder();
         while ((inputLine = in.readLine()) != null) {
@@ -134,12 +135,12 @@ public class DCmdResourcepackupdate implements DiscordCommand {
         connection.disconnect();
 
         // Parse the JSON response using Gson
-        Dreamvisitor.debug("Converting to JSON.");
+        Messager.debug("Converting to JSON.");
         JsonElement jsonElement = JsonParser.parseString(content.toString());
         JsonObject jsonObject = jsonElement.getAsJsonObject();
 
         // Access the assets array
-        Dreamvisitor.debug("Locating assets[0].browser_download_url");
+        Messager.debug("Locating assets[0].browser_download_url");
         JsonArray assets = jsonObject.getAsJsonArray("assets");
         if (!assets.isEmpty()) {
             // Get the first asset's browser_download_url

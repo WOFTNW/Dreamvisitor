@@ -1,9 +1,9 @@
 package io.github.stonley890.dreamvisitor.data;
 
-import dev.jorel.commandapi.wrappers.Time;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.commands.DCmdWarn;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -62,7 +62,7 @@ public class Infraction implements ConfigurationSerializable {
     public static void init() throws IOException {
         // If the file does not exist, create one
         if (!file.exists()) {
-            Dreamvisitor.debug("infractions.yml does not exist. Creating one now...");
+            Messager.debug("infractions.yml does not exist. Creating one now...");
             try {
                 if (!file.createNewFile())
                     throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
@@ -87,14 +87,14 @@ public class Infraction implements ConfigurationSerializable {
     }
 
     private static void saveToDisk(@NotNull YamlConfiguration config) {
-        Dreamvisitor.debug("Saving infractions.yml...");
+        Messager.debug("Saving infractions.yml...");
         try {
             config.save(file);
         } catch (IOException e) {
             Bukkit.getLogger().severe("infractions.yml cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
-        Dreamvisitor.debug("Done!");
+        Messager.debug("Done!");
     }
 
     /**
@@ -354,17 +354,17 @@ public class Infraction implements ConfigurationSerializable {
     }
 
     public void remind(long user) {
-        Dreamvisitor.debug("Remind warn. warnChannelId: " + warnChannelID);
+        Messager.debug("Remind warn. warnChannelId: " + warnChannelID);
         if (warnChannelID == null) return;
         TextChannel warnChannel = getWarnChannel();
         if (warnChannel == null) return;
 
-        Dreamvisitor.debug("Attempting to retrieve last message.");
+        Messager.debug("Attempting to retrieve last message.");
         if (!Bot.getGameLogChannel().getGuild().getChannels().contains(warnChannel)) return;
         warnChannel.retrieveMessageById(warnChannel.getLatestMessageId()).queue(message -> {
-            Dreamvisitor.debug("Retrieved last message.");
-            Dreamvisitor.debug("Message author is bot? " + message.getAuthor().equals(Bot.getJda().getSelfUser()));
-            Dreamvisitor.debug("Time is passed? " + message.getTimeCreated().plusDays(1).isBefore(OffsetDateTime.now()));
+            Messager.debug("Retrieved last message.");
+            Messager.debug("Message author is bot? " + message.getAuthor().equals(Bot.getJda().getSelfUser()));
+            Messager.debug("Time is passed? " + message.getTimeCreated().plusDays(1).isBefore(OffsetDateTime.now()));
             if (message.getAuthor().equals(Bot.getJda().getSelfUser()) && message.getTimeCreated().plusDays(1).isBefore(OffsetDateTime.now())) {
                 warnChannel.getGuild().retrieveMemberById(user).queue(member -> warnChannel.sendMessage(member.getAsMention() + ", you have not yet responded to this thread. On the first message in this thread, press **I understand** to close the thread or **I'm confused** if you're confused.").queue());
             }

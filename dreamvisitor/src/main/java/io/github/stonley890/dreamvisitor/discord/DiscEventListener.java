@@ -4,6 +4,7 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.data.Infraction;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import io.github.stonley890.dreamvisitor.functions.Whitelist;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -58,10 +59,10 @@ public class DiscEventListener extends ListenerAdapter {
 
         // If in the whitelist channel and username is "legal"
         try {
-            Dreamvisitor.debug("Channel ID: " + channel.getId());
-            Dreamvisitor.debug("Whitelist ID: " + Bot.getWhitelistChannel().getId());
-            Dreamvisitor.debug("Game chat ID: " + Bot.getGameChatChannel().getId());
-            Dreamvisitor.debug("Log chat ID: " + Bot.getGameLogChannel().getId());
+            Messager.debug("Channel ID: " + channel.getId());
+            Messager.debug("Whitelist ID: " + Bot.getWhitelistChannel().getId());
+            Messager.debug("Game chat ID: " + Bot.getGameChatChannel().getId());
+            Messager.debug("Log chat ID: " + Bot.getGameLogChannel().getId());
             if (channel.getId().equals(Bot.getWhitelistChannel().getId()) && !user.isBot() && !p.matcher(username).find()) {
 
                 EmbedBuilder builder = new EmbedBuilder();
@@ -76,11 +77,11 @@ public class DiscEventListener extends ListenerAdapter {
                 }
 
                 // Check for valid UUID
-                Dreamvisitor.debug("Checking for valid UUID");
+                Messager.debug("Checking for valid UUID");
                 UUID uuid = PlayerUtility.getUUIDOfUsername(username);
                 if (uuid == null) {
                     // username does not exist alert
-                    Dreamvisitor.debug("Username does not exist.");
+                    Messager.debug("Username does not exist.");
 
                     builder.setTitle("❌ `" + username + "` could not be found!")
                             .setDescription("Make sure you type your username exactly as shown in the bottom-right corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
@@ -88,22 +89,22 @@ public class DiscEventListener extends ListenerAdapter {
                     event.getMessage().replyEmbeds(builder.build()).queue();
 
                     event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
-                    Dreamvisitor.debug("Failed whitelist.");
+                    Messager.debug("Failed whitelist.");
                 } else {
 
-                    Dreamvisitor.debug("Got UUID");
+                    Messager.debug("Got UUID");
 
                     // Link accounts if not already linked
-                    Dreamvisitor.debug("Do accounts need to be linked?");
+                    Messager.debug("Do accounts need to be linked?");
                     if (AccountLink.getUuid(user.getIdLong()) == null) {
-                        Dreamvisitor.debug("Yes, linking account.");
+                        Messager.debug("Yes, linking account.");
                         AccountLink.linkAccounts(uuid, user.getIdLong());
-                        Dreamvisitor.debug("Linked.");
+                        Messager.debug("Linked.");
                     }
 
                     try {
                         if (Whitelist.isUserWhitelisted(uuid)) {
-                            Dreamvisitor.debug("Already whitelisted.");
+                            Messager.debug("Already whitelisted.");
 
                             builder.setTitle("☑️ `" + username + "` is already whitelisted!")
                                     .setDescription("Check <#914620824332435456> for the server address and version.")
@@ -111,14 +112,14 @@ public class DiscEventListener extends ListenerAdapter {
                             event.getMessage().replyEmbeds(builder.build()).queue();
 
                             event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
-                            Dreamvisitor.debug("Resolved.");
+                            Messager.debug("Resolved.");
                         } else {
-                            Dreamvisitor.debug("Player is not whitelisted.");
+                            Messager.debug("Player is not whitelisted.");
 
                             Whitelist.add(username, uuid);
 
                             // success message
-                            Dreamvisitor.debug("Success.");
+                            Messager.debug("Success.");
 
                             builder.setTitle("✅ `" + username + "` has been whitelisted!")
                                     .setDescription("Check <#914620824332435456> for the server address and version.")
@@ -236,7 +237,7 @@ public class DiscEventListener extends ListenerAdapter {
 
             if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
 
-                Dreamvisitor.debug("Sending console command from log channel...");
+                Messager.debug("Sending console command from log channel...");
 
                 String message = event.getMessage().getContentRaw();
 
@@ -437,7 +438,7 @@ Let's see if you remember this one.
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
 
-        Dreamvisitor.debug("Button interaction with ID " + event.getButton().getId());
+        Messager.debug("Button interaction with ID " + event.getButton().getId());
 
         Button button = event.getButton();
         ButtonInteraction interaction = event.getInteraction();

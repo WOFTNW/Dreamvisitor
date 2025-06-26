@@ -105,7 +105,7 @@ public class Sandbox implements Listener {
         if (event.getRightClicked() instanceof ItemFrame) {
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer().getName() + " interacted with an item frame with held item " + Objects.requireNonNull(player.getInventory().getItem(event.getHand())).getType());
+                    Messager.send(onlinePlayer, event.getPlayer().getName() + " interacted with an item frame with held item " + Objects.requireNonNull(player.getInventory().getItem(event.getHand())).getType());
                 }
             }
         }

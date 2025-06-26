@@ -1,6 +1,7 @@
 package io.github.stonley890.dreamvisitor.data;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.Node;
 import org.bukkit.Bukkit;
@@ -116,29 +117,29 @@ public class PlayerTribe {
         if (username == null) throw new NullPointerException("Player is null");
 
         // Check by team
-        Dreamvisitor.debug("Checking by team...");
+        Messager.debug("Checking by team...");
         Tribe[] tribes = Tribe.values();
         for (int i = 0; i < tribes.length; i++) {
             Tribe tribe = tribes[i];
             Team team = scoreboard.getTeam(tribe.getTeamName());
-            Dreamvisitor.debug("Checking team " + i);
+            Messager.debug("Checking team " + i);
             if (team != null && team.hasEntry(username)) {
-                Dreamvisitor.debug("Found team " + i);
+                Messager.debug("Found team " + i);
                 playerTribe = i;
                 savePlayer(uuid, tribes[playerTribe]);
                 return;
             }
         }
-        Dreamvisitor.debug("Could not find by team.");
+        Messager.debug("Could not find by team.");
 
         if (online) {
             // If no matching team, check by tags
-            Dreamvisitor.debug("Checking by tag...");
+            Messager.debug("Checking by tag...");
             for (int i = 0; i < tribes.length; i++) {
                 Tribe tribe = tribes[i];
-                Dreamvisitor.debug("Checking tag " + i);
+                Messager.debug("Checking tag " + i);
                 if (player.getScoreboardTags().contains(tribe.getTeamName())) {
-                    Dreamvisitor.debug("Found tag " + i);
+                    Messager.debug("Found tag " + i);
                     playerTribe = i;
                     savePlayer(uuid, tribes[playerTribe]);
                     return;
@@ -156,7 +157,7 @@ public class PlayerTribe {
     public static void updatePermissions(@NotNull UUID uuid) {
         if (Dreamvisitor.luckperms != null) {
 
-            Dreamvisitor.debug("[updatePermissions] Updating permissions for user " + uuid + " using info finding");
+            Messager.debug("[updatePermissions] Updating permissions for user " + uuid + " using info finding");
 
             Tribe tribe;
 
@@ -165,13 +166,13 @@ public class PlayerTribe {
             // Run async
             if (Dreamvisitor.luckperms != null) {
 
-                Dreamvisitor.debug("[updatePermissions] Updating permissions for user " + uuid);
+                Messager.debug("[updatePermissions] Updating permissions for user " + uuid);
 
                 // Get user manager
                 UserManager userManager = Dreamvisitor.luckperms.getUserManager();
                 // Get user at tribe t and position p
 
-                Dreamvisitor.debug("[updatePermissions] Updating permissions of UUID " + uuid + " of tribe " + tribe);
+                Messager.debug("[updatePermissions] Updating permissions of UUID " + uuid + " of tribe " + tribe);
 
                 // Run async
                 userManager.modifyUser(uuid, user -> {
@@ -182,7 +183,7 @@ public class PlayerTribe {
                         // remove it from player
 
                         if (tribeName != null) {
-                            Dreamvisitor.debug("[updatePermissions] Removing group " + tribeName + " from " + uuid);
+                            Messager.debug("[updatePermissions] Removing group " + tribeName + " from " + uuid);
                             // Get the group from lp and remove it from the user.
                             user.data().remove(Node.builder("group." + tribeName).build());
 
@@ -195,7 +196,7 @@ public class PlayerTribe {
 
                         String groupName = tribe.getTeamName().toLowerCase();
 
-                        Dreamvisitor.debug("[updatePermissions] Adding group " + groupName + " to " + uuid);
+                        Messager.debug("[updatePermissions] Adding group " + groupName + " to " + uuid);
                         // Get the group from lp and add it to the user.
                         user.data().add(Node.builder("group." + groupName).build());
                     }

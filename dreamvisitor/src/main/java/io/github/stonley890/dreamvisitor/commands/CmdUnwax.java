@@ -4,6 +4,7 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -28,7 +29,7 @@ public class CmdUnwax implements DVCommand {
                             sign.setWaxed(false);
                             sign.update(false);
                             sign.getWorld().spawnParticle(Particle.WAX_OFF, sign.getLocation().add(0.5, 0.5, 0.5), 5, 0.2, 0.2, 0.2);
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Wax, be gone!");
+                            Messager.send(sender, "Wax, be gone!");
                         } else throw CommandAPI.failWithString("That is not a sign.");
                     } else throw CommandAPI.failWithString("This command must be executed as a player!");
 

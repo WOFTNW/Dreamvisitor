@@ -5,6 +5,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,7 @@ public class CmdDiscord implements DVCommand {
                         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
                         memory.discordEnabled = !memory.discordEnabled;
 
-                        callee.sendMessage(Dreamvisitor.PREFIX + "Discord visibility toggled to " + !memory.discordEnabled + ".");
+                        Messager.send(player, "Discord visibility toggled to " + !memory.discordEnabled + ".");
 
                         PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
                     } else throw CommandAPI.failWithString("This command must be executed as a player!");

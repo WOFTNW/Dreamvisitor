@@ -1,8 +1,7 @@
 package io.github.stonley890.dreamvisitor.data;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import net.dv8tion.jda.api.entities.Role;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +20,7 @@ public class AccountLink {
     public static void init() throws IOException {
         // If the file does not exist, create one
         if (!file.exists()) {
-            Dreamvisitor.debug("accountLink.txt does not exist. Creating one now...");
+            Messager.debug("accountLink.txt does not exist. Creating one now...");
             try {
                 if (!file.createNewFile()) throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
             } catch (IOException e) {
@@ -32,7 +31,7 @@ public class AccountLink {
     }
 
     private static void loadFromFile() {
-        Dreamvisitor.debug("Loading accountLink.txt");
+        Messager.debug("Loading accountLink.txt");
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(file));
@@ -56,21 +55,21 @@ public class AccountLink {
     }
 
     public static void saveFile() {
-        Dreamvisitor.debug("Saving...");
+        Messager.debug("Saving...");
         BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(file));
             for (Map.Entry<UUID, Long> entry : uuidToDiscordIdMap.entrySet()) {
                 UUID uuid = entry.getKey();
-                Dreamvisitor.debug("UUID for this entry: " + uuid.toString());
+                Messager.debug("UUID for this entry: " + uuid.toString());
                 long discordId = entry.getValue();
-                Dreamvisitor.debug("Discord ID for this entry: " + discordId);
+                Messager.debug("Discord ID for this entry: " + discordId);
 
                 String data = uuid.toString().replaceAll("-", "") + ":" + discordId;
 
                 writer.write(data);
                 writer.newLine();
-                Dreamvisitor.debug("Line written");
+                Messager.debug("Line written");
             }
             writer.close();
         } catch (IOException e) {

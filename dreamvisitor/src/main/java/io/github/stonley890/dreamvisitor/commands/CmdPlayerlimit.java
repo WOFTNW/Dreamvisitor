@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.commands;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.IntegerArgument;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -25,7 +26,7 @@ public class CmdPlayerlimit implements DVCommand {
 
                     Object newLimitArg = args.get("newLimit");
                     if (newLimitArg == null) {
-                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Player limit override is currently set to " + Dreamvisitor.playerLimit + ".");
+                        Messager.send(sender, "Player limit override is currently set to " + Dreamvisitor.playerLimit + ".");
                     } else {
                         try {
                             // Change config
@@ -43,8 +44,7 @@ public class CmdPlayerlimit implements DVCommand {
                             plugin.saveConfig();
 
                         } catch (NumberFormatException e) {
-                            sender.sendMessage(Dreamvisitor.PREFIX +
-                                    ChatColor.RED + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
+                            Messager.sendDanger(sender, "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
                         }
                     }
 

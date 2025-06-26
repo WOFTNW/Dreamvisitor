@@ -5,7 +5,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.GreedyStringArgument;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import io.github.stonley890.dreamvisitor.functions.Radio;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -24,7 +24,7 @@ public class CmdAdminRadio implements DVCommand {
                 .executesNative(((sender, args) -> {
                     String message = (String) args.get("message");
 
-                    Dreamvisitor.debug(sender.getClass().getName());
+                    Messager.debug(sender.getClass().getName());
 
                     CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {

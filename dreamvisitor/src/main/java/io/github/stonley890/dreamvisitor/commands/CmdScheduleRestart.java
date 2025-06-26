@@ -4,6 +4,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.AutoRestart;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdScheduleRestart implements DVCommand {
@@ -17,10 +18,10 @@ public class CmdScheduleRestart implements DVCommand {
                 .executesNative((sender, args) -> {
                     if (AutoRestart.isAutoRestart()) {
                         AutoRestart.disableAutoRestart();
-                        sender.sendMessage(Dreamvisitor.PREFIX + "Canceled server restart. Run /autorestart again to cancel.");
+                        Messager.send(sender, "Canceled server restart. Run /autorestart again to cancel.");
                     } else {
                         AutoRestart.enableAutoRestart(null);
-                        sender.sendMessage(Dreamvisitor.PREFIX + "The server will restart when there are no players online. Run /autorestart again to cancel.");
+                        Messager.send(sender,"The server will restart when there are no players online. Run /autorestart again to cancel.");
                     }
                 });
     }

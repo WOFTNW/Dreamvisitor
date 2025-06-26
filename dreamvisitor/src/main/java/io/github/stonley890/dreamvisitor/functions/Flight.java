@@ -131,7 +131,7 @@ public class Flight {
         // Re-enable flight if it gets disabled by game mode change
         // Dreamvisitor.debug("FlightNotAllowed: " + !player.getAllowFlight() + " Permission: " + player.hasPermission("dreamvisitor.fly") + " NotRestricted: " + !isFlightRestricted(player) + " NotDepleted: " + !isPlayerDepleted(player) + " NotDisabled: " + !PlayerUtility.getPlayerMemory(player.getUniqueId()).flightDisabled);
         if (!player.getAllowFlight() && player.hasPermission("dreamvisitor.fly") && !isFlightRestricted(player) && !isPlayerDepleted(player) && !PlayerUtility.getPlayerMemory(player.getUniqueId()).flightDisabled) {
-            Dreamvisitor.debug("All requirements met for flight.");
+            Messager.debug("All requirements met for flight.");
             Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> player.setAllowFlight(true), 1);
         }
     }

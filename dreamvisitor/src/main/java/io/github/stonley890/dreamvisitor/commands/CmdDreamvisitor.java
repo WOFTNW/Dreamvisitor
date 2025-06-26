@@ -7,6 +7,7 @@ import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Tribe;
 import io.github.stonley890.dreamvisitor.data.TribeUtil;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -25,14 +26,14 @@ public class CmdDreamvisitor implements DVCommand {
     public CommandAPICommand getCommand() {
         return new CommandAPICommand("dreamvisitor")
                 .executes((sender, args) -> {
-                    sender.sendMessage(ChatColor.BLUE + "Dreamvisitor " + Dreamvisitor.getPlugin().getDescription().getVersion() + "\nDeveloped by Stonley890\nOpen source at https://github.com/Stonley890/Dreamvisitor");
+                    Messager.send(sender, "Dreamvisitor " + Dreamvisitor.getPlugin().getDescription().getVersion() + "\nDeveloped by Bog\nOpen source at https://github.com/WOFTNW/Dreamvisitor");
                 })
                 .withSubcommand(new CommandAPICommand("reload")
                         .withPermission(CommandPermission.OP)
                         .withHelp("Reload Dreamvisitor.", "Reload Dreamvisitor's config file from disk.")
                         .executes(((sender, args) -> {
                             Dreamvisitor.getPlugin().reloadConfig();
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Configuration reloaded.");
+                            Messager.send(sender, "Configuration reloaded.");
                         }))
                 )
                 .withSubcommand(new CommandAPICommand("manage")
@@ -110,12 +111,12 @@ public class CmdDreamvisitor implements DVCommand {
                                             @NotNull Tribe tribe = (Tribe) Objects.requireNonNull(args.get("tribe"));
                                             int tribeIndex = TribeUtil.indexOf(tribe);
                                             List<Long> emblems = plugin.getConfig().getLongList("triberoles");
-                                            if (roleId == null) sender.sendMessage(Dreamvisitor.PREFIX + "role of " + tribe.getName() + " is currently set to\n" + emblems.get(tribeIndex));
+                                            if (roleId == null) Messager.send(sender, "Role of " + tribe.getName() + " is currently set to\n" + emblems.get(tribeIndex));
                                             else {
                                                 emblems.set(tribeIndex, roleId);
                                                 plugin.getConfig().set("triberoles", emblems);
                                                 plugin.saveConfig();
-                                                sender.sendMessage(Dreamvisitor.PREFIX + "Set role of " + tribe.getName() + " to\n" + roleId);
+                                                Messager.send(sender, "Set role of " + tribe.getName() + " to\n" + roleId);
                                             }
                                         }),
                                 new CommandAPICommand("chatPaused")
@@ -168,7 +169,7 @@ public class CmdDreamvisitor implements DVCommand {
                                             Location location = plugin.getConfig().getLocation(key);
                                             String reply = "none";
                                             if (location != null) reply = location.toString();
-                                            sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + reply);
+                                            Messager.send(sender, key + " is currently set to\n" + reply);
                                         }),
                                 new CommandAPICommand("log-console")
                                         .withHelp("Set log-console.", """
@@ -443,62 +444,62 @@ public class CmdDreamvisitor implements DVCommand {
 
     private void configBoolean(CommandSender sender, @NotNull CommandArguments args, String key) {
         Boolean value = (Boolean) args.get(key);
-        if (value == null) sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + plugin.getConfig().getBoolean(key));
+        if (value == null) Messager.send(sender, key + " is currently set to\n" + plugin.getConfig().getBoolean(key));
         else {
             plugin.getConfig().set(key, value);
             plugin.saveConfig();
-            sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getBoolean(key));
+            Messager.send(sender, "Set " + key + " to\n" + plugin.getConfig().getBoolean(key));
         }
     }
 
     private void configInt(CommandSender sender, @NotNull CommandArguments args, String key) {
         Integer value = (Integer) args.get(key);
-        if (value == null) sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + plugin.getConfig().getInt(key));
+        if (value == null) Messager.send(sender, key + " is currently set to\n" + plugin.getConfig().getInt(key));
         else {
             plugin.getConfig().set(key, value);
             plugin.saveConfig();
-            sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getInt(key));
+            Messager.send(sender, "Set " + key + " to\n" + plugin.getConfig().getInt(key));
         }
     }
 
     private void configDouble(CommandSender sender, @NotNull CommandArguments args, String key) {
         Double value = (Double) args.get(key);
-        if (value == null) sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + plugin.getConfig().getDouble(key));
+        if (value == null) Messager.send(sender, key + " is currently set to\n" + plugin.getConfig().getDouble(key));
         else {
             plugin.getConfig().set(key, value);
             plugin.saveConfig();
-            sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getDouble(key));
+            Messager.send(sender, "Set " + key + " to\n" + plugin.getConfig().getDouble(key));
         }
     }
 
     private void configLong(CommandSender sender, @NotNull CommandArguments args, String key) {
         Long value = (Long) args.get(key);
-        if (value == null) sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + plugin.getConfig().getLong(key));
+        if (value == null) Messager.send(sender, key + " is currently set to\n" + plugin.getConfig().getLong(key));
         else {
             plugin.getConfig().set(key, value);
             plugin.saveConfig();
-            sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getLong(key));
+            Messager.send(sender, "Set " + key + " to\n" + plugin.getConfig().getLong(key));
         }
     }
 
     private void configString(CommandSender sender, @NotNull CommandArguments args, String key) {
         String value = (String) args.get(key);
-        if (value == null) sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + plugin.getConfig().getString(key));
+        if (value == null) Messager.send(sender, key + " is currently set to\n" + plugin.getConfig().getString(key));
         else {
             plugin.getConfig().set(key, value);
             plugin.saveConfig();
-            sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getString(key));
+            Messager.send(sender, "Set " + key + " to\n" + plugin.getConfig().getString(key));
         }
     }
 
     @SuppressWarnings("unchecked")
     private void configLongList(CommandSender sender, @NotNull CommandArguments args, String key) {
         List<Long> value = (List<Long>) args.get(key);
-        if (value == null) sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + plugin.getConfig().getLongList(key));
+        if (value == null) Messager.send(sender, key + " is currently set to\n" + plugin.getConfig().getLongList(key));
         else {
             plugin.getConfig().set(key, value);
             plugin.saveConfig();
-            sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getLongList(key));
+            Messager.send(sender, "Set " + key + " to\n" + plugin.getConfig().getLongList(key));
         }
     }
 }

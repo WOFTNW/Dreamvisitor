@@ -10,6 +10,7 @@ import dev.jorel.commandapi.arguments.TextArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.CommandScheduler;
 import io.github.stonley890.dreamvisitor.functions.CommandScheduler.Schedule;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,10 +56,10 @@ public class CmdSchedule implements DVCommand {
 
                   CommandScheduler.getInstance().addSchedule(name, intervalMinutes, commands);
                   if (commands.size() > 1) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Added schedule '" + name + "' to run " + commands.size() +
+                    Messager.send(sender, "Added schedule '" + name + "' to run " + commands.size() +
                         " commands every " + intervalMinutes + " minutes.");
                   } else {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Added schedule '" + name + "' to run '" + commandInput +
+                    Messager.send(sender, "Added schedule '" + name + "' to run '" + commandInput +
                         "' every " + intervalMinutes + " minutes.");
                   }
                 }),
@@ -92,15 +93,14 @@ public class CmdSchedule implements DVCommand {
 
                     CommandScheduler.getInstance().addDailySchedule(name, time, commands);
                     if (commands.size() > 1) {
-                      sender
-                          .sendMessage(Dreamvisitor.PREFIX + "Added schedule '" + name + "' to run " + commands.size() +
+                      Messager.send(sender, "Added schedule '" + name + "' to run " + commands.size() +
                               " commands daily at " + timeString + ".");
                     } else {
-                      sender.sendMessage(Dreamvisitor.PREFIX + "Added schedule '" + name + "' to run '" + commandInput +
+                      Messager.send(sender, "Added schedule '" + name + "' to run '" + commandInput +
                           "' daily at " + timeString + ".");
                     }
                   } catch (DateTimeParseException e) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED +
+                    Messager.sendDanger(sender,
                         "Invalid time format. Please use HH:MM:SS format (e.g., 06:00:00)");
                   }
                 }),
@@ -132,15 +132,13 @@ public class CmdSchedule implements DVCommand {
 
                   Schedule schedule = CommandScheduler.getInstance().addCronSchedule(name, pattern, commands);
                   if (schedule == null) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED +
-                        "Invalid cron pattern. Format: minute hour day-of-month month day-of-week");
+                    Messager.sendDanger(sender,"Invalid cron pattern. Format: minute hour day-of-month month day-of-week");
                   } else {
                     if (commands.size() > 1) {
-                      sender
-                          .sendMessage(Dreamvisitor.PREFIX + "Added schedule '" + name + "' to run " + commands.size() +
+                      Messager.send(sender, "Added schedule '" + name + "' to run " + commands.size() +
                               " commands using cron pattern '" + pattern + "'.");
                     } else {
-                      sender.sendMessage(Dreamvisitor.PREFIX + "Added schedule '" + name + "' to run '" + commandInput +
+                      Messager.send(sender, "Added schedule '" + name + "' to run '" + commandInput +
                           "' using cron pattern '" + pattern + "'.");
                     }
                   }
@@ -157,10 +155,9 @@ public class CmdSchedule implements DVCommand {
                   String name = (String) args.get("name");
 
                   if (CommandScheduler.getInstance().removeSchedule(name)) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Removed schedule '" + name + "'.");
+                    Messager.send(sender, "Removed schedule '" + name + "'.");
                   } else {
-                    sender.sendMessage(
-                        Dreamvisitor.PREFIX + ChatColor.RED + "No schedule with name '" + name + "' found.");
+                    Messager.sendDanger(sender, "No schedule with name '" + name + "' found.");
                   }
                 }),
             new CommandAPICommand("list")
@@ -169,25 +166,16 @@ public class CmdSchedule implements DVCommand {
                 .executesNative((sender, args) -> {
                   List<Schedule> schedules = CommandScheduler.getInstance().getSchedules();
                   if (schedules.isEmpty()) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "No schedules configured.");
+                    Messager.send(sender, "No schedules configured.");
                     return;
                   }
 
-                  sender.sendMessage(Dreamvisitor.PREFIX + "Scheduled commands:");
+                  Messager.send(sender, "Scheduled commands:");
                   for (Schedule schedule : schedules) {
                     List<String> commands = schedule.getCommands();
-                    String typeInfo;
+                    String typeInfo = getTypeInfo(schedule);
 
-                    switch (schedule.getType()) {
-                      case INTERVAL -> typeInfo = "every " + ChatColor.GREEN + schedule.getIntervalMinutes()
-                          + ChatColor.WHITE + " minutes";
-                      case DAILY -> typeInfo = "daily at " + ChatColor.GREEN + schedule.getDailyTime();
-                      case CRON ->
-                        typeInfo = "using cron pattern " + ChatColor.GREEN + schedule.getCronPattern().getPattern();
-                      default -> typeInfo = "unknown schedule type";
-                    }
-
-                    sender.sendMessage(ChatColor.YELLOW + schedule.getName() + ChatColor.WHITE +
+                    Messager.send(sender,ChatColor.YELLOW + schedule.getName() + ChatColor.WHITE +
                         ": "
                         + (commands.size() > 1 ? commands.size() + " commands "
                             : "'" + ChatColor.GRAY + commands.get(0) + ChatColor.WHITE + "' ")
@@ -215,10 +203,9 @@ public class CmdSchedule implements DVCommand {
                   String name = (String) args.get("name");
 
                   if (CommandScheduler.getInstance().runScheduleNow(name)) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Running schedule '" + name + "' now.");
+                    Messager.send(sender, "Running schedule '" + name + "' now.");
                   } else {
-                    sender.sendMessage(
-                        Dreamvisitor.PREFIX + ChatColor.RED + "No schedule with name '" + name + "' found.");
+                    Messager.sendDanger(sender, "No schedule with name '" + name + "' found.");
                   }
                 }),
             new CommandAPICommand("add-command")
@@ -235,11 +222,9 @@ public class CmdSchedule implements DVCommand {
                   String command = (String) args.get("command");
 
                   if (CommandScheduler.getInstance().addCommand(name, command)) {
-                    sender.sendMessage(
-                        Dreamvisitor.PREFIX + "Added command '" + command + "' to schedule '" + name + "'.");
+                    Messager.send(sender, "Added command '" + command + "' to schedule '" + name + "'.");
                   } else {
-                    sender.sendMessage(
-                        Dreamvisitor.PREFIX + ChatColor.RED + "No schedule with name '" + name + "' found.");
+                    Messager.sendDanger(sender, "No schedule with name '" + name + "' found.");
                   }
                 }),
             new CommandAPICommand("remove-command")
@@ -256,11 +241,10 @@ public class CmdSchedule implements DVCommand {
                   int index = (int) args.get("index") - 1; // Convert to 0-based index
 
                   if (CommandScheduler.getInstance().removeCommand(name, index)) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Removed command at position " + (index + 1)
+                    Messager.send(sender, "Removed command at position " + (index + 1)
                         + " from schedule '" + name + "'.");
                   } else {
-                    sender.sendMessage(
-                        Dreamvisitor.PREFIX + ChatColor.RED + "No schedule with name '" + name
+                    Messager.sendDanger(sender, "No schedule with name '" + name
                             + "' found or invalid command index.");
                   }
                 }),
@@ -282,13 +266,12 @@ public class CmdSchedule implements DVCommand {
 
                   // Pass ticks directly to CommandScheduler without conversion
                   if (CommandScheduler.getInstance().addDelay(name, index, delayTicks)) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Added " + delayTicks + " tick" +
+                    Messager.send(sender, "Added " + delayTicks + " tick" +
                         (delayTicks == 1 ? "" : "s") + " delay before command "
                         + (index + 1) + " in schedule '" + name + "'. (" +
                         String.format("%.1f", delayTicks / 20.0) + " seconds)");
                   } else {
-                    sender.sendMessage(
-                        Dreamvisitor.PREFIX + ChatColor.RED + "No schedule with name '" + name
+                    Messager.sendDanger(sender, "No schedule with name '" + name
                             + "' found or invalid command index.");
                   }
                 }),
@@ -307,13 +290,27 @@ public class CmdSchedule implements DVCommand {
                   int index = (int) args.get("index") - 1; // Convert to 0-based index
 
                   if (CommandScheduler.getInstance().removeDelay(name, index)) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Removed delay from command " + (index + 1)
+                    Messager.send(sender,"Removed delay from command " + (index + 1)
                         + " in schedule '" + name + "'.");
                   } else {
-                    sender.sendMessage(
-                        Dreamvisitor.PREFIX + ChatColor.RED + "No schedule with name '" + name
+                    Messager.sendDanger(sender, "No schedule with name '" + name
                             + "' found or no delay was set for this command.");
                   }
                 }));
+  }
+
+  @NotNull
+  private static String getTypeInfo(@NotNull Schedule schedule) {
+    String typeInfo;
+
+    switch (schedule.getType()) {
+      case INTERVAL -> typeInfo = "every " + ChatColor.GREEN + schedule.getIntervalMinutes()
+          + ChatColor.WHITE + " minutes";
+      case DAILY -> typeInfo = "daily at " + ChatColor.GREEN + schedule.getDailyTime();
+      case CRON ->
+        typeInfo = "using cron pattern " + ChatColor.GREEN + schedule.getCronPattern().getPattern();
+      default -> typeInfo = "unknown schedule type";
+    }
+    return typeInfo;
   }
 }

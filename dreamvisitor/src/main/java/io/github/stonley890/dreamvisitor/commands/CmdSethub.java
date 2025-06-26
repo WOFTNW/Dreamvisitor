@@ -8,6 +8,7 @@ import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.RotationArgument;
 import dev.jorel.commandapi.arguments.WorldArgument;
 import dev.jorel.commandapi.wrappers.Rotation;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -64,7 +65,7 @@ public class CmdSethub implements DVCommand {
                     Dreamvisitor.hubLocation = location;
                     plugin.getConfig().set("hubLocation", Dreamvisitor.hubLocation);
                     plugin.saveConfig();
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Hub location set.");
+                    Messager.send(sender, "Hub location set.");
                 });
     }
 }

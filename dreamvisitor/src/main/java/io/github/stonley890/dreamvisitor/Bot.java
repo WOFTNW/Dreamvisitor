@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.discord.DiscEventListener;
 import io.github.stonley890.dreamvisitor.discord.commands.DCmdAutorestart;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Role;
@@ -45,13 +46,13 @@ public class Bot {
     // Build JDA
     String token = Dreamvisitor.getPlugin().getConfig().getString("bot-token");
     // Try to create a bot
-    Dreamvisitor.debug("Attempting to create a bot...");
+    Messager.debug("Attempting to create a bot...");
     try {
       jda = JDABuilder
           .createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
           .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER)
           .build();
-      Dreamvisitor.debug("Bot created.");
+      Messager.debug("Bot created.");
       Dreamvisitor.botFailed = false;
 
     } catch (InvalidTokenException e) {
@@ -78,15 +79,15 @@ public class Bot {
       // Wait for bot ready
       try {
         jda.awaitReady();
-        Dreamvisitor.debug("Bot is ready.");
+        Messager.debug("Bot is ready.");
 
         long chatChannelID = config.getLong("chatChannelID");
         long logChannelID = config.getLong("logChannelID");
         long whitelistChannelID = config.getLong("whitelistChannelID");
 
-        Dreamvisitor.debug(String.valueOf(chatChannelID));
-        Dreamvisitor.debug(String.valueOf(logChannelID));
-        Dreamvisitor.debug(String.valueOf(whitelistChannelID));
+        Messager.debug(String.valueOf(chatChannelID));
+        Messager.debug(String.valueOf(logChannelID));
+        Messager.debug(String.valueOf(whitelistChannelID));
 
         Bot.gameChatChannel = jda.getTextChannelById(chatChannelID);
         Bot.gameLogChannel = jda.getTextChannelById(logChannelID);
@@ -169,7 +170,7 @@ public class Bot {
           .warning("Dreamvisitor bot does not have sufficient permissions to send messages in game log channel!");
     } catch (IllegalArgumentException e) {
       if (Dreamvisitor.debugMode)
-        Dreamvisitor.debug("Attempted to send an invalid message.");
+        Messager.debug("Attempted to send an invalid message.");
     }
   }
 

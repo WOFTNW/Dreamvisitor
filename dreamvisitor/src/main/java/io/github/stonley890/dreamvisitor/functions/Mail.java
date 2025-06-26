@@ -43,7 +43,7 @@ public class Mail {
     public static void init() throws IOException {
         // If the file does not exist, create one
         if (!file.exists()) {
-            Dreamvisitor.debug(file.getName() + " does not exist. Creating one now...");
+            Messager.debug(file.getName() + " does not exist. Creating one now...");
             try {
                 if (!file.createNewFile())
                     throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
@@ -140,15 +140,15 @@ public class Mail {
     public static MailLocation getNearestLocation(@NotNull Location queryLocation) {
         double shortestDistance = 50000.0;
         MailLocation nearest = null;
-        Dreamvisitor.debug("Getting nearest MailLocation to " + queryLocation);
+        Messager.debug("Getting nearest MailLocation to " + queryLocation);
         for (MailLocation location : getLocations()) {
-            Dreamvisitor.debug("Checking " + location.getName());
+            Messager.debug("Checking " + location.getName());
             if (!Objects.equals(location.getLocation().getWorld(), queryLocation.getWorld())) continue;
-            Dreamvisitor.debug("Same world.");
+            Messager.debug("Same world.");
             double distance = location.getLocation().distance(queryLocation);
-            Dreamvisitor.debug("Distance: " + distance);
+            Messager.debug("Distance: " + distance);
             if (distance < shortestDistance) {
-                Dreamvisitor.debug("New nearest!");
+                Messager.debug("New nearest!");
                 nearest = location;
                 shortestDistance = distance;
             }
@@ -222,7 +222,7 @@ public class Mail {
         if (nearestLocation == null) throw new Exception("No nearest location found!");
         if (!player.getWorld().equals(nearestLocation.location.getWorld())) throw new Exception("Not in same world!");
         double distance = player.getLocation().distance(nearestLocation.location);
-        Dreamvisitor.debug("Distance to nearest: " + distance);
+        Messager.debug("Distance to nearest: " + distance);
         if (distance > 10) throw new Exception("Not close enough to MailLocation!");
 
         PlayerInventory inventory = player.getInventory();
@@ -239,14 +239,14 @@ public class Mail {
 
         player.getInventory().remove(deliverer.parcel);
 
-        Dreamvisitor.debug("Removed from activeDeliverers: " + activeDeliverers.remove(deliverer));
+        Messager.debug("Removed from activeDeliverers: " + activeDeliverers.remove(deliverer));
 
         return reward;
     }
 
     public static void cancel(@NotNull Player player) {
         activeDeliverers.removeIf(deliverer -> deliverer.player.equals(player));
-        player.sendMessage(Dreamvisitor.PREFIX + "You canceled your delivery.");
+        Messager.send(player, "You canceled your delivery.");
     }
 
     public static boolean isPLayerDeliverer(@NotNull Player player) {
@@ -255,51 +255,51 @@ public class Mail {
 
     @NotNull
     public static MailLocation chooseDeliveryLocation(@NotNull MailLocation startPos) throws InvalidConfigurationException {
-        Dreamvisitor.debug("Max distance:" + maxDistance);
+        Messager.debug("Max distance:" + maxDistance);
         List<MailLocation> locations = getLocations();
-        Dreamvisitor.debug("Removed start pos:" + locations.remove(startPos));
+        Messager.debug("Removed start pos:" + locations.remove(startPos));
         if (locations.isEmpty()) throw new InvalidConfigurationException("There aren't enough mail locations!");
 
         // Compute the total weight of all items together.
         // This can be skipped of course if sum is already 1.
         double totalWeight = 0.0;
         for (MailLocation location : locations) {
-            Dreamvisitor.debug("\nEvaluating " + location.getName());
+            Messager.debug("\nEvaluating " + location.getName());
             double weight = calculateWeight(startPos, location);
             totalWeight += weight;
-            Dreamvisitor.debug("Weight: " + weight);
+            Messager.debug("Weight: " + weight);
         }
-        Dreamvisitor.debug("Total weight: " + totalWeight);
+        Messager.debug("Total weight: " + totalWeight);
 
         // Now choose a random item.
         double countWeight = 0.0;
         double r = Math.random() * totalWeight;
-        Dreamvisitor.debug("random value: " + r);
+        Messager.debug("random value: " + r);
         for (int index = 0; index < locations.size() - 1; ++index) {
             MailLocation evalLocation = locations.get(index);
-            Dreamvisitor.debug("\nLocation at index " + index + ": " + evalLocation.getName());
+            Messager.debug("\nLocation at index " + index + ": " + evalLocation.getName());
             double weight = calculateWeight(startPos, evalLocation);
             countWeight += weight;
-            Dreamvisitor.debug("New countWeight: " + countWeight);
+            Messager.debug("New countWeight: " + countWeight);
             if (countWeight >= r) {
-                Dreamvisitor.debug(countWeight + " >= " + r + ", returning.");
+                Messager.debug(countWeight + " >= " + r + ", returning.");
                 return evalLocation;
             }
-            Dreamvisitor.debug("countWeight < random");
+            Messager.debug("countWeight < random");
 
         }
-        Dreamvisitor.debug("Selecting last, " + locations.get(locations.size() -1).getName());
+        Messager.debug("Selecting last, " + locations.get(locations.size() -1).getName());
         return locations.get(locations.size() -1);
     }
 
     private static double calculateWeight(@NotNull MailLocation startLoc, @NotNull MailLocation location) {
-        Dreamvisitor.debug("Base weight: " + location.getWeight());
-        Dreamvisitor.debug("Distance weight multiplier: " + getDistanceWeightMultiplier());
-        Dreamvisitor.debug("Maxdist: " + maxDistance);
+        Messager.debug("Base weight: " + location.getWeight());
+        Messager.debug("Distance weight multiplier: " + getDistanceWeightMultiplier());
+        Messager.debug("Maxdist: " + maxDistance);
         double distance = MailLocation.getDistance(startLoc, location);
-        Dreamvisitor.debug("distance: " + distance);
-        Dreamvisitor.debug("Maxdist - distance: " + (maxDistance - distance));
-        Dreamvisitor.debug("that divided by maxdist: " + ((maxDistance - distance) / maxDistance));
+        Messager.debug("distance: " + distance);
+        Messager.debug("Maxdist - distance: " + (maxDistance - distance));
+        Messager.debug("that divided by maxdist: " + ((maxDistance - distance) / maxDistance));
         return location.getWeight() + getDistanceWeightMultiplier() * ((maxDistance - distance) / maxDistance);
     }
 

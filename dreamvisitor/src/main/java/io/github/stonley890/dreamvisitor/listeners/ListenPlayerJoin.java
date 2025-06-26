@@ -6,6 +6,7 @@ import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerTribe;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Tribe;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.luckperms.api.model.user.User;
@@ -65,7 +66,7 @@ public class ListenPlayerJoin implements Listener {
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
                     sandboxerOnline = true;
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + player.getName() + " is currently in sandbox mode.");
+                    Messager.send(onlinePlayer, player.getName() + " is currently in sandbox mode.");
                 }
             }
             if (!sandboxerOnline) Sandbox.disableSandbox(player);

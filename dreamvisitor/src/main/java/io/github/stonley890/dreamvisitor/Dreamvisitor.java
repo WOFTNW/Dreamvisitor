@@ -22,7 +22,6 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.luckperms.api.LuckPerms;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
@@ -40,8 +39,6 @@ import java.util.logging.Level;
 @SuppressWarnings({ "null" })
 public class Dreamvisitor extends JavaPlugin {
 
-  public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] "
-      + ChatColor.RESET;
   private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager
       .getRootLogger();
   public static Dreamvisitor PLUGIN;
@@ -65,12 +62,6 @@ public class Dreamvisitor extends JavaPlugin {
 
   public static @NotNull String getPlayerPath(@NotNull UUID uuid) {
     return PLUGIN.getDataFolder().getAbsolutePath() + "/player/" + uuid + ".yml";
-  }
-
-  public static void debug(String message) {
-    if (getPlugin().getConfig().getBoolean("debug")) {
-      Bukkit.getLogger().info("DEBUG: " + message);
-    }
   }
 
   @NotNull
@@ -135,10 +126,10 @@ public class Dreamvisitor extends JavaPlugin {
 
       checkConfig();
 
-      debug("Initializing PocketBase config loader...");
+      Messager.debug("Initializing PocketBase config loader...");
       PBConfigLoader.init();
 
-      debug("Registering listeners...");
+      Messager.debug("Registering listeners...");
       registerListeners();
 
       List<DVCommand> commands = new ArrayList<>();
@@ -172,42 +163,42 @@ public class Dreamvisitor extends JavaPlugin {
       commands.add(new CmdVelocity());
       commands.add(new CmdSchedule());
 
-      debug("Initializing commands...");
+      Messager.debug("Initializing commands...");
       CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
       CommandAPI.onEnable();
       registerCommands(commands);
 
-      debug("Creating data folder...");
+      Messager.debug("Creating data folder...");
       boolean directoryCreated = getDataFolder().mkdir();
       if (!directoryCreated)
-        debug("Dreamvisitor did not create a data folder. It may already exist.");
+        Messager.debug("Dreamvisitor did not create a data folder. It may already exist.");
       saveDefaultConfig();
 
-      debug("Initializing accountLink.txt");
+      Messager.debug("Initializing accountLink.txt");
       AccountLink.init();
 
-      debug("Initializing infractions.yml");
+      Messager.debug("Initializing infractions.yml");
       Infraction.init();
 
-      debug("Initializing alts.yml");
+      Messager.debug("Initializing alts.yml");
       AltFamily.init();
 
-      debug("Initializing economy.yml");
+      Messager.debug("Initializing economy.yml");
       Economy.init();
 
-      debug("Initializing mail.yml");
+      Messager.debug("Initializing mail.yml");
       Mail.init();
 
-      debug("Initializing player-tribes.yml");
+      Messager.debug("Initializing player-tribes.yml");
       PlayerTribe.setup();
 
-      debug("Initializing energy");
+      Messager.debug("Initializing energy");
       Flight.init();
 
-      debug("Initializing command scheduler");
+      Messager.debug("Initializing command scheduler");
       CommandScheduler.getInstance().loadConfig();
 
-      debug("Initializing badwords.yml");
+      Messager.debug("Initializing badwords.yml");
       BadWords.init();
 
       RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
@@ -220,45 +211,43 @@ public class Dreamvisitor extends JavaPlugin {
 
       getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
 
-      debug("Starting Dreamvisitor bot...");
+      Messager.debug("Starting Dreamvisitor bot...");
       Bot.startBot(getConfig());
 
       if (!botFailed) {
-        debug("Fetching recorded channels and roles from config.");
+        Messager.debug("Fetching recorded channels and roles from config.");
         DiscCommandsManager.init();
 
         try {
           Bot.getGameLogChannel().sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
         } catch (InsufficientPermissionException e) {
-          Bukkit.getLogger()
+          getLogger()
               .severe("Dreamvisitor Bot does not have permission to send messages in the game log channel!");
           throw e;
         }
 
       }
 
-      debug("Restoring chat pause...");
+      Messager.debug("Restoring chat pause...");
       if (getConfig().getBoolean("chatPaused")) {
         chatPaused = true;
-        Bukkit.getServer().getLogger().info(PREFIX +
-            "Chat is currently paused from last session! Use /pausechat to allow users to chat.");
+        getLogger().info("Chat is currently paused from last session! Use /pausechat to allow users to chat.");
       }
 
-      debug("Restoring player limit override...");
+      Messager.debug("Restoring player limit override...");
       playerLimit = getConfig().getInt("playerlimit");
-      getServer().getLogger().info(PREFIX +
-          "Player limit override is currently set to " + playerLimit);
+      getLogger().info("Player limit override is currently set to " + playerLimit);
 
-      debug("Restoring item banlist...");
+      Messager.debug("Restoring item banlist...");
       if (PLUGIN.getConfig().get("itemBlacklist") != null) {
         ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) PLUGIN.getConfig().getList("itemBlacklist");
         if (itemList != null) {
-          debug("Item banlist is null. Creating an empty banlist...");
+          Messager.debug("Item banlist is null. Creating an empty banlist...");
           ItemBanList.badItems = itemList.toArray(new ItemStack[0]);
         }
       }
 
-      debug("Setting up console logging...");
+      Messager.debug("Setting up console logging...");
       appender = new ConsoleLogger();
       logger.addAppender(appender);
 
@@ -277,10 +266,10 @@ public class Dreamvisitor extends JavaPlugin {
             try {
               Bot.getGameLogChannel().sendMessage(ConsoleLogger.messageBuilder.toString()).queue();
             } catch (InsufficientPermissionException e) {
-              Bukkit.getLogger().warning(
+              getLogger().warning(
                   "Dreamvisitor Bot does not have the necessary permissions to send messages in game log channel.");
             } catch (IllegalArgumentException e) {
-              Bukkit.getLogger().severe("Console logger tried to send an invalid message!");
+              getLogger().severe("Console logger tried to send an invalid message!");
             }
 
             ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
@@ -298,10 +287,10 @@ public class Dreamvisitor extends JavaPlugin {
                 try {
                   Bot.getGameLogChannel().sendMessage(overFlowMessageBuilder.toString()).queue();
                 } catch (InsufficientPermissionException e) {
-                  Bukkit.getLogger().warning(
+                  getLogger().warning(
                       "Dreamvisitor Bot does not have the necessary permissions to send messages in game log channel.");
                 } catch (IllegalArgumentException e) {
-                  Bukkit.getLogger().severe("Console logger tried to send an invalid message!");
+                  getLogger().severe("Console logger tried to send an invalid message!");
                 }
                 overFlowMessageBuilder = new StringBuilder();
 
@@ -322,7 +311,7 @@ public class Dreamvisitor extends JavaPlugin {
 
           if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().isEmpty()) {
             AutoRestart.sendAutoRestartMessage();
-            Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
+            getLogger().info("Restarting the server as scheduled.");
             Bot.sendLog("**Restarting the server as scheduled.**");
             getServer().spigot().restart();
           }
@@ -332,8 +321,8 @@ public class Dreamvisitor extends JavaPlugin {
           double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
           if (freeMemoryPercent <= 10) {
             AutoRestart.enableAutoRestart(null);
-            Bukkit.getLogger()
-                .info("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
+            getLogger()
+                .warning("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
           }
         }
       };
@@ -348,14 +337,14 @@ public class Dreamvisitor extends JavaPlugin {
       Runnable remindWarns = new BukkitRunnable() {
         @Override
         public void run() {
-          Dreamvisitor.debug("Checking warns to be reminded.");
+          Messager.debug("Checking warns to be reminded.");
           Map<Long, List<Infraction>> infractions = Infraction.getAllInfractions();
-          Dreamvisitor.debug("Got list of " + infractions.keySet().size() + " members.");
+          Messager.debug("Got list of " + infractions.keySet().size() + " members.");
           for (Long l : infractions.keySet()) {
-            Dreamvisitor.debug("Checking infractions of user " + l);
+            Messager.debug("Checking infractions of user " + l);
             List<Infraction> userInfractions = Infraction.getInfractions(l);
             for (Infraction userInfraction : userInfractions) {
-              Dreamvisitor.debug("Attempting remind...");
+              Messager.debug("Attempting remind...");
               userInfraction.remind(l);
             }
           }
@@ -395,10 +384,10 @@ public class Dreamvisitor extends JavaPlugin {
 
       Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20 * 10);
 
-      debug("Enable finished.");
+      Messager.debug("Enable finished.");
     } catch (Exception e) {
 
-      Bukkit.getLogger()
+      getLogger()
           .severe("Dreamvisitor was unable to start :(\nPlease notify Bog with the following stack trace:");
       e.printStackTrace();
 
@@ -415,9 +404,9 @@ public class Dreamvisitor extends JavaPlugin {
               .sendMessage(builder.toString()).complete();
         } catch (net.dv8tion.jda.api.exceptions.ErrorResponseException ex) {
           if (ex.getErrorCode() == 50007) {
-            Bukkit.getLogger().warning("Unable to send Discord DM to user: " + ex.getMessage() +
+            getLogger().warning("Unable to send Discord DM to user: " + ex.getMessage() +
                 ". User may have DMs disabled or is not in a shared server.");
-            Bukkit.getLogger().severe("Error message that would have been sent: " + builder.toString());
+            getLogger().severe("Error message that would have been sent: " + builder.toString());
           } else {
             throw ex;
           }
@@ -513,7 +502,7 @@ public class Dreamvisitor extends JavaPlugin {
         PlayerUtility.savePlayerMemory(player.getUniqueId());
         PlayerUtility.clearPlayerMemory(player.getUniqueId());
       } catch (IOException e) {
-        Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access?");
+        getLogger().severe("Unable to save player memory! Does the server have write access?");
         if (Dreamvisitor.debugMode)
           throw new RuntimeException();
       }

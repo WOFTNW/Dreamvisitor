@@ -1,12 +1,12 @@
 package io.github.stonley890.dreamvisitor.data;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BadWords {
@@ -16,7 +16,7 @@ public class BadWords {
     public static void init() throws IOException {
         // If the file does not exist, create one
         if (!file.exists()) {
-            Dreamvisitor.debug(file.getName() + " does not exist. Creating one now...");
+            Messager.debug(file.getName() + " does not exist. Creating one now...");
             try {
                 if (!file.createNewFile())
                     throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);

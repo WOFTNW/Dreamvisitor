@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Economy;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Mentions;
@@ -116,11 +116,11 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             selectMenu.setPlaceholder("Select an item to gift");
             for (Economy.ShopItem item : Economy.getItems()) {
                 if (consumer.getItemQuantity(item.getId()) > 0 && item.isGiftingEnabled()) {
-                    Dreamvisitor.debug("adding " + item.getId() + " to gift list");
+                    Messager.debug("adding " + item.getId() + " to gift list");
                     selectMenu.addOption(item.getName(), String.valueOf(item.getId()));
                 }
             }
-            Dreamvisitor.debug("selectmenu size: " + selectMenu.getOptions().size());
+            Messager.debug("selectmenu size: " + selectMenu.getOptions().size());
             if (selectMenu.getOptions().isEmpty()) {
                 event.reply("You do not have any items you can gift.").setEphemeral(true).queue();
                 return;
@@ -231,7 +231,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
     public void onEntitySelectInteraction(@NotNull EntitySelectInteractionEvent event) {
         String id = event.getSelectMenu().getId();
         if (id == null) return;
-        Dreamvisitor.debug("EntitySelectMenu with ID " + id);
+        Messager.debug("EntitySelectMenu with ID " + id);
         Mentions mentions = event.getMentions();
 
         String[] split = id.split("-");

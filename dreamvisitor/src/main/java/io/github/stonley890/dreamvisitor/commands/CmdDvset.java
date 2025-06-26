@@ -7,6 +7,7 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Text;
@@ -22,7 +23,7 @@ public class CmdDvset implements DVCommand {
 
     PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
-    ComponentBuilder builder = new ComponentBuilder(Dreamvisitor.PREFIX);
+    ComponentBuilder builder = new ComponentBuilder();
     builder.append("User Options ");
 
     if (player.hasPermission("dreamvisitor.set.discord")) {
@@ -66,7 +67,7 @@ public class CmdDvset implements DVCommand {
     }
 
     builder.append("").reset().append("\n");
-    player.spigot().sendMessage(builder.create());
+    Messager.send(player, builder.create());
 
   }
 
@@ -134,31 +135,31 @@ public class CmdDvset implements DVCommand {
                 case "discord" -> {
                   if (!player.hasPermission("dreamvisitor.set.discord"))
                     throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                  callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility is currently set to "
+                  Messager.send(callee, ChatColor.GRAY + "Discord Visibility is currently set to "
                       + ChatColor.WHITE + playerMemory.discordEnabled);
                 }
                 case "flight" -> {
                   if (!player.hasPermission("dreamvisitor.set.flight"))
                     throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                  callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Flight Enabled is currently set to "
+                  Messager.send(callee, ChatColor.GRAY + "Flight Enabled is currently set to "
                       + ChatColor.WHITE + playerMemory.flightDisabled);
                 }
                 case "vanished" -> {
                   if (!player.hasPermission("dreamvisitor.set.zoop"))
                     throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                  callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish is currently set to "
+                  Messager.send(callee, ChatColor.GRAY + "Discord Vanish is currently set to "
                       + ChatColor.WHITE + playerMemory.vanished);
                 }
                 case "autoinvswap" -> {
                   if (!player.hasPermission("dreamvisitor.set.autoinvswap"))
                     throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                  callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY
+                  Messager.send(callee, ChatColor.GRAY
                       + "Automatic Inventory Swap is currently set to " + ChatColor.WHITE + playerMemory.autoinvswap);
                 }
                 case "autoradio" -> {
                   if (!player.hasPermission("dreamvisitor.set.autoradio"))
                     throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                  callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Radio is currently set to "
+                  Messager.send(callee, ChatColor.GRAY + "Automatic Radio is currently set to "
                       + ChatColor.WHITE + playerMemory.autoRadio);
                 }
                 default ->
@@ -192,14 +193,14 @@ public class CmdDvset implements DVCommand {
                       if (!player.hasPermission("dreamvisitor.set.discord"))
                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                       playerMemory.discordEnabled = Boolean.parseBoolean(modification);
-                      callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility toggled to "
+                      Messager.send(callee, ChatColor.GRAY + "Discord Visibility toggled to "
                           + ChatColor.WHITE + playerMemory.discordEnabled);
                     }
                     case "flight" -> {
                       if (!player.hasPermission("dreamvisitor.set.flight"))
                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                       playerMemory.flightDisabled = Boolean.parseBoolean(modification);
-                      callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Flight Enabled toggled to "
+                      Messager.send(callee, ChatColor.GRAY + "Flight Enabled toggled to "
                           + ChatColor.WHITE + playerMemory.flightDisabled);
                     }
                     case "vanished" -> {
@@ -216,21 +217,21 @@ public class CmdDvset implements DVCommand {
                       Bot.getGameChatChannel().sendMessage(chatMessage).queue();
                       Bot.sendLog(chatMessage);
 
-                      callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish toggled to "
+                      Messager.send(callee, ChatColor.GRAY + "Discord Vanish toggled to "
                           + ChatColor.WHITE + playerMemory.vanished);
                     }
                     case "autoinvswap" -> {
                       if (!player.hasPermission("dreamvisitor.set.autoinvswap"))
                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                       playerMemory.autoinvswap = Boolean.parseBoolean(modification);
-                      callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap toggled to "
+                      Messager.send(callee, ChatColor.GRAY + "Automatic Inventory Swap toggled to "
                           + ChatColor.WHITE + playerMemory.autoinvswap);
                     }
                     case "autoradio" -> {
                       if (!player.hasPermission("dreamvisitor.set.autoradio"))
                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                       playerMemory.autoRadio = Boolean.parseBoolean(modification);
-                      callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Radio toggled to "
+                      Messager.send(callee, ChatColor.GRAY + "Automatic Radio toggled to "
                           + ChatColor.WHITE + playerMemory.autoRadio);
                     }
                     default ->

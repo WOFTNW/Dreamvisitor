@@ -30,22 +30,22 @@ public class Whitelist extends ListenerAdapter {
     private static @NotNull JSONArray get() throws IOException {
 
         // Access whitelist.json file
-        Dreamvisitor.debug("Trying to access whitelist file");
+        Messager.debug("Trying to access whitelist file");
         String whitelistPath = Bukkit.getServer().getWorldContainer().getPath() + "/whitelist.json";
         // Parse whitelist.json to a string list
         List<String> lines = Files.readAllLines(new File(whitelistPath).toPath());
-        Dreamvisitor.debug("Success");
+        Messager.debug("Success");
 
         // Format the string list to StringBuilder
         StringBuilder fileString = new StringBuilder();
         for (String line : lines) {
             fileString.append(line);
         }
-        Dreamvisitor.debug("Strings joined to StringBuilder");
+        Messager.debug("Strings joined to StringBuilder");
 
         // Format string to JSONArray
         JSONArray whitelist = new JSONArray(fileString.toString());
-        Dreamvisitor.debug("String Builder parsed as JSON");
+        Messager.debug("String Builder parsed as JSON");
         return whitelist;
     }
 
@@ -68,30 +68,30 @@ public class Whitelist extends ListenerAdapter {
      */
     public static void add(@NotNull String username, @NotNull UUID uuid) throws IOException {
 
-        Dreamvisitor.debug("Adding " + username + " to the whitelist.");
+        Messager.debug("Adding " + username + " to the whitelist.");
 
         JSONArray whitelist = get();
 
         // Create entry
-        Dreamvisitor.debug("Creating entry...");
+        Messager.debug("Creating entry...");
         JSONObject whitelistEntry = new JSONObject();
         whitelistEntry.put("uuid", uuid.toString());
         whitelistEntry.put("name", username);
 
         // Add to whitelist.json
-        Dreamvisitor.debug("Adding to JSON...");
+        Messager.debug("Adding to JSON...");
         whitelist.put(whitelistEntry);
 
         // Write to whitelist.json file
-        Dreamvisitor.debug("Attempting to write to file...");
+        Messager.debug("Attempting to write to file...");
 
         Files.writeString(new File(Bukkit.getServer().getWorldContainer().getPath() + "/whitelist.json").toPath(), whitelist.toString(4));
-        Dreamvisitor.debug("Success.");
+        Messager.debug("Success.");
 
         // reload whitelist
-        Dreamvisitor.debug("Reloading whitelist");
+        Messager.debug("Reloading whitelist");
         Bukkit.reloadWhitelist();
-        Dreamvisitor.debug("Whitelist reloaded");
+        Messager.debug("Whitelist reloaded");
     }
 
     /**
@@ -102,7 +102,7 @@ public class Whitelist extends ListenerAdapter {
      */
     public static void remove(@NotNull String username, @NotNull UUID uuid) throws IOException {
 
-        Dreamvisitor.debug("Removing " + username + " to the whitelist.");
+        Messager.debug("Removing " + username + " to the whitelist.");
 
         JSONArray whitelist = get();
 
@@ -110,24 +110,24 @@ public class Whitelist extends ListenerAdapter {
         for (int i = 0; i < whitelist.length(); i++) {
             JSONObject object = (JSONObject) whitelist.get(i);
 
-            Dreamvisitor.debug("Checking " + object.get("uuid") + " with " + uuid);
+            Messager.debug("Checking " + object.get("uuid") + " with " + uuid);
 
             if (object.get("uuid").equals(uuid.toString())) {
 
-                Dreamvisitor.debug("Found match! " + whitelist.remove(i));
+                Messager.debug("Found match! " + whitelist.remove(i));
             }
         }
 
         // Write to whitelist.json file
-        Dreamvisitor.debug("Attempting to write to file...");
+        Messager.debug("Attempting to write to file...");
 
         Files.writeString(new File(Bukkit.getServer().getWorldContainer().getPath() + "/whitelist.json").toPath(), whitelist.toString(4));
-        Dreamvisitor.debug("Success.");
+        Messager.debug("Success.");
 
         // reload whitelist
-        Dreamvisitor.debug("Reloading whitelist");
+        Messager.debug("Reloading whitelist");
         Bukkit.reloadWhitelist();
-        Dreamvisitor.debug("Whitelist reloaded");
+        Messager.debug("Whitelist reloaded");
     }
 
     public static void startWeb(int port) {
@@ -144,17 +144,17 @@ public class Whitelist extends ListenerAdapter {
         Spark.post("/process-username", (request, response) -> {
             String username = request.queryParams("username");
 
-            Dreamvisitor.debug("Username from web form: " + username);
+            Messager.debug("Username from web form: " + username);
 
             // Process the username
             boolean success = processUsername(username);
 
-            Dreamvisitor.debug("Processed. Success: " + success);
+            Messager.debug("Processed. Success: " + success);
 
             // Send a response back to the web page
-            Dreamvisitor.debug("response.header");
+            Messager.debug("response.header");
             response.type("application/json");
-            Dreamvisitor.debug("response.type");
+            Messager.debug("response.type");
             return "{\"success\": " + success + "}";
         });
     }
@@ -166,33 +166,33 @@ public class Whitelist extends ListenerAdapter {
     private static boolean processUsername(@NotNull String username) throws IOException {
 
         // Check for valid UUID
-        Dreamvisitor.debug("Checking for valid UUID");
+        Messager.debug("Checking for valid UUID");
         UUID uuid = PlayerUtility.getUUIDOfUsername(username);
         if (uuid == null) {
             // username does not exist alert
-            Dreamvisitor.debug("Username does not exist.");
-            Dreamvisitor.debug("Failed whitelist.");
+            Messager.debug("Username does not exist.");
+            Messager.debug("Failed whitelist.");
         } else {
 
-            Dreamvisitor.debug("Got UUID");
+            Messager.debug("Got UUID");
 
             // No account to link
 
             // Check if already whitelisted
-            Dreamvisitor.debug("Is user already whitelisted?");
+            Messager.debug("Is user already whitelisted?");
 
             if (isUserWhitelisted(uuid)) {
-                Dreamvisitor.debug("Already whitelisted.");
-                Dreamvisitor.debug("Resolved.");
+                Messager.debug("Already whitelisted.");
+                Messager.debug("Resolved.");
 
                 return true;
             } else {
-                Dreamvisitor.debug("Player is not whitelisted.");
+                Messager.debug("Player is not whitelisted.");
 
                 add(username, uuid);
 
                 // success message
-                Dreamvisitor.debug("Success.");
+                Messager.debug("Success.");
 
                 report(username, uuid, null);
 

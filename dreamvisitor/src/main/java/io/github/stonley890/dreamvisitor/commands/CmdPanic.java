@@ -4,6 +4,7 @@ import java.util.TimerTask;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.ExecutableCommand;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -26,8 +27,7 @@ public class CmdPanic implements DVCommand {
                 .executesNative((sender, args) -> {
                     if (!panicAsked) {
                         panicAsked = true;
-                        sender.sendMessage(Dreamvisitor.PREFIX +
-                                ChatColor.RED + "Are you sure you want to kick all players? Run /panic again to confirm.");
+                        Messager.sendDanger(sender,"Are you sure you want to kick all players? Run /panic again to confirm.");
                         new java.util.Timer().schedule(new TimerTask() {
                             @Override
                             public void run() {

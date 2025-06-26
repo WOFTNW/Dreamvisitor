@@ -2,22 +2,14 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
-import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.*;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.*;
 
 public class CmdTribeUpdate implements DVCommand {
@@ -34,7 +26,7 @@ public class CmdTribeUpdate implements DVCommand {
                     assert players != null;
 
                     // This may take some time
-                    if (sender instanceof Player) sender.sendMessage(Dreamvisitor.PREFIX + "Please wait...");
+                    if (sender instanceof Player) Messager.send(sender, "Please wait...");
 
                     // Run async
                     Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
@@ -51,13 +43,13 @@ public class CmdTribeUpdate implements DVCommand {
                             if (playerTribe != null) {
 
                                 // Update LP groups
-                                Dreamvisitor.debug("Updating permissions");
+                                Messager.debug("Updating permissions");
                                 PlayerTribe.updatePermissions(uuid);
 
                             }
                         }
 
-                        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + players.size() + " players."));
+                        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Messager.send(sender, "Updated " + players.size() + " players."));
 
                     });
                 });

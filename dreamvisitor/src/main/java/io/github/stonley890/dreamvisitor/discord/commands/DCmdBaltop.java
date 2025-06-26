@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
@@ -36,28 +37,28 @@ public class DCmdBaltop implements DiscordCommand {
         sortedConsumers.sort(Comparator.comparingDouble(Economy.Consumer::getBalance).reversed());
 
         if (Dreamvisitor.debugMode) {
-            Dreamvisitor.debug("Sorted consumers: ");
+            Messager.debug("Sorted consumers: ");
             for (Economy.Consumer sortedConsumer : sortedConsumers) {
-                Dreamvisitor.debug(sortedConsumer.getId() + ": " + sortedConsumer.getBalance());
+                Messager.debug(sortedConsumer.getId() + ": " + sortedConsumer.getBalance());
             }
         }
 
         final Economy.Consumer senderConsumer = Economy.getConsumer(event.getUser().getIdLong());
 
         final int senderIndex = sortedConsumers.indexOf(senderConsumer);
-        Dreamvisitor.debug("Sender index: " + senderIndex);
+        Messager.debug("Sender index: " + senderIndex);
 
         Economy.Consumer aboveSender = null;
         try {
             aboveSender = sortedConsumers.get(senderIndex - 1);
         } catch (IndexOutOfBoundsException ignored) {}
-        Dreamvisitor.debug("Index above sender: " + (senderIndex - 1) + " id " + (aboveSender != null ? aboveSender.getId() : "null"));
+        Messager.debug("Index above sender: " + (senderIndex - 1) + " id " + (aboveSender != null ? aboveSender.getId() : "null"));
 
         Economy.Consumer belowSender = null;
         try {
             belowSender = sortedConsumers.get(senderIndex + 1);
         } catch (IndexOutOfBoundsException ignored) {}
-        Dreamvisitor.debug("Index below sender: " + (senderIndex + 1) + " id " + (belowSender != null ? belowSender.getId() : "null"));
+        Messager.debug("Index below sender: " + (senderIndex + 1) + " id " + (belowSender != null ? belowSender.getId() : "null"));
 
         final EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Top Balances");
@@ -65,7 +66,7 @@ public class DCmdBaltop implements DiscordCommand {
         int numberShown = 10;
 
         if (sortedConsumers.size() < numberShown) numberShown = sortedConsumers.size();
-        Dreamvisitor.debug("Consumer list size: " + sortedConsumers.size());
+        Messager.debug("Consumer list size: " + sortedConsumers.size());
 
         final List<Long> retrieveIds = new ArrayList<>(sortedConsumers.subList(0, numberShown).stream().map(Economy.Consumer::getId).toList());
         if (aboveSender != null) retrieveIds.add(aboveSender.getId());

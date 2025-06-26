@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.data;
 import com.google.gson.JsonObject;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.AutoRestart;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import io.github.stonley890.dreamvisitor.pb.PocketBase;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -41,7 +42,7 @@ public class PBConfigLoader {
       pbConfig.put("pocketbase-token", token);
       pocketBaseClient = PocketBase.fromConfig(pbConfig);
 
-      Dreamvisitor.debug("Initialized PocketBase client");
+      Messager.debug("Initialized PocketBase client");
     } catch (Exception e) {
       Bukkit.getLogger().warning("Failed to initialize PocketBase client: " + e.getMessage());
       return;
@@ -70,7 +71,7 @@ public class PBConfigLoader {
       String jsonString = record.toString();
       config = new JSONObject(jsonString);
 
-      Dreamvisitor.debug("Loaded PocketBase configuration: " + config.toString());
+      Messager.debug("Loaded PocketBase configuration: " + config.toString());
 
       // Apply config values to the system
       applyConfig();
@@ -101,10 +102,10 @@ public class PBConfigLoader {
         if (autoRestart != AutoRestart.isAutoRestart()) {
           if (autoRestart) {
             AutoRestart.enableAutoRestart(null);
-            Dreamvisitor.debug("Auto restart enabled from remote config");
+            Messager.debug("Auto restart enabled from remote config");
           } else {
             AutoRestart.disableAutoRestart();
-            Dreamvisitor.debug("Auto restart disabled from remote config");
+            Messager.debug("Auto restart disabled from remote config");
           }
         }
       }
@@ -128,7 +129,7 @@ public class PBConfigLoader {
         // Update the record
         pocketBaseClient.updateRecord(COLLECTION_NAME, configId, updateData, null, null);
 
-        Dreamvisitor.debug("Updated PocketBase configuration field " + field + " to " + value);
+        Messager.debug("Updated PocketBase configuration field " + field + " to " + value);
 
         // If not using realtime updates, we need to reload config manually
         if (!useRealtime) {

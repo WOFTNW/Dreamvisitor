@@ -5,6 +5,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.WorldArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
@@ -32,7 +33,7 @@ public class CmdSynctime implements DVCommand {
                         } else throw CommandAPI.failWithString("World must be specified if it cannot be inferred!");
                     }
                     for (World world : Bukkit.getWorlds()) world.setFullTime(worldArg.getFullTime());
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Set all worlds to match " + worldArg.getName() + ": " + worldArg.getFullTime());
+                    Messager.send(sender, "Set all worlds to match " + worldArg.getName() + ": " + worldArg.getFullTime());
                 });
     }
 }

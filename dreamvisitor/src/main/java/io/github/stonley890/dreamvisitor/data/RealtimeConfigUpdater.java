@@ -1,6 +1,7 @@
 package io.github.stonley890.dreamvisitor.data;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 public class RealtimeConfigUpdater {
   private static ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -44,7 +44,7 @@ public class RealtimeConfigUpdater {
     }
 
     if (baseUrl == null || baseUrl.isEmpty() || configId == null || configId.isEmpty()) {
-      Dreamvisitor.debug("Cannot start realtime updates: baseUrl or configId is not set");
+      Messager.debug("Cannot start realtime updates: baseUrl or configId is not set");
       return;
     }
 
@@ -54,7 +54,7 @@ public class RealtimeConfigUpdater {
       try {
         connectSSE();
       } catch (Exception e) {
-        Dreamvisitor.debug("Error in SSE connection: " + e.getMessage());
+        Messager.debug("Error in SSE connection: " + e.getMessage());
         handleReconnect();
       } finally {
         isConnecting.set(false);
@@ -63,7 +63,7 @@ public class RealtimeConfigUpdater {
   }
 
   private static void connectSSE() throws IOException {
-    Dreamvisitor.debug("Connecting to SSE endpoint");
+    Messager.debug("Connecting to SSE endpoint");
 
     URL url = new URL(baseUrl + "/api/realtime");
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -88,11 +88,11 @@ public class RealtimeConfigUpdater {
             line = reader.readLine();
             if (line != null && line.startsWith("data: ")) {
               clientId = line.substring(6).trim();
-              Dreamvisitor.debug("Connected to SSE with client ID: " + clientId);
+              Messager.debug("Connected to SSE with client ID: " + clientId);
               setSubscription();
             }
           } else if (line.startsWith("event: PB_DISCONNECT")) {
-            Dreamvisitor.debug("Received disconnect event from server");
+            Messager.debug("Received disconnect event from server");
             break;
           } else if (line.startsWith("event: update")) {
             // Next line should be data
@@ -139,7 +139,7 @@ public class RealtimeConfigUpdater {
 
       int responseCode = connection.getResponseCode();
       if (responseCode != HttpURLConnection.HTTP_NO_CONTENT) {
-        Dreamvisitor.debug("Failed to set subscription: " + responseCode);
+        Messager.debug("Failed to set subscription: " + responseCode);
 
         // Read error response if available
         if (connection.getErrorStream() != null) {
@@ -149,14 +149,14 @@ public class RealtimeConfigUpdater {
             while ((line = br.readLine()) != null) {
               errorResponse.append(line);
             }
-            Dreamvisitor.debug("Error response: " + errorResponse.toString());
+            Messager.debug("Error response: " + errorResponse.toString());
           }
         }
       } else {
-        Dreamvisitor.debug("Successfully subscribed to config updates");
+        Messager.debug("Successfully subscribed to config updates");
       }
     } catch (Exception e) {
-      Dreamvisitor.debug("Error setting subscription: " + e.getMessage());
+      Messager.debug("Error setting subscription: " + e.getMessage());
     }
   }
 
@@ -169,7 +169,7 @@ public class RealtimeConfigUpdater {
         // Handle autoRestart field
         if (record.has("autoRestart")) {
           boolean autoRestart = record.getBoolean("autoRestart");
-          Dreamvisitor.debug("Received real-time update: autoRestart = " + autoRestart);
+          Messager.debug("Received real-time update: autoRestart = " + autoRestart);
 
           // Schedule update on main thread
           Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
@@ -178,14 +178,14 @@ public class RealtimeConfigUpdater {
         }
       }
     } catch (JSONException e) {
-      Dreamvisitor.debug("Error parsing update event: " + e.getMessage());
+      Messager.debug("Error parsing update event: " + e.getMessage());
     }
   }
 
   private static void handleReconnect() {
     if (retryCount < MAX_RETRIES) {
       retryCount++;
-      Dreamvisitor.debug("Attempting to reconnect SSE (attempt " + retryCount + "/" + MAX_RETRIES + ")");
+      Messager.debug("Attempting to reconnect SSE (attempt " + retryCount + "/" + MAX_RETRIES + ")");
 
       try {
         Thread.sleep(RETRY_DELAY_MS);
@@ -194,7 +194,7 @@ public class RealtimeConfigUpdater {
         Thread.currentThread().interrupt();
       }
     } else {
-      Dreamvisitor.debug("Max retry attempts reached. Giving up on SSE connection.");
+      Messager.debug("Max retry attempts reached. Giving up on SSE connection.");
       // Fallback to polling
       retryCount = 0;
     }

@@ -7,6 +7,7 @@ import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Messager;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -44,10 +45,10 @@ public class CmdSandbox implements DVCommand {
                         }
 
                         if (sandboxedPlayers.isEmpty()) {
-                            sender.sendMessage(Dreamvisitor.PREFIX + "No players currently online are in sandbox mode. Use /sandbox <player> [true|false] to toggle sandbox mode.");
+                            Messager.send(sender, "No players currently online are in sandbox mode. Use /sandbox <player> [true|false] to toggle sandbox mode.");
                         }
 
-                        ComponentBuilder messageBuilder = new ComponentBuilder(Dreamvisitor.PREFIX + "Players currently sandboxed:\n");
+                        ComponentBuilder messageBuilder = new ComponentBuilder("Players currently sandboxed:\n");
 
                         HoverEvent tooltip = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to remove."));
 
@@ -62,7 +63,7 @@ public class CmdSandbox implements DVCommand {
                                     .append(" in world ").append(Objects.requireNonNull(location.getWorld()).getName()).append(".\n\n");
                         }
 
-                        sender.spigot().sendMessage(messageBuilder.create());
+                        Messager.send(sender, messageBuilder.create());
                     } else {
                         Object stateArg = args.get("state");
                         if (stateArg == null) {
@@ -70,15 +71,15 @@ public class CmdSandbox implements DVCommand {
                                 if (PlayerUtility.getPlayerMemory(player.getUniqueId()).sandbox) Sandbox.disableSandbox(player);
                                 else Sandbox.enableSandbox(player);
                             });
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Toggled sandbox mode for " + players.size() + " players.");
+                            Messager.send(sender, "Toggled sandbox mode for " + players.size() + " players.");
                         } else {
                             boolean sandboxState = (boolean) stateArg;
                             if (sandboxState) {
                                 players.forEach(Sandbox::enableSandbox);
-                                sender.sendMessage(Dreamvisitor.PREFIX + "Enabled sandbox mode for " + players.size() + " players.");
+                                Messager.send(sender, "Enabled sandbox mode for " + players.size() + " players.");
                             } else {
                                 players.forEach(Sandbox::disableSandbox);
-                                sender.sendMessage(Dreamvisitor.PREFIX + "Disabled sandbox mode for " + players.size() + " players.");
+                                Messager.send(sender, "Disabled sandbox mode for " + players.size() + " players.");
                             }
                         }
                     }

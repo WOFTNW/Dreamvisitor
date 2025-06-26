@@ -180,7 +180,7 @@ public class CmdParcel implements DVCommand {
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected");
 
                                     add(players, start, end);
-                                    Messager.send(sender, "Added " + players.size() + " player(s).");
+                                    Messager.send(sender, "Added " + Messager.nameOrCountPlayer(players) + ".");
                                 })
                         )
 
@@ -194,7 +194,7 @@ public class CmdParcel implements DVCommand {
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected");
 
                                     remove(players);
-                                    Messager.send(sender, "Removed " + players.size() + " player(s).");
+                                    Messager.send(sender, "Removed " + Messager.nameOrCountPlayer(players) + ".");
                                 })
                         )
 

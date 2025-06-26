@@ -55,13 +55,9 @@ public class CmdSchedule implements DVCommand {
                   }
 
                   CommandScheduler.getInstance().addSchedule(name, intervalMinutes, commands);
-                  if (commands.size() > 1) {
-                    Messager.send(sender, "Added schedule '" + name + "' to run " + commands.size() +
-                        " commands every " + intervalMinutes + " minutes.");
-                  } else {
-                    Messager.send(sender, "Added schedule '" + name + "' to run '" + commandInput +
-                        "' every " + intervalMinutes + " minutes.");
-                  }
+                    Messager.send(sender, "Added schedule '" + name + "' to run " +
+                            Messager.nameOrCountString(commands.stream().map(cmd -> "\"".concat(cmd).concat("\"")).toList(), "command", "commands") +
+                        " every " + intervalMinutes + " minutes.");
                 }),
             new CommandAPICommand("daily")
                 .withPermission(CommandPermission.fromString("dreamvisitor.schedule"))
@@ -92,13 +88,10 @@ public class CmdSchedule implements DVCommand {
                     }
 
                     CommandScheduler.getInstance().addDailySchedule(name, time, commands);
-                    if (commands.size() > 1) {
-                      Messager.send(sender, "Added schedule '" + name + "' to run " + commands.size() +
+                      Messager.send(sender, "Added schedule '" + name + "' to run " +
+                              Messager.nameOrCountString(commands.stream().map(cmd -> "\"".concat(cmd).concat("\"")).toList(), "command", "commands") +
                               " commands daily at " + timeString + ".");
-                    } else {
-                      Messager.send(sender, "Added schedule '" + name + "' to run '" + commandInput +
-                          "' daily at " + timeString + ".");
-                    }
+
                   } catch (DateTimeParseException e) {
                     Messager.sendDanger(sender,
                         "Invalid time format. Please use HH:MM:SS format (e.g., 06:00:00)");
@@ -134,13 +127,9 @@ public class CmdSchedule implements DVCommand {
                   if (schedule == null) {
                     Messager.sendDanger(sender,"Invalid cron pattern. Format: minute hour day-of-month month day-of-week");
                   } else {
-                    if (commands.size() > 1) {
-                      Messager.send(sender, "Added schedule '" + name + "' to run " + commands.size() +
+                      Messager.send(sender, "Added schedule '" + name + "' to run " +
+                              Messager.nameOrCountString(commands.stream().map(cmd -> "\"".concat(cmd).concat("\"")).toList(), "command", "commands") +
                               " commands using cron pattern '" + pattern + "'.");
-                    } else {
-                      Messager.send(sender, "Added schedule '" + name + "' to run '" + commandInput +
-                          "' using cron pattern '" + pattern + "'.");
-                    }
                   }
                 }),
             new CommandAPICommand("remove")

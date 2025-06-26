@@ -71,15 +71,15 @@ public class CmdSandbox implements DVCommand {
                                 if (PlayerUtility.getPlayerMemory(player.getUniqueId()).sandbox) Sandbox.disableSandbox(player);
                                 else Sandbox.enableSandbox(player);
                             });
-                            Messager.send(sender, "Toggled sandbox mode for " + players.size() + " players.");
+                            Messager.send(sender, "Toggled sandbox mode for " + Messager.nameOrCountPlayer(players) + ".");
                         } else {
                             boolean sandboxState = (boolean) stateArg;
                             if (sandboxState) {
                                 players.forEach(Sandbox::enableSandbox);
-                                Messager.send(sender, "Enabled sandbox mode for " + players.size() + " players.");
+                                Messager.send(sender, "Enabled sandbox mode for " + Messager.nameOrCountPlayer(players) + ".");
                             } else {
                                 players.forEach(Sandbox::disableSandbox);
-                                Messager.send(sender, "Disabled sandbox mode for " + players.size() + " players.");
+                                Messager.send(sender, "Disabled sandbox mode for " + Messager.nameOrCountPlayer(players) + ".");
                             }
                         }
                     }

@@ -104,7 +104,7 @@
       <!--Brigadier Command API-->
       <groupId>dev.jorel</groupId>
       <artifactId>commandapi-bukkit-shade</artifactId>
-      <version>9.7.0</version>
+      <version>10.1.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

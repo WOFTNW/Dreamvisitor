@@ -49,7 +49,7 @@ public class CmdTribeUpdate implements DVCommand {
                             }
                         }
 
-                        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Messager.send(sender, "Updated " + players.size() + " players."));
+                        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Messager.send(sender, "Updated " + Messager.nameOrCountPlayer(players) + "."));
 
                     });
                 });

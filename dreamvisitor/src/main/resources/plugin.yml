@@ -1,4 +1,4 @@
-main: io.github.stonley890.dreamvisitor.Dreamvisitor
+main: org.woftnw.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
 version: "${project.version}"
 api-version: 1.20

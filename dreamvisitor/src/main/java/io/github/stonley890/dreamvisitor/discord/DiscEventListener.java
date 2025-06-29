@@ -22,9 +22,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
-import org.bukkit.BanEntry;
-import org.bukkit.BanList;
-import org.bukkit.Bukkit;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -32,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -182,6 +181,7 @@ public class DiscEventListener extends ListenerAdapter {
                 ComponentBuilder message = new ComponentBuilder();
 
                 // include reply if one exists
+                String playerRepliedTo = null;
                 MessageReference messageReference = event.getMessage().getMessageReference();
                 if (messageReference != null) {
                     Message reference = messageReference.resolve().complete();
@@ -193,9 +193,9 @@ public class DiscEventListener extends ListenerAdapter {
                         authorText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(referenceAuthor.getName())));
 
                         if (referenceAuthor.equals(event.getJDA().getSelfUser())) {
-                            String referenceAuthorString = referenceContent.split("\\*\\*")[1];
-                            referenceContent = referenceContent.substring(referenceAuthorString.length() + 6);
-                            authorText.setText(referenceAuthorString);
+                            playerRepliedTo = referenceContent.split("\\*\\*")[1];
+                            referenceContent = referenceContent.substring(playerRepliedTo.length() + 6);
+                            authorText.setText(playerRepliedTo);
                             authorText.setHoverEvent(null);
                         }
 
@@ -227,6 +227,7 @@ public class DiscEventListener extends ListenerAdapter {
                         // If the player has discord on, build and send the message
                         if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordEnabled) {
                             player.spigot().sendMessage(message.create());
+                            if (player.getName().equals(playerRepliedTo)) player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, SoundCategory.PLAYERS, 1, 1);
                         }
                     }
                 }

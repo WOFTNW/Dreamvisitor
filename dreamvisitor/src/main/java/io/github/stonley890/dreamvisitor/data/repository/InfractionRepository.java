@@ -4,8 +4,6 @@ package io.github.stonley890.dreamvisitor.data.repository;
 import java.util.List;
 import java.util.Optional;
 
-import io.github.stonley890.dreamvisitor.data.type.Infraction;
-
 /**
  * Repository interface for Infraction data operations
  */

@@ -1,6 +1,5 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -31,7 +30,6 @@ public class Radio {
             }
 
         }
-        Bot.sendLog(ChatColor.stripColor(finalMessage));
     }
 
     private static @NotNull String getString(String message, @NotNull String name, @NotNull String command) {

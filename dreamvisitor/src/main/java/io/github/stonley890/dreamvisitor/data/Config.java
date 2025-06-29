@@ -5,6 +5,7 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.AutoRestart;
 import io.github.stonley890.dreamvisitor.functions.Messager;
 import io.github.stonley890.dreamvisitor.pb.PocketBase;
+import io.github.stonley890.dreamvisitor.util.ConfigKey;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.Contract;
@@ -13,10 +14,11 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class PBConfigLoader {
+public class Config {
   private static JSONObject config;
   private static String baseUrl;
   private static String configId;
@@ -40,8 +42,8 @@ public class PBConfigLoader {
     // Create PocketBase client from config
     try {
       Map<String, Object> pbConfig = new HashMap<>();
-      pbConfig.put("pocketbase-url", baseUrl);
-      pbConfig.put("pocketbase-token", token);
+      pbConfig.put("pocketbaseUrl", baseUrl);
+      pbConfig.put("pocketbaseToken", token);
       pocketBaseClient = PocketBase.fromConfig(pbConfig);
 
       Messager.debug("Initialized PocketBase client");
@@ -145,19 +147,20 @@ public class PBConfigLoader {
     });
   }
 
-  public static boolean getBoolean(String field, boolean defaultValue) {
-    if (config == null) {
-      return defaultValue;
+  @SuppressWarnings("unchecked")
+  public static <T> T get(@NotNull ConfigKey configKey) {
+    Object value = config.get(configKey.getKey());
+
+    if (value == null) {
+      value = configKey.getDefaultValue();
     }
 
-    try {
-      return config.getBoolean(field);
-    } catch (Exception e) {
-      return defaultValue;
+    if (configKey.getType().isInstance(value)) {
+      return (T) value;
     }
+
+    throw new IllegalStateException("Config value for key '" + configKey.getKey() +
+            "' is not of expected type: " + configKey.getType().getSimpleName());
   }
 
-  public static PocketBase getClient() {
-    return pocketBaseClient;
-  }
 }

@@ -1,8 +1,7 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.Config;
 import io.github.stonley890.dreamvisitor.functions.Flight;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,8 +56,8 @@ public class ListenPlayerMoveEvent implements Listener {
         double distanceY = toY - fromY;
         if (distanceY < 0) distanceY = 0;
 
-        double flightEnergyDepletionXYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionXYMultiplier");
-        double flightEnergyDepletionYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionYMultiplier");
+        double flightEnergyDepletionXYMultiplier = Config.getDouble("flightEnergyDepletionXYMultiplier", 1.0);
+        double flightEnergyDepletionYMultiplier = Config.getDouble("flightEnergyDepletionYMultiplier", 2.00);
         energyToRemove = distance2d * flightEnergyDepletionXYMultiplier + distanceY * flightEnergyDepletionYMultiplier;
         return energyToRemove;
     }

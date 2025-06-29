@@ -2,9 +2,6 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.*;
 import dev.jorel.commandapi.arguments.StringArgument;
-import dev.jorel.commandapi.executors.NativeCommandExecutor;
-import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Messager;
@@ -214,8 +211,9 @@ public class CmdDvset implements DVCommand {
                       } else {
                         chatMessage = "**" + player.getName() + " joined the game**";
                       }
-                      Bot.getGameChatChannel().sendMessage(chatMessage).queue();
-                      Bot.sendLog(chatMessage);
+                      // TODO: Send the message to the chat channel.
+//                      Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+//                      Bot.sendLog(chatMessage);
 
                       Messager.send(callee, ChatColor.GRAY + "Discord Vanish toggled to "
                           + ChatColor.WHITE + playerMemory.vanished);

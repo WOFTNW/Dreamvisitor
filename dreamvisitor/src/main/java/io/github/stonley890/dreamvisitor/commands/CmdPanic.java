@@ -3,13 +3,11 @@ package io.github.stonley890.dreamvisitor.commands;
 import java.util.TimerTask;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.ExecutableCommand;
 import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,7 +43,8 @@ public class CmdPanic implements DVCommand {
                         plugin.saveConfig();
                         Bukkit.getServer().broadcastMessage(
                                 ChatColor.RED + "Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.");
-                        Bot.sendLog("**Panicked by " + sender.getName());
+                        // TODO: Send a message to the server log.
+//                        Bot.sendLog("**Panicked by " + sender.getName());
                     }
                 });
     }

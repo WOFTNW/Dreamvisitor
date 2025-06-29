@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import io.github.stonley890.dreamvisitor.data.Config;
 import io.github.stonley890.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -57,7 +57,7 @@ public class ListenPlayerLogin implements Listener {
                 // Kick for server full
                 event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + Dreamvisitor.playerLimit);
 
-            } else if (plugin.getConfig().getBoolean("softwhitelist")) {
+            } else if (Config.getBoolean("softwhitelist", false)) {
                 
                 // Soft whitelist is enabled
                 allowIfSoftWhitelist(player, event);
@@ -72,7 +72,7 @@ public class ListenPlayerLogin implements Listener {
             // Player limit is not overridden
 
             // If soft whitelist is on
-            if (plugin.getConfig().getBoolean("softwhitelist")) {
+            if (Config.getBoolean("softwhitelist", false)) {
 
                 // Soft whitelist is enabled
                 Bukkit.getLogger().info("Soft whitelist is enabled");

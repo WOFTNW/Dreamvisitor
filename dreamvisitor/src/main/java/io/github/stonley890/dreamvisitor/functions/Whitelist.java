@@ -1,14 +1,9 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.profile.PlayerProfile;
@@ -185,7 +180,6 @@ public class Whitelist extends ListenerAdapter {
                 Messager.debug("Already whitelisted.");
                 Messager.debug("Resolved.");
 
-                return true;
             } else {
                 Messager.debug("Player is not whitelisted.");
 
@@ -194,42 +188,10 @@ public class Whitelist extends ListenerAdapter {
                 // success message
                 Messager.debug("Success.");
 
-                report(username, uuid, null);
-
-                return true;
             }
+            return true;
         }
         return false;
-    }
-
-    /**
-     * Report a whitelist to the system log channel.
-     * @param username the username that is being whitelisted.
-     * @param source the {@link User} (or {@code null} if by web) that caused this whitelist.
-     */
-    public static void report(String username, UUID uuid, User source) {
-
-        String sourceName = "web whitelist";
-        if (source != null) sourceName = source.getName();
-
-        TextChannel systemChannel = Bot.getGameLogChannel().getGuild().getSystemChannel();
-        if (systemChannel != null) {
-            EmbedBuilder logEmbed = getEmbedBuilder(username, source, sourceName);
-
-            Button ban = Button.danger("ban-" + uuid, "Ban");
-            Button unwhitelist = Button.secondary("unwhitelist-" + uuid, "Unwhitelist");
-            systemChannel.sendMessageEmbeds(logEmbed.build()).setActionRow(ban, unwhitelist).queue();
-        }
-    }
-
-    @NotNull
-    private static EmbedBuilder getEmbedBuilder(String username, User source, String sourceName) {
-        EmbedBuilder logEmbed = new EmbedBuilder();
-        logEmbed.setTitle("Whitelisted " + username + " from " + sourceName);
-
-        if (source != null) logEmbed.setDescription(source.getAsMention() + " added " + username + " to the whitelist with Dreamvisitor. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a different member.");
-        else logEmbed.setDescription("Added " + username + " to the whitelist via the web whitelist. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a Discord member.");
-        return logEmbed;
     }
 
     @Override

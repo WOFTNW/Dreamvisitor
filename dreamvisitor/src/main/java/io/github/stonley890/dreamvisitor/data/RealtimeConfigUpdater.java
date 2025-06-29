@@ -173,7 +173,7 @@ public class RealtimeConfigUpdater {
 
           // Schedule update on main thread
           Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
-            PBConfigLoader.updateLocalConfig(record);
+            Config.updateLocalConfig(record);
           });
         }
       }

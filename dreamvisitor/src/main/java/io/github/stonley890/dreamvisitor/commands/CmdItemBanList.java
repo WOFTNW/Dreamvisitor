@@ -9,6 +9,7 @@ import io.github.stonley890.dreamvisitor.functions.ItemBanList;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdItemBanList implements DVCommand {
@@ -23,7 +24,7 @@ public class CmdItemBanList implements DVCommand {
                     CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
                         if (ItemBanList.badItems != null) {
-                            ItemBanList.inv.setContents(ItemBanList.badItems);
+                            ItemBanList.inv.setContents(ItemBanList.badItems.toArray(new ItemStack[0]));
                         }
                         player.openInventory(ItemBanList.inv);
                     } else throw CommandAPI.failWithString("This command must be executed as a player!");

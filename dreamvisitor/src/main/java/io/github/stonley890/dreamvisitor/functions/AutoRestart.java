@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.data.PBConfigLoader;
+import io.github.stonley890.dreamvisitor.data.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.Nullable;
@@ -18,19 +18,19 @@ public class AutoRestart {
     autoRestartMessage = replyMessage;
     localAutoRestart = true;
     // Update the PocketBase config
-    PBConfigLoader.updateConfigField("autoRestart", true);
+    Config.updateConfigField("autoRestart", true);
   }
 
   public static void disableAutoRestart() {
     localAutoRestart = false;
     autoRestartMessage = null;
     // Update the PocketBase config
-    PBConfigLoader.updateConfigField("autoRestart", false);
+    Config.updateConfigField("autoRestart", false);
   }
 
   public static boolean isAutoRestart() {
     // Check PocketBase config first, fall back to local state if needed
-    return PBConfigLoader.getBoolean("autoRestart", localAutoRestart);
+    return Config.getBoolean("autoRestart", localAutoRestart);
   }
 
   /**

@@ -1,4 +1,4 @@
 pocketbaseUrl: "http://127.0.0.1:8090/"
-pocketbaseConfigId: ""
-pocketbaseToken: ""
+pocketbaseConfigId: "record_id_here"
+pocketbaseToken: "your_admin_token_here"
 pocketbaseUseRealtime: true

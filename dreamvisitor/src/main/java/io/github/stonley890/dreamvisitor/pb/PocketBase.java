@@ -30,7 +30,7 @@ public class PocketBase {
    * @param baseUrl The base URL of the PocketBase instance
    * @param token   The admin/user auth token
    */
-  public PocketBase(String baseUrl, String token) {
+  public PocketBase(@NotNull String baseUrl, String token) {
     this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     this.token = token;
     this.gson = new Gson();
@@ -46,9 +46,10 @@ public class PocketBase {
    *
    * @return A preconfigured PocketBase instance
    */
-  public static PocketBase fromConfig(Map<String, Object> config) {
-    String baseUrl = (String) config.get("pocketbase-url");
-    String token = (String) config.get("pocketbase-token");
+  @NotNull
+  public static PocketBase fromConfig(@NotNull Map<String, Object> config) {
+    String baseUrl = (String) config.get("pocketbaseUrl");
+    String token = (String) config.get("pocketbaseToken");
     return new PocketBase(baseUrl, token);
   }
 
@@ -59,6 +60,7 @@ public class PocketBase {
    * @param queryParams Query parameters
    * @return The complete URL
    */
+  @NotNull
   private HttpUrl buildUrl(String endpoint, @Nullable Map<String, String> queryParams) {
     HttpUrl.Builder urlBuilder = HttpUrl.parse(this.baseUrl + endpoint).newBuilder();
 
@@ -81,8 +83,9 @@ public class PocketBase {
    * @return Response string
    * @throws IOException If the request fails
    */
-  private String executeRequest(String method, String endpoint, @Nullable RequestBody body,
-      @Nullable Map<String, String> queryParams) throws IOException {
+  @NotNull
+  private String executeRequest(@NotNull String method, String endpoint, @Nullable RequestBody body,
+                                @Nullable Map<String, String> queryParams) throws IOException {
     HttpUrl url = buildUrl(endpoint, queryParams);
 
     Request.Builder requestBuilder = new Request.Builder()
@@ -366,7 +369,7 @@ public class PocketBase {
    * @param files  Map of field names to files
    * @return Multipart request body
    */
-  public RequestBody createMultipartBody(Map<String, Object> fields, Map<String, File> files) {
+  public RequestBody createMultipartBody(@NotNull Map<String, Object> fields, Map<String, File> files) {
     MultipartBody.Builder builder = new MultipartBody.Builder()
         .setType(MultipartBody.FORM);
 

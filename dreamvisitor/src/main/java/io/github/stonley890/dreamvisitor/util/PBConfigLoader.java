@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import io.github.stonley890.dreamvisitor.pb.PocketBase;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Utility class for loading configuration from PocketBase
  */
@@ -92,7 +94,7 @@ public class PBConfigLoader {
    * @param config    The configuration map
    * @param fieldName The field name to check
    */
-  private static void ensureChannelIdFormat(Map<String, Object> config, String fieldName) {
+  private static void ensureChannelIdFormat(@NotNull Map<String, Object> config, String fieldName) {
     if (config.containsKey(fieldName)) {
       Object value = config.get(fieldName);
       if (value instanceof Number) {
@@ -109,7 +111,7 @@ public class PBConfigLoader {
    * @param oldName The old field name
    * @param newName The new field name
    */
-  private static void renameField(Map<String, Object> config, String oldName, String newName) {
+  private static void renameField(@NotNull Map<String, Object> config, String oldName, String newName) {
     if (config.containsKey(oldName)) {
       config.put(newName, config.get(oldName));
       config.remove(oldName);

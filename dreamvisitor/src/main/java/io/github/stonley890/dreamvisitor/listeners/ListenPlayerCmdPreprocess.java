@@ -7,7 +7,6 @@ import java.util.List;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Mail;
 import io.github.stonley890.dreamvisitor.functions.Messager;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,7 +16,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.md_5.bungee.api.ChatColor;
 import org.jetbrains.annotations.NotNull;
@@ -71,19 +69,20 @@ public class ListenPlayerCmdPreprocess implements Listener {
 
                 // If list contains player, allow
                 if (bypassedPlayers.contains(player.getUniqueId().toString()) || player.isOp()) {
-                    // Remove command
-                    int spaceIndex = cmd.indexOf(' ');
-                    if (spaceIndex == -1) return;
-                    String action = cmd.substring(spaceIndex + 1);
-                    String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
-                            + ")**]** " + ChatColor.stripColor(action);
-                    // Send message
-                    try {
-                        Bot.getGameChatChannel().sendMessage(message).queue();
-                    } catch (InsufficientPermissionException e) {
-                        Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
-                    }
-                    Bot.sendLog(message);
+                    // TODO: Send action to DVHub
+//                    // Remove command
+//                    int spaceIndex = cmd.indexOf(' ');
+//                    if (spaceIndex == -1) return;
+//                    String action = cmd.substring(spaceIndex + 1);
+//                    String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
+//                            + ")**]** " + ChatColor.stripColor(action);
+//                    // Send message
+//                    try {
+//                        Bot.getGameChatChannel().sendMessage(message).queue();
+//                    } catch (InsufficientPermissionException e) {
+//                        Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+//                    }
+//                    Bot.sendLog(message);
                 } // If list does not contain player, stop the command
                 else {
                     event.setCancelled(true);
@@ -92,28 +91,24 @@ public class ListenPlayerCmdPreprocess implements Listener {
             } // If chat is not paused, allow
             else {
 
+                // TODO: Send action to DVHub
+
                 // Remove command
-                int spaceIndex = cmd.indexOf(' ');
-                if (spaceIndex == -1) return;
-                String action = cmd.substring(spaceIndex + 1);
-                String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
-                        + ")**]** " + ChatColor.stripColor(action);
-                // Send message
-                try {
-                    Bot.getGameChatChannel().sendMessage(message).queue();
-                } catch (InsufficientPermissionException e) {
-                    Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
-                }
-                Bot.sendLog(message);
+//                int spaceIndex = cmd.indexOf(' ');
+//                if (spaceIndex == -1) return;
+//                String action = cmd.substring(spaceIndex + 1);
+//                String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
+//                        + ")**]** " + ChatColor.stripColor(action);
+//                // Send message
+//                try {
+//                    Bot.getGameChatChannel().sendMessage(message).queue();
+//                } catch (InsufficientPermissionException e) {
+//                    Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+//                }
+//                Bot.sendLog(message);
             }
         } else {
-            for (String string : msgAliases) {
-                if (cmd.startsWith(string)) {
-                    String message = "**" + Bot.escapeMarkdownFormatting(player.getName()) + "** sent command: `" + cmd + "`";
-                    Bot.sendLog(message);
-                    return;
-                }
-            }
+            // Cancel if command is a teleportation command to a sandboxed player.
             for (String tpAlias : tpAliases) {
                 if (cmd.startsWith(tpAlias)) {
                     if (Mail.isPLayerDeliverer(player)) Mail.cancel(player);

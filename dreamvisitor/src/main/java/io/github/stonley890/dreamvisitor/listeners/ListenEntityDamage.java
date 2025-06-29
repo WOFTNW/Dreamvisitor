@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
+import io.github.stonley890.dreamvisitor.data.Config;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,7 +17,7 @@ public class ListenEntityDamage implements Listener {
     public void onEntityDamageEvent(@NotNull EntityDamageByEntityEvent event) {
 
         // If PvP is disabled and the damage type is player, cancel the event
-        if ((event.getDamager().getType() == EntityType.PLAYER && event.getEntity().getType() == EntityType.PLAYER) && plugin.getConfig().getBoolean("disablepvp")) {
+        if ((event.getDamager().getType() == EntityType.PLAYER && event.getEntity().getType() == EntityType.PLAYER) && Config.getBoolean("disable_pvp", false)) {
                 event.setCancelled(true);
         }
     }

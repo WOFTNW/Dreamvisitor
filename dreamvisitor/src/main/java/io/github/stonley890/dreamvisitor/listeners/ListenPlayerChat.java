@@ -2,7 +2,6 @@ package io.github.stonley890.dreamvisitor.listeners;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -11,7 +10,6 @@ import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Chatback;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -25,7 +23,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,15 +58,13 @@ public class ListenPlayerChat implements Listener {
                 return;
             }
         }
-        
+
+        // TODO: See below.
         /*
         Send chat messages to Discord
         IF chat is not paused AND the player is not an operator OR the player is an
         operator, send message
         */
-
-        String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + "**: " + event.getMessage();
-
 
 
         if (!Dreamvisitor.chatPaused || event.isCancelled()) {
@@ -86,19 +81,20 @@ public class ListenPlayerChat implements Listener {
                     replyUser.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(replyMessage.authorUsername)));
                     replyNotice.append(replyUser);
 
-                    Bot.getGameChatChannel().sendMessage(chatMessage).setMessageReference(replyMessage.messageId).failOnInvalidReply(false).queue();
+                    // TODO: Send message with reply
+//                    Bot.getGameChatChannel().sendMessage(chatMessage).setMessageReference(replyMessage.messageId).failOnInvalidReply(false).queue();
 
                     Bukkit.spigot().broadcast(replyNotice.create());
 
                     Chatback.nextChatback.remove(event.getPlayer());
                 } else {
-                    Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                    // TODO: Send message
+//                    Bot.getGameChatChannel().sendMessage(chatMessage).queue();
                 }
 
             } catch (InsufficientPermissionException e) {
                 Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
             }
-            Bot.sendLog(chatMessage);
 
         } else {
 
@@ -131,22 +127,23 @@ public class ListenPlayerChat implements Listener {
                         replyNotice.append(replyUser);
 
                         Bukkit.spigot().broadcast(replyNotice.create());
-                        Bot.getGameChatChannel().sendMessage(chatMessage).setMessageReference(replyMessage.messageId).failOnInvalidReply(false).queue();
+                        // TODO: Send message as reply
+//                        Bot.getGameChatChannel().sendMessage(chatMessage).setMessageReference(replyMessage.messageId).failOnInvalidReply(false).queue();
 
                         Chatback.nextChatback.remove(event.getPlayer());
                     } else {
-                        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                        // TODO: Send message
+//                        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
                     }
                 } catch (InsufficientPermissionException e) {
                     Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
                 }
-                Bot.sendLog(chatMessage);
 
             } else {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
 
-                Bot.sendLog("Blocked: " + chatMessage);
+                Dreamvisitor.getPlugin().getLogger().info("Message from " + event.getPlayer().getName() + " was blocked: " + event.getMessage());
 
             }
         }

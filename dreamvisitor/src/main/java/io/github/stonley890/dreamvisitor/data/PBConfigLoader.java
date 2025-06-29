@@ -7,6 +7,8 @@ import io.github.stonley890.dreamvisitor.functions.Messager;
 import io.github.stonley890.dreamvisitor.pb.PocketBase;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -25,10 +27,10 @@ public class PBConfigLoader {
 
   public static void init() {
     FileConfiguration pluginConfig = Dreamvisitor.getPlugin().getConfig();
-    baseUrl = pluginConfig.getString("pocketbase-url", "");
-    configId = pluginConfig.getString("pocketbase-config-id", "");
-    token = pluginConfig.getString("pocketbase-token", "");
-    useRealtime = pluginConfig.getBoolean("pocketbase-use-realtime", true);
+    baseUrl = pluginConfig.getString("pocketbaseUrl", "http://127.0.0.1:8090/");
+    configId = pluginConfig.getString("pocketbaseConfigId", "");
+    token = pluginConfig.getString("pocketbaseToken", "");
+    useRealtime = pluginConfig.getBoolean("pocketbaseUseRealtime", true);
 
     if (baseUrl.isEmpty() || configId.isEmpty()) {
       Bukkit.getLogger().warning("PocketBase URL or config ID not configured in plugin config.");
@@ -60,7 +62,7 @@ public class PBConfigLoader {
   public static void loadConfig() {
     try {
       if (pocketBaseClient == null) {
-        Bukkit.getLogger().warning("PocketBase client not initialized, cannot load config");
+        Dreamvisitor.getPlugin().getLogger().warning("PocketBase client not initialized, cannot load config");
         return;
       }
 
@@ -114,6 +116,8 @@ public class PBConfigLoader {
     }
   }
 
+  @NotNull
+  @Contract("_, _ -> new")
   public static CompletableFuture<Void> updateConfigField(String field, boolean value) {
     return CompletableFuture.runAsync(() -> {
       try {
@@ -136,7 +140,7 @@ public class PBConfigLoader {
           loadConfig();
         }
       } catch (IOException e) {
-        Bukkit.getLogger().warning("Error updating PocketBase config: " + e.getMessage());
+        Dreamvisitor.getPlugin().getLogger().warning("Error updating PocketBase config: " + e.getMessage());
       }
     });
   }

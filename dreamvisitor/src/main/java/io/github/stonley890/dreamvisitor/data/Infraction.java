@@ -11,12 +11,15 @@ import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
+import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -204,7 +207,12 @@ public class Infraction implements ConfigurationSerializable {
             UUID uuid = AccountLink.getUuid(member.getIdLong());
             if (uuid != null) Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), bukkitTask -> {
                 ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
-                banList.addBan(Bukkit.createPlayerProfile(uuid), infraction.reason, (Date) null, "Dreamvisitor");
+                BanEntry<PlayerProfile> banEntry = banList.addBan(Bukkit.createPlayerProfile(uuid), infraction.reason, (Date) null, "Dreamvisitor");
+                assert banEntry != null;
+                banEntry.save();
+
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null && player.isOnline()) player.kickPlayer("Banned by Dreamvisitor.");
             });
             member.ban(0, TimeUnit.MINUTES).queue();
             return;
@@ -216,12 +224,19 @@ public class Infraction implements ConfigurationSerializable {
                 String username = PlayerUtility.getUsernameOfUuid(uuid);
                 if (username != null) {
                     ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
+                    BanEntry<PlayerProfile> banEntry;
                     if (!hasTempban) {
                         LocalDateTime localDateTime = LocalDateTime.now().plusDays(7);
-                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), "Dreamvisitor");
+                        banEntry = banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), "Dreamvisitor");
                     } else {
-                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
+                        banEntry = banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
                     }
+
+                    assert banEntry != null;
+                    banEntry.save();
+
+                    Player player = Bukkit.getPlayer(uuid);
+                    if (player != null && player.isOnline()) player.kickPlayer("Banned by Dreamvisitor.");
                 }
             });
         }

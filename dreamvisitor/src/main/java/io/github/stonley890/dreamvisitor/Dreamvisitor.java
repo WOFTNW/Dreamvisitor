@@ -175,7 +175,6 @@ public class Dreamvisitor extends JavaPlugin {
       commands.add(new CmdSethub());
       commands.add(new CmdSoftwhitelist());
       commands.add(new CmdTagRadio());
-      commands.add(new CmdTogglepvp());
       commands.add(new CmdZoop());
       commands.add(new CmdItemBanList());
       commands.add(new CmdUser());
@@ -238,6 +237,10 @@ public class Dreamvisitor extends JavaPlugin {
       // Init command scheduler
       debug("Initializing command scheduler");
       CommandScheduler.getInstance().loadConfig();
+
+      // Init bad words
+      debug("Initializing badwords.yml");
+      BadWords.init();
 
       // LuckPerms API
       RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
@@ -399,6 +402,7 @@ public class Dreamvisitor extends JavaPlugin {
         @Override
         public void run() {
           Moonglobe.tick();
+          Flight.tick();
         }
       };
 
@@ -522,7 +526,6 @@ public class Dreamvisitor extends JavaPlugin {
     pluginManager.registerEvents(new ListenTimeSkip(), this);
     pluginManager.registerEvents(new ListenSignChangeEvent(), this);
     pluginManager.registerEvents(new ListenPlayerToggleFlightEvent(), this);
-    pluginManager.registerEvents(new ListenPlayerMoveEvent(), this);
     pluginManager.registerEvents(new ListenEntityToggleGlideEvent(), this);
     pluginManager.registerEvents(new ListenPlayerChangedWorld(), this);
     pluginManager.registerEvents(new ListenPlayerRespawn(), this);

@@ -71,6 +71,7 @@ public class ListenPlayerChat implements Listener {
                         }
                     }
                 }
+                Dreamvisitor.getPlugin().getLogger().info("SocialSpy: " + player.getName() + " tried to say " + badWord + ", but it was blocked by Dreamvisitor.");
 
                 event.setCancelled(true);
                 return;

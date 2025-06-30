@@ -22,7 +22,7 @@ import java.util.UUID;
 public class PlayerTribe {
 
     private static final Dreamvisitor plugin = Dreamvisitor.getPlugin();
-    private static final File file = new File(plugin.getDataFolder(), "player-tribes.yml");
+    public static final File file = new File(plugin.getDataFolder(), "player-tribes.yml");
 
     /**
      * Initializes the player tribe storage.

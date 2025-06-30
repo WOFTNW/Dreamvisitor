@@ -16,8 +16,6 @@ import org.woftnw.dreamvisitor.functions.*;
 import org.woftnw.dreamvisitor.functions.worldguard.DragonFlightFlag;
 import org.woftnw.dreamvisitor.functions.worldguard.WitherFlag;
 import org.woftnw.dreamvisitor.listeners.*;
-import org.woftnw.dreamvisitor.pb.PocketBase;
-import org.woftnw.dreamvisitor.pb.PocketBaseUtils;
 import org.woftnw.dreamvisitor.util.ConfigKey;
 import net.luckperms.api.LuckPerms;
 import org.apache.logging.log4j.LogManager;
@@ -46,10 +44,8 @@ public class Dreamvisitor extends JavaPlugin {
     public static boolean chatPaused;
     public static int playerLimit;
     public static Location hubLocation;
-    public static boolean webWhitelistEnabled;
     public static boolean debugMode;
     private static ConsoleLogger appender;
-    public final String VERSION = getDescription().getVersion();
 
     public static StateFlag DRAGON_FLIGHT;
     public static StateFlag WITHER;
@@ -115,182 +111,188 @@ public class Dreamvisitor extends JavaPlugin {
     @Override
     public void onEnable() {
 
+        PLUGIN = this;
+
+        debugMode = Config.get(ConfigKey.DEBUG);
+
+        checkConfig();
+
+        Messager.debug("Initializing PocketBase config loader...");
+        Config.init();
+
+        Messager.debug("Registering listeners...");
+        registerListeners();
+
+        List<DVCommand> commands = new ArrayList<>();
+        commands.add(new CmdAdminRadio());
+        commands.add(new CmdDiscord());
+        commands.add(new CmdHub());
+        commands.add(new CmdPanic());
+        commands.add(new CmdPauseBypass());
+        commands.add(new CmdPausechat());
+        commands.add(new CmdPlayerlimit());
+        commands.add(new CmdRadio());
+        commands.add(new CmdSethub());
+        commands.add(new CmdSoftwhitelist());
+        commands.add(new CmdTagRadio());
+        commands.add(new CmdZoop());
+        commands.add(new CmdItemBanList());
+        commands.add(new CmdUser());
+        commands.add(new CmdTribeUpdate());
+        commands.add(new CmdUnwax());
+        commands.add(new CmdScheduleRestart());
+        commands.add(new CmdInvSwap());
+        commands.add(new CmdDvset());
+        commands.add(new CmdSetmotd());
+        commands.add(new CmdSynctime());
+        commands.add(new CmdSandbox());
+        commands.add(new CmdMoonglobe());
+        commands.add(new CmdSetback());
+        commands.add(new CmdParcel());
+        commands.add(new CmdDreamvisitor());
+        commands.add(new CmdChatback());
+        commands.add(new CmdVelocity());
+        commands.add(new CmdSchedule());
+
+        Messager.debug("Initializing commands...");
+        CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
+        CommandAPI.onEnable();
+        registerCommands(commands);
+
+        Messager.debug("Creating data folder...");
+        boolean directoryCreated = getDataFolder().mkdir();
+        if (!directoryCreated)
+            Messager.debug("Dreamvisitor did not create a data folder. It may already exist.");
+        saveDefaultConfig();
+
+        Messager.debug("Initializing mail.yml");
         try {
-            PLUGIN = this;
-
-            debugMode = Config.get(ConfigKey.DEBUG);
-
-            checkConfig();
-
-            Messager.debug("Initializing PocketBase config loader...");
-            Config.init();
-
-            Messager.debug("Registering listeners...");
-            registerListeners();
-
-            List<DVCommand> commands = new ArrayList<>();
-            commands.add(new CmdAdminRadio());
-            commands.add(new CmdDiscord());
-            commands.add(new CmdHub());
-            commands.add(new CmdPanic());
-            commands.add(new CmdPauseBypass());
-            commands.add(new CmdPausechat());
-            commands.add(new CmdPlayerlimit());
-            commands.add(new CmdRadio());
-            commands.add(new CmdSethub());
-            commands.add(new CmdSoftwhitelist());
-            commands.add(new CmdTagRadio());
-            commands.add(new CmdZoop());
-            commands.add(new CmdItemBanList());
-            commands.add(new CmdUser());
-            commands.add(new CmdTribeUpdate());
-            commands.add(new CmdUnwax());
-            commands.add(new CmdScheduleRestart());
-            commands.add(new CmdInvSwap());
-            commands.add(new CmdDvset());
-            commands.add(new CmdSetmotd());
-            commands.add(new CmdSynctime());
-            commands.add(new CmdSandbox());
-            commands.add(new CmdMoonglobe());
-            commands.add(new CmdSetback());
-            commands.add(new CmdParcel());
-            commands.add(new CmdDreamvisitor());
-            commands.add(new CmdChatback());
-            commands.add(new CmdVelocity());
-            commands.add(new CmdSchedule());
-
-            Messager.debug("Initializing commands...");
-            CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
-            CommandAPI.onEnable();
-            registerCommands(commands);
-
-            Messager.debug("Creating data folder...");
-            boolean directoryCreated = getDataFolder().mkdir();
-            if (!directoryCreated)
-                Messager.debug("Dreamvisitor did not create a data folder. It may already exist.");
-            saveDefaultConfig();
-
-            Messager.debug("Initializing mail.yml");
             Mail.init();
+        } catch (IOException e) {
+            getLogger().warning("Unable to mail locations from " + PlayerTribe.file + ": " + e.getMessage());
+        }
 
-            Messager.debug("Initializing player-tribes.yml");
+        Messager.debug("Initializing player-tribes.yml");
+        try {
             PlayerTribe.setup();
+        } catch (IOException e) {
+            getLogger().warning("Unable to load tribes from " + PlayerTribe.file + ": " + e.getMessage());
+        }
 
-            Messager.debug("Initializing energy");
-            Flight.init();
+        Messager.debug("Initializing energy");
+        Flight.init();
 
-            Messager.debug("Initializing command scheduler");
-            CommandScheduler.getInstance().loadConfig();
+        Messager.debug("Initializing command scheduler");
+        CommandScheduler.getInstance().loadConfig();
 
-            Messager.debug("Initializing badwords.yml");
+        Messager.debug("Initializing badwords.yml");
+        try {
             BadWords.init();
+        } catch (IOException e) {
+            getLogger().warning("Unable to load bad words from " + BadWords.file + ": " + e.getMessage());
+        }
 
-            RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
-            if (provider != null)
-                luckperms = provider.getProvider();
+        RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        if (provider != null)
+            luckperms = provider.getProvider();
 
-            SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
-            sessionManager.registerHandler(DragonFlightFlag.FACTORY, null);
-            sessionManager.registerHandler(WitherFlag.FACTORY, null);
+        SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
+        sessionManager.registerHandler(DragonFlightFlag.FACTORY, null);
+        sessionManager.registerHandler(WitherFlag.FACTORY, null);
 
-            getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for Wings of Fire: The New World to add various features.");
+        getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for Wings of Fire: The New World to add various features.");
 
-            Messager.debug("Restoring chat pause...");
-            if (Config.get(ConfigKey.PAUSE_CHAT)) {
-                chatPaused = true;
-                getLogger().info("Chat is currently paused from last session! Use /pausechat to allow users to chat.");
-            }
+        Messager.debug("Restoring chat pause...");
+        if (Config.get(ConfigKey.PAUSE_CHAT)) {
+            chatPaused = true;
+            getLogger().info("Chat is currently paused from last session! Use /pausechat to allow users to chat.");
+        }
 
-            Messager.debug("Restoring player limit override...");
-            playerLimit = Config.get(ConfigKey.PLAYER_LIMIT);
-            getLogger().info("Player limit override is currently set to " + playerLimit);
+        Messager.debug("Restoring player limit override...");
+        playerLimit = Config.get(ConfigKey.PLAYER_LIMIT);
+        getLogger().info("Player limit override is currently set to " + playerLimit);
 
-            Messager.debug("Restoring item banlist...");
+        Messager.debug("Restoring item banlist...");
+        try {
             ItemBanList.init();
+        } catch (IOException e) {
+            getLogger().warning("Unable to load banned items from " + ItemBanList.file + ": " + e.getMessage());
+        }
 
-            Messager.debug("Setting up console logging...");
-            appender = new ConsoleLogger();
-            logger.addAppender(appender);
+        Messager.debug("Setting up console logging...");
+        appender = new ConsoleLogger();
+        logger.addAppender(appender);
 
-            Runnable pushConsole = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (Config.get(ConfigKey.LOG_CONSOLE)) {
+        Runnable pushConsole = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (Config.get(ConfigKey.LOG_CONSOLE)) {
 
 
 
-                    }
                 }
-            };
+            }
+        };
 
-            Runnable scheduledRestarts = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Config.loadConfig();
+        Runnable scheduledRestarts = new BukkitRunnable() {
+            @Override
+            public void run() {
+                Config.loadConfig();
 
-                    if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().isEmpty()) {
-                        AutoRestart.sendAutoRestartMessage();
-                        getLogger().info("Restarting the server as scheduled.");
-                        getServer().spigot().restart();
-                    }
-
-                    long maxMemory = Runtime.getRuntime().maxMemory();
-                    long freeMemory = Runtime.getRuntime().freeMemory();
-                    double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
-                    if (freeMemoryPercent <= 10) {
-                        AutoRestart.enableAutoRestart(null);
-                        getLogger()
-                                .warning("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
-                    }
+                if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().isEmpty()) {
+                    AutoRestart.sendAutoRestartMessage();
+                    getLogger().info("Restarting the server as scheduled.");
+                    getServer().spigot().restart();
                 }
-            };
 
-            Runnable tick = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Moonglobe.tick();
+                long maxMemory = Runtime.getRuntime().maxMemory();
+                long freeMemory = Runtime.getRuntime().freeMemory();
+                double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
+                if (freeMemoryPercent <= 10) {
+                    AutoRestart.enableAutoRestart(null);
+                    getLogger()
+                            .warning("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
                 }
-            };
+            }
+        };
 
-            Runnable checkBannedItems = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (!player.isOp() && ItemBanList.badItems != null) {
+        Runnable tick = new BukkitRunnable() {
+            @Override
+            public void run() {
+                Moonglobe.tick();
+            }
+        };
 
-                            for (ItemStack item : ItemBanList.badItems) {
-                                if (item == null)
+        Runnable checkBannedItems = new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (!player.isOp() && ItemBanList.badItems != null) {
+
+                        for (ItemStack item : ItemBanList.badItems) {
+                            if (item == null)
+                                continue;
+                            for (ItemStack content : player.getInventory().getContents()) {
+                                if (content == null || !content.isSimilar(item))
                                     continue;
-                                for (ItemStack content : player.getInventory().getContents()) {
-                                    if (content == null || !content.isSimilar(item))
-                                        continue;
-                                    player.getInventory().remove(item);
-                                    getLogger().info("Removed " + item.getType().name() + " ("
-                                            + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
-                                }
+                                player.getInventory().remove(item);
+                                getLogger().info("Removed " + item.getType().name() + " ("
+                                        + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
                             }
                         }
                     }
                 }
-            };
+            }
+        };
 
-            Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
+        Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 
-            Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
+        Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
 
-            Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20 * 10);
+        Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20 * 10);
 
-            Messager.debug("Enable finished.");
-        } catch (Exception e) {
+        Messager.debug("Enable finished.");
 
-            getLogger()
-                    .severe("Dreamvisitor was unable to start :(\nPlease notify Bog with the following stack trace:");
-            e.printStackTrace();
-
-            Bukkit.getPluginManager().disablePlugin(this);
-            throw new RuntimeException();
-
-        }
     }
 
     private void checkConfig() {

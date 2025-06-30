@@ -11,7 +11,7 @@ import java.util.List;
 
 public class BadWords {
 
-    static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getPath() + "/badWords.yml");
+    public static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getPath() + "/badWords.yml");
 
     public static void init() throws IOException {
         // If the file does not exist, create one

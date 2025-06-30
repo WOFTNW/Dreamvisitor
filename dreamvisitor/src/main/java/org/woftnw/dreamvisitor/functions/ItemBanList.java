@@ -20,9 +20,9 @@ import java.util.Objects;
 
 public class ItemBanList implements Listener {
     public static final Inventory inv = Bukkit.createInventory(null, 27, "Banned Items");
-    public static List<ItemStack> badItems;
+    public static List<ItemStack> badItems = new ArrayList<>();
 
-    static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getPath() + "/bannedItems.yml");
+    public static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getPath() + "/bannedItems.yml");
     static FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
     public static void init() throws IOException {
@@ -41,7 +41,6 @@ public class ItemBanList implements Listener {
             badItems = (List<ItemStack>) config.getList("items", new ArrayList<>());
         } catch (Exception e) {
             Dreamvisitor.getPlugin().getLogger().warning("Unable to restore item ban list.");
-            badItems = new ArrayList<>();
         }
     }
 

@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import org.woftnw.dreamvisitor.data.PlayerUtility;
 import org.woftnw.dreamvisitor.data.type.DVUser;
 import org.woftnw.dreamvisitor.pb.PocketBase;
-import org.woftnw.dreamvisitor.util.UUIDFromater;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -187,7 +187,7 @@ public class PocketBaseUserRepository implements UserRepository {
 
         if (json.has("mc_uuid") && !json.get("mc_uuid").isJsonNull()) {
             try {
-                user.setMc_uuid(UUID.fromString(UUIDFromater.formatUuid(json.get("mc_uuid").getAsString())));
+                user.setMc_uuid(UUID.fromString(PlayerUtility.formatUuid(json.get("mc_uuid").getAsString())));
             } catch (IllegalArgumentException e) {
                 LOGGER.warning("Invalid UUID format: " + json.get("mc_uuid").getAsString());
             }

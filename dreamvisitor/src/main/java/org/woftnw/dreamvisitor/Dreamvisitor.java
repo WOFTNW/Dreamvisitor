@@ -16,6 +16,7 @@ import org.woftnw.dreamvisitor.functions.*;
 import org.woftnw.dreamvisitor.functions.worldguard.DragonFlightFlag;
 import org.woftnw.dreamvisitor.functions.worldguard.WitherFlag;
 import org.woftnw.dreamvisitor.listeners.*;
+import org.woftnw.dreamvisitor.pb.PocketBase;
 import org.woftnw.dreamvisitor.util.ConfigKey;
 import net.luckperms.api.LuckPerms;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.util.PBConfigLoader;
 
 import java.io.IOException;
 import java.util.*;
@@ -40,6 +42,7 @@ public class Dreamvisitor extends JavaPlugin {
             .getRootLogger();
     public static Dreamvisitor PLUGIN;
     public static LuckPerms luckperms;
+    public static PocketBase pocketBase;
     public static String MOTD = null;
     public static boolean chatPaused;
     public static int playerLimit;
@@ -72,8 +75,11 @@ public class Dreamvisitor extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        // Register WorldGuard flags
         try {
+            // Get registry
             FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
+            // Create and register dragon-flight flag
             try {
                 StateFlag flag = new StateFlag("dragon-flight", true);
                 registry.register(flag);
@@ -88,6 +94,7 @@ public class Dreamvisitor extends JavaPlugin {
                             .severe("A flag with the name dragon-flight already exists! Some other plugin claimed it already :(");
                 }
             }
+            // Create and register dragon-flight flag
             try {
                 StateFlag flag = new StateFlag("wither", true);
                 registry.register(flag);
@@ -102,9 +109,9 @@ public class Dreamvisitor extends JavaPlugin {
                 }
             }
         } catch (NoClassDefFoundError e) {
-            getLogger().info("WorldGuard is not installed, so no flags will be created.");
+            getLogger().warning("WorldGuard is not installed, so no flags will be created.");
         } catch (IllegalStateException e) {
-            getLogger().warning("New WorldGuard flags cannot be registered at this time. You may not have WorldGuard installed.");
+            getLogger().warning("New WorldGuard flags cannot be registered at this time: " + e.getMessage());
         }
     }
 
@@ -113,12 +120,16 @@ public class Dreamvisitor extends JavaPlugin {
 
         PLUGIN = this;
 
-        debugMode = Config.get(ConfigKey.DEBUG);
+        // Can't use debug messages until debug mode is enabled, so these first two are normal info messages.
 
+        getLogger().info("Checking local config file...");
         checkConfig();
 
-        Messager.debug("Initializing PocketBase config loader...");
+        getLogger().info("Initializing PocketBase config loader...");
         Config.init();
+        getLogger().info("Configuration fetched. Starting enable.");
+
+        debugMode = Config.get(ConfigKey.DEBUG);
 
         Messager.debug("Registering listeners...");
         registerListeners();
@@ -154,9 +165,12 @@ public class Dreamvisitor extends JavaPlugin {
         commands.add(new CmdVelocity());
         commands.add(new CmdSchedule());
 
-        Messager.debug("Initializing commands...");
+        // CommandAPI is shaded into Dreamvisitor, so it must be loaded and enabled.
+        Messager.debug("Loading the CommandAPI...");
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
+        Messager.debug("Enabling the CommandAPI...");
         CommandAPI.onEnable();
+        Messager.debug("Registering " + commands.size() + " commands...");
         registerCommands(commands);
 
         Messager.debug("Creating data folder...");
@@ -192,15 +206,15 @@ public class Dreamvisitor extends JavaPlugin {
             getLogger().warning("Unable to load bad words from " + BadWords.file + ": " + e.getMessage());
         }
 
+        Messager.debug("Initializing LuckPerms API...");
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null)
             luckperms = provider.getProvider();
 
+        Messager.debug("Registering WorldGuard flag handlers...");
         SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
         sessionManager.registerHandler(DragonFlightFlag.FACTORY, null);
         sessionManager.registerHandler(WitherFlag.FACTORY, null);
-
-        getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for Wings of Fire: The New World to add various features.");
 
         Messager.debug("Restoring chat pause...");
         if (Config.get(ConfigKey.PAUSE_CHAT)) {
@@ -222,6 +236,8 @@ public class Dreamvisitor extends JavaPlugin {
         Messager.debug("Setting up console logging...");
         appender = new ConsoleLogger();
         logger.addAppender(appender);
+
+        Messager.debug("Setting up schedules...");
 
         Runnable pushConsole = new BukkitRunnable() {
             @Override
@@ -291,18 +307,14 @@ public class Dreamvisitor extends JavaPlugin {
 
         Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20 * 10);
 
-        Messager.debug("Enable finished.");
+        getLogger().log(Level.INFO, "Dreamvisitor has been enabled.");
 
     }
 
+    /**
+     * Checks the config.yml file and sets default values if they do not exist.
+     */
     private void checkConfig() {
-//    if (getConfig().getLongList("triberoles").size() != 10)
-//      throw new InvalidConfigurationException("triberoles must contain exactly 10 entries.");
-//    if (getConfig().getInt("playerlimit") < -1)
-//      getConfig().set("playerlimit", -1);
-//    if (getConfig().getInt("infraction-expire-time-days") < 1)
-//      throw new InvalidConfigurationException("infraction-expire-time-days must be at least 1.");
-
         if (!getConfig().contains("pocketbaseUrl")) {
             getConfig().set("pocketbaseUrl", "http://127.0.0.1:8090/");
         }
@@ -319,6 +331,9 @@ public class Dreamvisitor extends JavaPlugin {
         saveConfig();
     }
 
+    /**
+     * Registers listeners so that they can receive events.
+     */
     private void registerListeners() {
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new ListenEntityDamage(), this);
@@ -342,6 +357,9 @@ public class Dreamvisitor extends JavaPlugin {
         pluginManager.registerEvents(new ListenCreatureSpawn(), this);
     }
 
+    /**
+     * Registers commands using CommandAPI.
+     */
     private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {
         for (DVCommand command : commands) {
             if (command.getCommand() instanceof CommandAPICommand apiCommand) {
@@ -355,14 +373,17 @@ public class Dreamvisitor extends JavaPlugin {
     @Override
     public void onDisable() {
 
+        // Disable CommandAPI
         CommandAPI.onDisable();
 
         // Shutdown the realtime updater
         RealtimeConfigUpdater.shutdown();
 
+        // Remove any active moon globes
         for (Moonglobe moonglobe : Moonglobe.activeMoonglobes)
             moonglobe.remove(null);
 
+        // Save all player memory
         for (Player player : Bukkit.getOnlinePlayers()) {
             try {
                 PlayerUtility.savePlayerMemory(player.getUniqueId());
@@ -374,10 +395,16 @@ public class Dreamvisitor extends JavaPlugin {
             }
         }
 
+        // Save and shutdown the Command Scheduler
         CommandScheduler.getInstance().saveConfig();
         CommandScheduler.getInstance().stopScheduler();
 
+        // Unattach the server logger
         logger.removeAppender(appender);
+
+        // TODO: Send shutdown signal to PocketBase.
+
+        getLogger().info("Dreamvisitor has been disabled.");
     }
 
 }

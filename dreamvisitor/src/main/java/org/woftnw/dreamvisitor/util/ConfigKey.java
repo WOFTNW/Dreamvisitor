@@ -2,6 +2,9 @@ package org.woftnw.dreamvisitor.util;
 
 import org.bukkit.Location;
 
+/**
+ * An enum that holds all the relevant configuration keys. Each key has a default value and a type.
+ */
 public enum ConfigKey {
 
     DEBUG("debug", true, Boolean.class), // This is intentionally set to true because these default should typically only be used when no database is connected.

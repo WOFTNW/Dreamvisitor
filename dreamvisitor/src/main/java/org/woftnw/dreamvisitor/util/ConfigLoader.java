@@ -1,6 +1,7 @@
 package org.woftnw.dreamvisitor.util;
 
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -17,7 +18,7 @@ import java.util.logging.Logger;
  * Utility class for loading YAML configuration files
  */
 public class ConfigLoader {
-    private static final Logger logger = Logger.getLogger("DreamvisitorHub");
+    private static final Logger logger = Dreamvisitor.getPlugin().getLogger();;
 
     private ConfigLoader() {
         throw new IllegalStateException("Utility class");

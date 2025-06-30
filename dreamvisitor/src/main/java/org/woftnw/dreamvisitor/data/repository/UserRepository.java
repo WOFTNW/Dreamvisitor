@@ -83,7 +83,7 @@ public interface UserRepository {
     /**
      * Get all users that match a given condition
      *
-     * @param predicate Condition to filter users
+     * @param filter Condition to filter users
      * @return List of users matching the condition
      */
     List<DVUser> getAllWhere(String filter);

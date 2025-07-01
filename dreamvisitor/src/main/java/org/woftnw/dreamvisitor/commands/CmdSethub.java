@@ -17,6 +17,8 @@ import org.bukkit.entity.Entity;
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
+
 public class CmdSethub implements DVCommand {
 
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
@@ -31,10 +33,10 @@ public class CmdSethub implements DVCommand {
                 .withOptionalArguments(new RotationArgument("rotation"))
                 .withOptionalArguments(new WorldArgument("world"))
                 .executesNative((sender, args) -> {
-                    Location location = (Location) args.get("location");
-                    Rotation rotation = (Rotation) args.get("rotation");
-                    World world = (World) args.get("world");
-                    CommandSender callee = sender.getCallee();
+                    @Nullable Location location = (Location) args.get("location");
+                    @Nullable Rotation rotation = (Rotation) args.get("rotation");
+                    @Nullable World world = (World) args.get("world");
+                    final CommandSender callee = sender.getCallee();
                     if (location == null) {
                         if (callee instanceof Entity entity) {
                             location = entity.getLocation();

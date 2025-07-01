@@ -30,7 +30,7 @@ public class CmdPlayerlimit implements DVCommand {
                     } else {
                         try {
                             // Change config
-                            int result = (int) newLimitArg;
+                            final int result = (int) newLimitArg;
                             // Dreamvisitor.getPlugin().getServer().setMaxPlayers(result);
 
                             for (Player player : Bukkit.getServer().getOnlinePlayers()) {

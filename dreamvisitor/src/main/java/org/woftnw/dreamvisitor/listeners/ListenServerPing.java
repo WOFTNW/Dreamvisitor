@@ -10,8 +10,10 @@ public class ListenServerPing implements Listener {
 
     @EventHandler
     public void onPing(@NotNull ServerListPingEvent event) {
+        // Show player limit override
         event.setMaxPlayers(Dreamvisitor.getPlugin().getServer().getMaxPlayers());
 
+        // Show custom MOTD
         if (Dreamvisitor.MOTD != null) event.setMotd(Dreamvisitor.MOTD);
     }
 

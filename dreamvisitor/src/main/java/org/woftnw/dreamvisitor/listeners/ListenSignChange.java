@@ -9,20 +9,24 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.Dreamvisitor;
 
-public class ListenSignChangeEvent implements Listener {
+public class ListenSignChange implements Listener {
 
     @EventHandler
     public void onSignChangeEvent(@NotNull SignChangeEvent event) {
         if (event.isCancelled()) return;
-        Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+
+        // Get essentials API
+        final Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
         if (ess == null) return;
-        Player editor = event.getPlayer();
+        final Player editor = event.getPlayer();
         if (editor.isOp()) return;
 
-        Block block = event.getBlock();
-        String[] lines = event.getLines();
+        final Block block = event.getBlock();
+        final String[] lines = event.getLines();
 
+        // If the sign is empty, ignore
         boolean empty = true;
         for (String line : lines) {
             if (!line.isBlank()) {
@@ -32,14 +36,18 @@ public class ListenSignChangeEvent implements Listener {
         }
         if (empty) return;
 
-        String message = ChatColor.GOLD + editor.getName() + " placed or edited a sign at " + block.getX() + ", " + block.getY() + ", " + block.getZ() + " in " + block.getWorld().getName() + ":\n" + ChatColor.RESET
+        // Create report message
+        final String message = ChatColor.GOLD + editor.getName() + " placed or edited a sign at " + block.getX() + ", " + block.getY() + ", " + block.getZ() + " in " + block.getWorld().getName() + ":\n" + ChatColor.RESET
                 + lines[0] + "\n" + lines[1] + "\n" + lines[2] + "\n" + lines[3] + "\n";
 
+        // Send to social spies
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (ess.getUser(player).isSocialSpyEnabled())
                 player.sendMessage(message);
         }
-        Bukkit.getLogger().info(ChatColor.stripColor(message));
+
+        // Send to log
+        Dreamvisitor.getPlugin().getLogger().info(ChatColor.stripColor(message));
     }
 
 }

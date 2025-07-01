@@ -3,6 +3,8 @@ package org.woftnw.dreamvisitor.functions;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.Dreamvisitor;
+import org.woftnw.dreamvisitor.data.type.ServerLog;
 
 public class ConsoleLogger extends AbstractAppender {
 
@@ -25,7 +27,10 @@ public class ConsoleLogger extends AbstractAppender {
 
         String message = builder.toString();
 
-        // TODO: Send message.
+        // Send message to PocketBase
+        ServerLog logItem = new ServerLog();
+        logItem.setLogMsg(message);
+        Dreamvisitor.getPlugin().getRepositoryManager().getServerLogsRepository().create(logItem);
 
     }
 

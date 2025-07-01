@@ -10,6 +10,7 @@ public class ListenPlayerChangedWorld implements Listener {
 
     @EventHandler
     public void onPlayerChangedWorld(@NotNull PlayerChangedWorldEvent event) {
+        // Setup flight when a player moves to a new world
         Flight.setupFlight(event.getPlayer());
     }
 

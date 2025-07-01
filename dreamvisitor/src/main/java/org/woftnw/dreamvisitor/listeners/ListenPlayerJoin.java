@@ -5,6 +5,8 @@ import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerTribe;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import org.woftnw.dreamvisitor.data.Tribe;
+import org.woftnw.dreamvisitor.data.type.DVUser;
+import org.woftnw.dreamvisitor.functions.Flight;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.woftnw.dreamvisitor.functions.Sandbox;
 import net.luckperms.api.model.user.User;
@@ -39,14 +41,14 @@ public class ListenPlayerJoin implements Listener {
                 tribeColor = ChatColor.WHITE;
             }
 
+            // Get the prefix from LuckPerms data
             String prefix = lpUser.getCachedData().getMetaData().getPrefix();
+            // Set the player list name with the prefix
             if (prefix != null) player.setPlayerListName(prefix.replace('&', '§') + tribeColor + player.getName());
         }
 
         // Enable flight
-        if (player.hasPermission("dreamvisitor.fly")) {
-            player.setAllowFlight(true);
-        }
+        Flight.setupFlight(player);
 
         // TODO: Send join messages
 //        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getName())) + " joined the game**";
@@ -57,9 +59,10 @@ public class ListenPlayerJoin implements Listener {
 //        }
 //        Bot.sendLog(chatMessage);
 
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+        DVUser user = PlayerUtility.getUser(player);
 
-        if (memory.sandbox) {
+        // If the player is in sandbox mode, handle accordingly
+        if (user.isInSandboxMode()) {
             boolean sandboxerOnline = false;
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {

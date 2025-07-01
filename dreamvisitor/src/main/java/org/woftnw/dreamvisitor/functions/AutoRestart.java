@@ -4,6 +4,7 @@ import org.woftnw.dreamvisitor.data.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.Nullable;
+import org.woftnw.dreamvisitor.util.ConfigKey;
 
 import java.awt.*;
 import java.time.Instant;
@@ -18,19 +19,19 @@ public class AutoRestart {
     autoRestartMessage = replyMessage;
     localAutoRestart = true;
     // Update the PocketBase config
-    Config.updateConfigField("autoRestart", true);
+    Config.set(ConfigKey.AUTO_RESTART, true);
   }
 
   public static void disableAutoRestart() {
     localAutoRestart = false;
     autoRestartMessage = null;
     // Update the PocketBase config
-    Config.updateConfigField("autoRestart", false);
+    Config.set(ConfigKey.AUTO_RESTART, false);
   }
 
   public static boolean isAutoRestart() {
     // Check PocketBase config first, fall back to local state if needed
-    return Config.getBoolean("autoRestart", localAutoRestart);
+    return Config.get(ConfigKey.AUTO_RESTART);
   }
 
   /**

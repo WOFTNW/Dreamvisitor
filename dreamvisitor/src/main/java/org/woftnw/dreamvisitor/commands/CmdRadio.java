@@ -22,9 +22,9 @@ public class CmdRadio implements DVCommand {
                 .withArguments(new GreedyStringArgument("message"))
                 .executesNative((sender, args) -> {
 
-                    String message = (String) args.get("message");
+                    final String message = (String) args.get("message");
 
-                    CommandSender callee = sender.getCallee();
+                    final CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
                         Radio.buildMessage(message, player.getName(), getCommand().getName(), null);
                     } else if (callee instanceof ConsoleCommandSender) {

@@ -1,5 +1,6 @@
 package org.woftnw.dreamvisitor.data;
 
+import org.jetbrains.annotations.NotNull;
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
@@ -115,17 +116,7 @@ public class RealtimeConfigUpdater {
 
     private static void setSubscription() {
         try {
-            URL url = new URL(baseUrl + "/api/realtime");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-
-            // Add authentication if token is provided
-            if (token != null && !token.isEmpty()) {
-                connection.setRequestProperty("Authorization", "Bearer " + token);
-            }
-
-            connection.setDoOutput(true);
+            HttpURLConnection connection = getRealtimeConnection();
 
             // Subscribe to collection/record
             JSONObject requestBody = new JSONObject();
@@ -158,6 +149,22 @@ public class RealtimeConfigUpdater {
         } catch (Exception e) {
             Messager.debug("Error setting subscription: " + e.getMessage());
         }
+    }
+
+    @NotNull
+    private static HttpURLConnection getRealtimeConnection() throws IOException {
+        URL url = new URL(baseUrl + "/api/realtime");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        // Add authentication if token is provided
+        if (token != null && !token.isEmpty()) {
+            connection.setRequestProperty("Authorization", "Bearer " + token);
+        }
+
+        connection.setDoOutput(true);
+        return connection;
     }
 
     private static void handleUpdateEvent(String data) {

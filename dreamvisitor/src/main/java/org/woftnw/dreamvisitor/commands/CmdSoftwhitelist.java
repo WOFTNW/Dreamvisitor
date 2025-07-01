@@ -27,9 +27,9 @@ public class CmdSoftwhitelist implements DVCommand {
                 .withSubcommand(new CommandAPICommand("add")
                         .withArguments(new OfflinePlayerArgument("player"))
                         .executesNative((sender, args) -> {
-                            OfflinePlayer player = (OfflinePlayer) args.get("player");
+                            final OfflinePlayer player = (OfflinePlayer) args.get("player");
                             if (player == null) throw CommandAPI.failWithString("That player could not be found!");
-                            List<UUID> players = SoftWhitelist.getPlayers();
+                            final List<UUID> players = SoftWhitelist.getPlayers();
                             if (players.contains(player.getUniqueId())) throw CommandAPI.failWithString("That player is already on the soft whitelist!");
                             players.add(player.getUniqueId());
                             SoftWhitelist.setPlayers(players);
@@ -39,9 +39,9 @@ public class CmdSoftwhitelist implements DVCommand {
                 .withSubcommand(new CommandAPICommand("remove")
                         .withArguments(new OfflinePlayerArgument("player"))
                         .executesNative((sender, args) -> {
-                            OfflinePlayer player = (OfflinePlayer) args.get("player");
+                            final OfflinePlayer player = (OfflinePlayer) args.get("player");
                             if (player == null) throw CommandAPI.failWithString("That player could not be found!");
-                            List<UUID> players = SoftWhitelist.getPlayers();
+                            final List<UUID> players = SoftWhitelist.getPlayers();
                             if (!players.contains(player.getUniqueId())) throw CommandAPI.failWithString("That player is not on soft whitelist!");
                             players.remove(player.getUniqueId());
                             SoftWhitelist.setPlayers(players);
@@ -50,8 +50,8 @@ public class CmdSoftwhitelist implements DVCommand {
                 )
                 .withSubcommand(new CommandAPICommand("list")
                         .executesNative((sender, args) -> {
-                            List<UUID> players = SoftWhitelist.getPlayers();
-                            StringBuilder list = new StringBuilder();
+                            final List<UUID> players = SoftWhitelist.getPlayers();
+                            final StringBuilder list = new StringBuilder();
 
                             for (UUID player : players) {
                                 if (!list.isEmpty()) {

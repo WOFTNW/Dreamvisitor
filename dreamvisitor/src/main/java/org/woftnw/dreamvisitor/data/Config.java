@@ -113,22 +113,41 @@ public class Config {
 
     @NotNull
     @Contract("_, _ -> new")
-    public static CompletableFuture<Void> updateConfigField(String field, boolean value) {
+    public static <T> CompletableFuture<Void> set(ConfigKey key, T value) {
         return CompletableFuture.runAsync(() -> {
             try {
                 if (pocketBaseClient == null) {
-                    Bukkit.getLogger().warning("PocketBase client not initialized, cannot update config");
+                    Dreamvisitor.getPlugin().getLogger().warning("PocketBase client not initialized, cannot update config");
                     return;
+                }
+
+                if (value != null && !key.getType().isInstance(value)) {
+                    throw new IllegalArgumentException("Value for config key '" + key.getKey() +
+                            "' is not of expected type: " + key.getType().getSimpleName());
                 }
 
                 // Create update data object
                 JsonObject updateData = new JsonObject();
-                updateData.addProperty(field, value);
+
+                // Handle manual conversion for supported types
+                if (value instanceof Boolean) {
+                    updateData.addProperty(key.getKey(), (Boolean) value);
+                } else if (value instanceof Number) {
+                    updateData.addProperty(key.getKey(), (Number) value);
+                } else if (value instanceof String) {
+                    updateData.addProperty(key.getKey(), (String) value);
+                } else {
+                    // More types can be added if needed
+                    throw new IllegalArgumentException("Unsupported config value type for key '" + key.getKey() + "'");
+                }
 
                 // Update the record
                 pocketBaseClient.updateRecord(COLLECTION_NAME, configId, updateData, null, null);
 
-                Messager.debug("Updated PocketBase configuration field " + field + " to " + value);
+                Messager.debug("Updated PocketBase configuration field " + key.getKey() + " to " + value);
+
+                // Update local storage
+                config.put(key.getKey(), value);
 
                 // If not using realtime updates, we need to reload config manually
                 if (!useRealtime) {

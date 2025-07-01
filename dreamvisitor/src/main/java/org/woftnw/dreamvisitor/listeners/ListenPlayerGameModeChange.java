@@ -1,7 +1,7 @@
 package org.woftnw.dreamvisitor.listeners;
 
-import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
+import org.woftnw.dreamvisitor.data.type.DVUser;
 import org.woftnw.dreamvisitor.functions.Flight;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -16,12 +16,14 @@ public class ListenPlayerGameModeChange implements Listener {
     @EventHandler
     public void onPlayerGameModeChangeEvent(@NotNull PlayerGameModeChangeEvent event) {
 
-        Player player = event.getPlayer();
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+        final Player player = event.getPlayer();
+        final DVUser user = PlayerUtility.getUser(player);
 
+        // Setup flight on game mode change
         Flight.setupFlight(player);
 
-        if (memory.autoinvswap && ((player.getGameMode().equals(GameMode.SURVIVAL) && event.getNewGameMode().equals(GameMode.CREATIVE)) || (player.getGameMode().equals(GameMode.CREATIVE) && event.getNewGameMode().equals(GameMode.SURVIVAL)))) Bukkit.dispatchCommand(player, "invswap");
+        // If auto inventory swap is on and player changes from survival to creative or vise versa, swap inventory
+        if (user.isAutoInvSwapEnabled() && ((player.getGameMode().equals(GameMode.SURVIVAL) && event.getNewGameMode().equals(GameMode.CREATIVE)) || (player.getGameMode().equals(GameMode.CREATIVE) && event.getNewGameMode().equals(GameMode.SURVIVAL)))) Bukkit.dispatchCommand(player, "invswap");
 
     }
 

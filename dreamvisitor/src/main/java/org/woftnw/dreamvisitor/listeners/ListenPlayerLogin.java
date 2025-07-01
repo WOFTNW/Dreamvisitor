@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerLoginEvent.Result;
 
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.util.ConfigKey;
 
 public class ListenPlayerLogin implements Listener {
 
@@ -31,11 +32,6 @@ public class ListenPlayerLogin implements Listener {
         if (player.hasPermission("dreamvisitor.nowhitelist")) {
 
             // Always allow ops
-
-            // Remind bot login failure to ops
-            if (Dreamvisitor.botFailed && player.isOp()) {
-                Messager.sendDanger(player,"Bot login failed on server start! You may need a new login token.");
-            }
             event.allow();
 
         } else if (event.getResult() == PlayerLoginEvent.Result.KICK_BANNED) {
@@ -57,7 +53,7 @@ public class ListenPlayerLogin implements Listener {
                 // Kick for server full
                 event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + Dreamvisitor.playerLimit);
 
-            } else if (Config.getBoolean("softwhitelist", false)) {
+            } else if (Config.get(ConfigKey.SOFT_WHITELIST)) {
                 
                 // Soft whitelist is enabled
                 allowIfSoftWhitelist(player, event);
@@ -72,7 +68,7 @@ public class ListenPlayerLogin implements Listener {
             // Player limit is not overridden
 
             // If soft whitelist is on
-            if (Config.getBoolean("softwhitelist", false)) {
+            if (Config.get(ConfigKey.SOFT_WHITELIST)) {
 
                 // Soft whitelist is enabled
                 Bukkit.getLogger().info("Soft whitelist is enabled");

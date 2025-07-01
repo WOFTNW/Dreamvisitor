@@ -1,73 +1,88 @@
 package org.woftnw.dreamvisitor.data.type;
 
+import org.bukkit.inventory.ItemStack;
+
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class DVUser {
-    private String id;
-    private String collectionId;
-    private String collectionName;
+    // Entry info
+    private String id = null;
+    private String collectionId = null;
+    private String collectionName = null;
 
-    private UUID mc_uuid;
-    private String mcUsername;
-    private String discord_username;
-    private String discord_id;
-    private String discord_img;
-    private Long snowflakeId;
+    // Identification
+    private UUID minecraftUuid = null;
+    private String minecraftUsername = null;
+    private String discordUsername = null;
+    private Long discordId = null;
+    private String discordAvatarUrl = null;
 
-    private List<String> infractions;
-    private List<String> users_home;
-    private List<String> inventory_items;
-    private List<String> claims;
-    private List<String> alts; // Added alts field
+    private List<String> infractions = new ArrayList<>(); // This is irrelevant and can be removed
+    private List<String> homes = new ArrayList<>();
+    private List<String> inventory_items = new ArrayList<>(); // This is irrelevant and can be removed
+    private List<String> claims = new ArrayList<>();
+    private List<String> alts = new ArrayList<>(); // This is irrelevant and can be removed
 
-    private Integer claim_limit;
-    private Integer play_time;
-    private Double balance;
-    private Integer daily_streak;
+    // In-game stats
+    private Integer claimLimit = 0;
+    private Integer playTime = 0;
+    // These are irrelevant and can be removed
+    private Double balance = 0d;
+    private Integer daily_streak = 0;
 
-    private OffsetDateTime last_work;
-    private OffsetDateTime last_daily;
-    private OffsetDateTime last_played;
+    // These are irrelevant and can be removed
+    private OffsetDateTime lastWork = null;
+    private OffsetDateTime lastDaily = null;
+    private OffsetDateTime lastPlayed = null;
 
-    private Boolean is_suspended;
-    private Boolean is_banned;
+    // Standing
+    private Boolean isSuspended = false;
+    private Boolean isBanned = false;
 
-    private OffsetDateTime created;
-    private OffsetDateTime updated;
+    // User options
+    private Boolean showDiscordMessages = true;
+    private Boolean flightDisabled = false;
+    private Boolean vanished = false;
+    private Boolean autoInvSwapEnabled = true;
+    private Boolean autoRadioEnabled = false;
+
+    // Sandbox Mode
+    private Boolean inSandboxMode = false;
+
+    // Inventory selection
+    private Boolean usingCreativeInv = false;
+    private ItemStack[] survivalInv = null;
+    private ItemStack[] creativeInv = null;
+
+    private OffsetDateTime created = null;
+    private OffsetDateTime updated = null;
 
     // Existing getters and setters
-    public UUID getMc_uuid() {
-        return mc_uuid;
+    public UUID getMinecraftUuid() {
+        return minecraftUuid;
     }
 
-    public Long getSnowflakeId() {
-        return snowflakeId;
+    public String getDiscordUsername() {
+        return discordUsername;
     }
 
-    public String getDiscord_username() {
-        return discord_username;
+    public String getMinecraftUsername() {
+        return minecraftUsername;
     }
 
-    public String getMcUsername() {
-        return mcUsername;
+    public void setDiscordUsername(String dcUsername) {
+        this.discordUsername = dcUsername;
     }
 
-    public void setDiscord_username(String dcUsername) {
-        this.discord_username = dcUsername;
+    public void setMinecraftUsername(String minecraftUsername) {
+        this.minecraftUsername = minecraftUsername;
     }
 
-    public void setMcUsername(String mcUsername) {
-        this.mcUsername = mcUsername;
-    }
-
-    public void setSnowflakeId(Long snowflakeId) {
-        this.snowflakeId = snowflakeId;
-    }
-
-    public void setMc_uuid(UUID uuid) {
-        this.mc_uuid = uuid;
+    public void setMinecraftUuid(UUID minecraftUuid) {
+        this.minecraftUuid = minecraftUuid;
     }
 
     // New getters and setters
@@ -95,20 +110,20 @@ public class DVUser {
         this.collectionName = collectionName;
     }
 
-    public String getDiscord_id() {
-        return discord_id;
+    public Long getDiscordId() {
+        return discordId;
     }
 
-    public void setDiscord_id(String discord_id) {
-        this.discord_id = discord_id;
+    public void setDiscordId(Long discordId) {
+        this.discordId = discordId;
     }
 
-    public String getDiscord_img() {
-        return discord_img;
+    public String getDiscordAvatarUrl() {
+        return discordAvatarUrl;
     }
 
-    public void setDiscord_img(String discord_img) {
-        this.discord_img = discord_img;
+    public void setDiscordAvatarUrl(String discordAvatarUrl) {
+        this.discordAvatarUrl = discordAvatarUrl;
     }
 
     public List<String> getInfractions() {
@@ -119,12 +134,12 @@ public class DVUser {
         this.infractions = infractions;
     }
 
-    public List<String> getUsers_home() {
-        return users_home;
+    public List<String> getHomes() {
+        return homes;
     }
 
-    public void setUsers_home(List<String> users_home) {
-        this.users_home = users_home;
+    public void setHomes(List<String> homes) {
+        this.homes = homes;
     }
 
     public List<String> getInventory_items() {
@@ -151,20 +166,20 @@ public class DVUser {
         this.alts = alts;
     }
 
-    public Integer getClaim_limit() {
-        return claim_limit;
+    public Integer getClaimLimit() {
+        return claimLimit;
     }
 
-    public void setClaim_limit(Integer claim_limit) {
-        this.claim_limit = claim_limit;
+    public void setClaimLimit(Integer claimLimit) {
+        this.claimLimit = claimLimit;
     }
 
-    public Integer getPlay_time() {
-        return play_time;
+    public Integer getPlayTime() {
+        return playTime;
     }
 
-    public void setPlay_time(Integer play_time) {
-        this.play_time = play_time;
+    public void setPlayTime(Integer playTime) {
+        this.playTime = playTime;
     }
 
     public Double getBalance() {
@@ -183,40 +198,40 @@ public class DVUser {
         this.daily_streak = daily_streak;
     }
 
-    public OffsetDateTime getLast_work() {
-        return last_work;
+    public OffsetDateTime getLastWork() {
+        return lastWork;
     }
 
-    public void setLast_work(OffsetDateTime last_work) {
-        this.last_work = last_work;
+    public void setLastWork(OffsetDateTime lastWork) {
+        this.lastWork = lastWork;
     }
 
-    public OffsetDateTime getLast_played() {
-        return last_played;
+    public OffsetDateTime getLastPlayed() {
+        return lastPlayed;
     }
 
-    public OffsetDateTime getLast_daily() {
-        return last_daily;
+    public OffsetDateTime getLastDaily() {
+        return lastDaily;
     }
 
-    public void setLast_daily(OffsetDateTime last_daily) {
-        this.last_daily = last_daily;
+    public void setLastDaily(OffsetDateTime lastDaily) {
+        this.lastDaily = lastDaily;
     }
 
-    public Boolean getIs_suspended() {
-        return is_suspended;
+    public Boolean getIsSuspended() {
+        return isSuspended;
     }
 
-    public void setIs_suspended(Boolean is_suspended) {
-        this.is_suspended = is_suspended;
+    public void setIsSuspended(Boolean isSuspended) {
+        this.isSuspended = isSuspended;
     }
 
-    public Boolean getIs_banned() {
-        return is_banned;
+    public Boolean getIsBanned() {
+        return isBanned;
     }
 
-    public void setIs_banned(Boolean is_banned) {
-        this.is_banned = is_banned;
+    public void setIsBanned(Boolean isBanned) {
+        this.isBanned = isBanned;
     }
 
     public OffsetDateTime getCreated() {
@@ -236,6 +251,78 @@ public class DVUser {
     }
 
     public void setLast_Played(OffsetDateTime last_played) {
-        this.last_played = last_played;
+        this.lastPlayed = last_played;
+    }
+
+    public Boolean isShowDiscordOn() {
+        return showDiscordMessages;
+    }
+
+    public void setShowDiscordMessages(Boolean showDiscordMessages) {
+        this.showDiscordMessages = showDiscordMessages;
+    }
+
+    public Boolean isFlightDisabled() {
+        return flightDisabled;
+    }
+
+    public void setFlightDisabled(Boolean flightDisabled) {
+        this.flightDisabled = flightDisabled;
+    }
+
+    public Boolean isVanished() {
+        return vanished;
+    }
+
+    public void setVanished(Boolean vanished) {
+        this.vanished = vanished;
+    }
+
+    public Boolean isAutoInvSwapEnabled() {
+        return autoInvSwapEnabled;
+    }
+
+    public void setAutoInvSwapEnabled(Boolean autoInvSwapEnabled) {
+        this.autoInvSwapEnabled = autoInvSwapEnabled;
+    }
+
+    public Boolean isAutoRadioEnabled() {
+        return autoRadioEnabled;
+    }
+
+    public void setAutoRadioEnabled(Boolean autoRadioEnabled) {
+        this.autoRadioEnabled = autoRadioEnabled;
+    }
+
+    public Boolean isInSandboxMode() {
+        return inSandboxMode;
+    }
+
+    public void setInSandboxMode(Boolean inSandboxMode) {
+        this.inSandboxMode = inSandboxMode;
+    }
+
+    public Boolean isUsingCreativeInv() {
+        return usingCreativeInv;
+    }
+
+    public void setUsingCreativeInv(Boolean usingCreativeInv) {
+        this.usingCreativeInv = usingCreativeInv;
+    }
+
+    public ItemStack[] getSurvivalInv() {
+        return survivalInv;
+    }
+
+    public void setSurvivalInv(ItemStack[] survivalInv) {
+        this.survivalInv = survivalInv;
+    }
+
+    public ItemStack[] getCreativeInv() {
+        return creativeInv;
+    }
+
+    public void setCreativeInv(ItemStack[] creativeInv) {
+        this.creativeInv = creativeInv;
     }
 }

@@ -1,6 +1,5 @@
 package org.woftnw.dreamvisitor.functions;
 
-import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -20,12 +19,13 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.data.type.DVUser;
 
 import java.util.Objects;
 
 public class Sandbox implements Listener {
 
-    private static final String[] disallowedCommands = {"tpaccept", "tpa", "hub", "etpa", "etpaccept", "home", "ehome"};
+    public static final String[] DISALLOWED_COMMANDS = {"tpaccept", "tpa", "hub", "etpa", "etpaccept", "home", "ehome"};
 
     /**
      * Enable sandbox mode for the given {@link Player}. If they are not already in sandbox mode, they will be put into creative mode and their inventory will be swapped.
@@ -33,11 +33,11 @@ public class Sandbox implements Listener {
      * @param player the player to enable sandbox mode for.
      */
     public static void enableSandbox(@NotNull Player player) {
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+        DVUser user = PlayerUtility.getUser(player);
 
-        if (memory.sandbox) return;
+        if (user.isInSandboxMode()) return;
 
-        memory.sandbox = true;
+        user.setInSandboxMode(true);
         InvSwap.swapInventories(player);
         player.setGameMode(GameMode.CREATIVE);
         player.setGlowing(true);
@@ -62,11 +62,11 @@ public class Sandbox implements Listener {
      * @param player the player to disable sandbox mode for.
      */
     public static void disableSandbox(@NotNull Player player) {
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+        DVUser user = PlayerUtility.getUser(player);
 
-        if (!memory.sandbox) return;
+        if (!user.isInSandboxMode()) return;
 
-        memory.sandbox = false;
+        user.setInSandboxMode(false);
         InvSwap.swapInventories(player);
         player.setGameMode(GameMode.SURVIVAL);
         player.setGlowing(false);
@@ -74,62 +74,5 @@ public class Sandbox implements Listener {
         player.sendMessage(ChatColor.BOLD + "You are no longer in sandbox mode.");
     }
 
-    @EventHandler
-    public void onPlayerDropItem(@NotNull PlayerDropItemEvent event) {
-        Player player = event.getPlayer();
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-        if (memory.sandbox) event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onPlayerInteract(@NotNull PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-        if (!memory.sandbox) return;
-        if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            assert event.getClickedBlock() != null;
-            if ((event.getClickedBlock().getState() instanceof Container && !player.isSneaking())
-                    || (event.getClickedBlock().getState() instanceof DecoratedPot)
-                    || (event.getClickedBlock().getState() instanceof EnderChest)
-                    || (event.getItem() != null && event.getItem().getItemMeta() instanceof SpawnEggMeta))
-                event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onPlayerInteractEntity (@NotNull PlayerInteractEntityEvent event) {
-        Player player = event.getPlayer();
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-        if (!memory.sandbox) return;
-        if (event.getRightClicked() instanceof ItemFrame) {
-            for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
-                if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    Messager.send(onlinePlayer, event.getPlayer().getName() + " interacted with an item frame with held item " + Objects.requireNonNull(player.getInventory().getItem(event.getHand())).getType());
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPlayerCommandPreprocess(@NotNull PlayerCommandPreprocessEvent event) {
-
-        Player player = event.getPlayer();
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-        if (memory.sandbox) {
-            for (String disallowedCommand : disallowedCommands) {
-                if (event.getMessage().contains(disallowedCommand)) event.setCancelled(true);
-            }
-        } else {
-            for (String disallowedCommand : disallowedCommands) {
-                if (event.getMessage().contains(disallowedCommand))
-                    for (Player onlinePlayer : Bukkit.getOnlinePlayers())
-                        if (PlayerUtility.getPlayerMemory(onlinePlayer.getUniqueId()).sandbox && event.getMessage().contains(onlinePlayer.getName())) {
-                            event.getPlayer().sendMessage(ChatColor.RED + "That player is currently in Sandbox Mode.");
-                            event.setCancelled(true);
-                        }
-
-            }
-        }
-    }
 
 }

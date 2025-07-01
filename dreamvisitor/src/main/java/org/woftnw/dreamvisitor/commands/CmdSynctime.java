@@ -4,6 +4,7 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.WorldArgument;
+import org.jetbrains.annotations.Nullable;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -22,17 +23,17 @@ public class CmdSynctime implements DVCommand {
                 .withHelp("Sync time across worlds.", "Sync time across all worlds.")
                 .withOptionalArguments(new WorldArgument("world"))
                 .executesNative((sender, args) -> {
-                    World worldArg = (World) args.get("world");
-                    CommandSender callee = sender.getCallee();
-                    if (worldArg == null) {
+                    @Nullable World targetWorld = (World) args.get("world");
+                    final CommandSender callee = sender.getCallee();
+                    if (targetWorld == null) {
                         if (callee instanceof Entity entity) {
-                            worldArg = entity.getWorld();
+                            targetWorld = entity.getWorld();
                         } else if (callee instanceof BlockCommandSender block) {
-                            worldArg = block.getBlock().getWorld();
+                            targetWorld = block.getBlock().getWorld();
                         } else throw CommandAPI.failWithString("World must be specified if it cannot be inferred!");
                     }
-                    for (World world : Bukkit.getWorlds()) world.setFullTime(worldArg.getFullTime());
-                    Messager.send(sender, "Set all worlds to match " + worldArg.getName() + ": " + worldArg.getFullTime());
+                    for (World world : Bukkit.getWorlds()) world.setFullTime(targetWorld.getFullTime());
+                    Messager.send(sender, "Set all worlds to match " + targetWorld.getName() + ": " + targetWorld.getFullTime());
                 });
     }
 }

@@ -51,7 +51,7 @@ public class CmdMoonglobe implements DVCommand {
                         .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
                         .executesNative((sender, args) -> {
 
-                            Collection<Player> targets = (Collection<Player>) args.get("players");
+                            final Collection<Player> targets = (Collection<Player>) args.get("players");
 
                             // Get players
                             assert targets != null;
@@ -75,12 +75,12 @@ public class CmdMoonglobe implements DVCommand {
                             // Get players
                             assert targets != null;
 
-                            Location location = getLocation(sender, args);
+                            final Location location = getLocation(sender, args);
 
                             // get distance
                             float maxDistance = 256.0f;
 
-                            Object maxDistanceArg = args.get("maxDistance");
+                            final Object maxDistanceArg = args.get("maxDistance");
                             if (maxDistanceArg != null) maxDistance = (float) maxDistanceArg;
 
                             Messager.send(sender, create(targets, location, maxDistance));
@@ -94,7 +94,7 @@ public class CmdMoonglobe implements DVCommand {
 
                             World world;
 
-                            CommandSender callee = sender.getCallee();
+                            final CommandSender callee = sender.getCallee();
                             if (callee instanceof Player player) world = player.getWorld();
                             else if (callee instanceof BlockCommandSender block) world = block.getBlock().getWorld();
                             else world = Bukkit.getWorlds().get(0);
@@ -121,7 +121,7 @@ public class CmdMoonglobe implements DVCommand {
                             // get distance
                             float maxDistance = 256.0f;
 
-                            Object maxDistanceArg = args.get("maxDistance");
+                            final Object maxDistanceArg = args.get("maxDistance");
                             if (maxDistanceArg != null) maxDistance = (float) maxDistanceArg;
 
                             Messager.send(sender, create(targets, location, maxDistance));

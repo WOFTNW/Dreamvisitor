@@ -2,6 +2,7 @@ package org.woftnw.dreamvisitor.listeners;
 
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.woftnw.dreamvisitor.data.PlayerMemory;
+import org.woftnw.dreamvisitor.data.type.DVUser;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.woftnw.dreamvisitor.functions.Sandbox;
 import org.bukkit.Bukkit;
@@ -28,9 +29,10 @@ public class ListenPlayerQuit implements Listener {
 //        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
 //        Bot.sendLog(chatMessage);
 
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
+        final DVUser user = PlayerUtility.getUser(player);
 
-        if (memory.sandbox) {
+        // Notify moderators if the quitting player is in Sandbox Mode
+        if (user.isInSandboxMode()) {
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
                     Messager.send(onlinePlayer, event.getPlayer().getName() + " left while in sandbox mode.");
@@ -38,15 +40,12 @@ public class ListenPlayerQuit implements Listener {
             }
         }
 
-        try {
-            PlayerUtility.savePlayerMemory(player.getUniqueId());
-            PlayerUtility.clearPlayerMemory(player.getUniqueId());
-        } catch (IOException e) {
-            Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access? Player memory will remain in memory. " + e.getMessage());
-        }
+        // Save and clear player memory
+        PlayerUtility.saveUser(user);
 
         Messager.debug("Checking sandbox.");
 
+        // This player might be the last sandbox moderator, so check that
         Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
 
             Messager.debug("Task start.");
@@ -65,7 +64,7 @@ public class ListenPlayerQuit implements Listener {
                 Messager.debug("No mods online! Gotta disable sandboxed.");
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     Messager.debug("Is " + onlinePlayer + " sandboxed?");
-                    if (PlayerUtility.getPlayerMemory(onlinePlayer.getUniqueId()).sandbox) {
+                    if (PlayerUtility.getUser(onlinePlayer).isInSandboxMode()) {
                         Messager.debug("Yes. Disabling.");
                         Sandbox.disableSandbox(onlinePlayer);
                         onlinePlayer.sendMessage("You are no longer in Sandbox Mode because there are no sandbox managers available.");

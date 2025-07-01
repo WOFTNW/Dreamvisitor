@@ -7,6 +7,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.*;
 import dev.jorel.commandapi.wrappers.Rotation;
+import org.jetbrains.annotations.Nullable;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -34,19 +35,19 @@ public class CmdSetback implements DVCommand {
                 .withOptionalArguments(new WorldArgument("world"))
                 .executesNative((sender, args) -> {
 
-                    Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                    final Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
                     if (ess == null) {
                         throw CommandAPI.failWithString("EssentialsX is not currently active!");
                     }
 
-                    Collection<Player> players = (Collection<Player>) args.get("players");
-                    Location location = (Location) args.get("location");
-                    Rotation rotation = (Rotation) args.get("rotation");
-                    World world = (World) args.get("world");
+                    final Collection<Player> players = (Collection<Player>) args.get("players");
+                    @Nullable Location location = (Location) args.get("location");
+                    @Nullable Rotation rotation = (Rotation) args.get("rotation");
+                    @Nullable World world = (World) args.get("world");
 
                     assert players != null;
 
-                    CommandSender callee = sender.getCallee();
+                    final CommandSender callee = sender.getCallee();
                     if (location == null) {
                         if (callee instanceof Entity entity) {
                             location = entity.getLocation();

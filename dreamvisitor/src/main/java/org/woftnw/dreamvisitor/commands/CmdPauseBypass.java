@@ -25,8 +25,8 @@ public class CmdPauseBypass implements DVCommand {
                 .withSubcommand(new CommandAPICommand("add")
                         .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
                         .executesNative((sender, args) -> {
-                            Collection<Player> players = (Collection<Player>) args.get("players");
-                            List<UUID> playersList = PauseBypass.getPlayers();
+                            final Collection<Player> players = (Collection<Player>) args.get("players");
+                            final List<UUID> playersList = PauseBypass.getPlayers();
                             assert players != null;
                             playersList.addAll(players.stream().map(Player::getUniqueId).toList());
                             PauseBypass.setPlayers(playersList);
@@ -36,10 +36,10 @@ public class CmdPauseBypass implements DVCommand {
                 .withSubcommand(new CommandAPICommand("remove")
                         .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
                         .executesNative((sender, args) -> {
-                            Collection<Player> players = (Collection<Player>) args.get("players");
-                            List<UUID> playersList = PauseBypass.getPlayers();
+                            final Collection<Player> players = (Collection<Player>) args.get("players");
+                            final List<UUID> playersList = PauseBypass.getPlayers();
                             assert players != null;
-                            boolean removed = playersList.removeAll(players.stream().map(Player::getUniqueId).toList());
+                            final boolean removed = playersList.removeAll(players.stream().map(Player::getUniqueId).toList());
                             PauseBypass.setPlayers(playersList);
                             if (removed) Messager.send(sender, "Removed " + Messager.nameOrCountPlayer(players) + " from the bypass list.");
                             else throw CommandAPI.failWithString("No players were removed.");
@@ -48,7 +48,7 @@ public class CmdPauseBypass implements DVCommand {
                 .withSubcommand(new CommandAPICommand("list")
                         .executesNative((sender, args) -> {
                             // Build list
-                            StringBuilder list = new StringBuilder();
+                            final StringBuilder list = new StringBuilder();
 
                             for (UUID player : PauseBypass.getPlayers()) {
                                 if (!list.isEmpty()) list.append(", ");

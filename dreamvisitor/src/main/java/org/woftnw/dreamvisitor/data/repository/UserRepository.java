@@ -10,7 +10,7 @@ import org.woftnw.dreamvisitor.data.type.DVUser;
 /**
  * Repository interface for User data operations
  */
-public interface UserRepository {
+public interface UserRepository extends Repository {
     /**
      * Find a user by their PocketBase ID
      *
@@ -33,15 +33,7 @@ public interface UserRepository {
      * @param discordId Discord ID
      * @return Optional containing the user if found
      */
-    Optional<DVUser> findByDiscordId(String discordId);
-
-    /**
-     * Find a user by their Discord Snowflake ID
-     *
-     * @param snowflakeId Discord Snowflake ID
-     * @return Optional containing the user if found
-     */
-    Optional<DVUser> findBySnowflakeId(Long snowflakeId);
+    Optional<DVUser> findByDiscordId(long discordId);
 
     /**
      * Find a user by their Minecraft username

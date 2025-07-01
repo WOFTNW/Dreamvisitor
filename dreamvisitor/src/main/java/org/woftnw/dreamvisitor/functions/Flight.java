@@ -1,6 +1,9 @@
 package org.woftnw.dreamvisitor.functions;
 
+import org.bukkit.Input;
+import org.bukkit.util.Vector;
 import org.woftnw.dreamvisitor.Dreamvisitor;
+import org.woftnw.dreamvisitor.data.Config;
 import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
@@ -11,26 +14,30 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.data.type.DVUser;
+import org.woftnw.dreamvisitor.util.ConfigKey;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Flight {
-    public static double energyCapacity = Dreamvisitor.getPlugin().getConfig().getInt("flightEnergyCapacity");
-    public static double reactivationPoint = Dreamvisitor.getPlugin().getConfig().getInt("flightRegenerationPoint");
+    public static double energyCapacity = Config.get(ConfigKey.FLIGHT_ENERGY_CAPACITY);
+    public static double reactivationPoint = Config.get(ConfigKey.FLIGHT_REGENERATION_POINT);
     public static final Map<Player, Double> energy = new HashMap<>();
     private static final Map<Player, Boolean> energyDepletion = new HashMap<>();
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
+    private static final Map<Player, Vector> lastPosition = new HashMap<>();
 
     public static void init() {
         Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
 
             for (Player player : Bukkit.getOnlinePlayers()) {
 
-                PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+                DVUser user = PlayerUtility.getUser(player);
 
                 // If player does not have the dreamvisitor.fly permission, disable flight if not in creative
-                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && !inFlightGameMode(player)) || (memory.flightDisabled && !inFlightGameMode(player))) {
+                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && !inFlightGameMode(player)) || (user.isFlightDisabled() && !inFlightGameMode(player))) {
                     player.setAllowFlight(false);
                 } else setupFlight(player);
 
@@ -130,7 +137,7 @@ public class Flight {
     public static void setupFlight(@NotNull Player player) {
         // Re-enable flight if it gets disabled by game mode change
         // Dreamvisitor.debug("FlightNotAllowed: " + !player.getAllowFlight() + " Permission: " + player.hasPermission("dreamvisitor.fly") + " NotRestricted: " + !isFlightRestricted(player) + " NotDepleted: " + !isPlayerDepleted(player) + " NotDisabled: " + !PlayerUtility.getPlayerMemory(player.getUniqueId()).flightDisabled);
-        if (!player.getAllowFlight() && player.hasPermission("dreamvisitor.fly") && !isFlightRestricted(player) && !isPlayerDepleted(player) && !PlayerUtility.getPlayerMemory(player.getUniqueId()).flightDisabled) {
+        if (!player.getAllowFlight() && player.hasPermission("dreamvisitor.fly") && !isFlightRestricted(player) && !isPlayerDepleted(player) && !PlayerUtility.getUser(player).isFlightDisabled()) {
             Messager.debug("All requirements met for flight.");
             Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> player.setAllowFlight(true), 1);
         }
@@ -138,10 +145,59 @@ public class Flight {
 
     /**
      * Whether a player is in a flight-enabled game mode like Creative or Spectator.
-     * @param player
-     * @return
      */
     public static boolean inFlightGameMode(@NotNull Player player) {
         return (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR);
+    }
+
+    public static void tick() {
+
+        for (final Player player : Bukkit.getOnlinePlayers()) {
+            final Input input = player.getCurrentInput();
+
+            if (player.isFlying() && !inFlightGameMode(player)) {
+                // Remove energy if flying
+                try {
+                    Double energy = Flight.energy.get(player);
+                    Vector lastLoc = lastPosition.get(player);
+                    Vector currentLoc = player.getLocation().toVector();
+
+                    // Check planar movement
+                    double movement2d = 0;
+                    // If pressing movement key, remove 1
+                    if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) movement2d = 1;
+                    // If sprinting, multiply that by 2
+                    if (player.isSprinting()) movement2d *= 2;
+                    // If not actually moving, don't remove energy
+                    if (lastLoc != null && Objects.equals(currentLoc.getX(), lastLoc.getX()) && Objects.equals(currentLoc.getZ(), lastLoc.getZ())) movement2d = 0;
+
+                    // Check vertical movement
+                    double movementY = 0;
+                    // If pressing jump, remove 1
+                    if (input.isJump()) movementY = 1;
+                    // If not actually moving up, don't remove energy
+                    if (lastLoc != null && Objects.equals(currentLoc.getY(), lastLoc.getY())) movementY = 0;
+
+                    // Get multiplication factors from config
+                    final double flightEnergyDepletionXYMultiplier = Config.get(ConfigKey.FLIGHT_ENERGY_DEPLETION_X_Z_MULTIPLIER);
+                    final double flightEnergyDepletionYMultiplier = Config.get(ConfigKey.FLIGHT_ENERGY_DEPLETION_Y_MULTIPLIER);
+                    // Calculate the total energy to remove
+                    final double energyToRemove = movement2d * flightEnergyDepletionXYMultiplier + movementY * flightEnergyDepletionYMultiplier;
+
+                    // Calculate what the player's energy should be
+                    energy -= energyToRemove;
+
+                    // Ensure energy is not below zero
+                    if (energy < 0) energy = 0.0;
+                    // Save new energy state to player
+                    Flight.energy.put(player, energy);
+                    Flight.lastPosition.put(player, currentLoc);
+                } catch (NullPointerException e) {
+                    // If the energy for the player doesn't exist for some reason, set it to full
+                    energy.put(player, energyCapacity);
+                }
+            }
+        }
+
     }
 }

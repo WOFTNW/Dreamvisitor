@@ -16,13 +16,13 @@ public class CmdSetmotd implements DVCommand {
                 .withHelp("Set or reset the MOTD.", "Set or reset the server MOTD.")
                 .withOptionalArguments(new GreedyStringArgument("newMotd"))
                 .executesNative((sender, args) -> {
-                    String newMotd = (String) args.get("newMotd");
+                    final String newMotd = (String) args.get("newMotd");
                     if (newMotd == null) {
                         Dreamvisitor.MOTD = null;
                         Messager.send(sender, "Reset MOTD to default:\n" + sender.getServer().getMotd());
                         Messager.debug("Existing MOTD: " + sender.getServer().getMotd());
                     } else {
-                        String finalMotd = newMotd.replaceAll("&", "§").replaceAll("\\\\n","\n").strip();
+                        final String finalMotd = newMotd.replaceAll("&", "§").replaceAll("\\\\n","\n").strip();
 
                         Dreamvisitor.MOTD = finalMotd;
                         Messager.send(sender, "MOTD set to\n" + finalMotd);

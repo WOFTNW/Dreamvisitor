@@ -22,11 +22,11 @@ public class CmdAdminRadio implements DVCommand {
                 .withHelp("Use the admin radio.", "Sends a message to all operators.")
                 .withArguments(new GreedyStringArgument("message"))
                 .executesNative(((sender, args) -> {
-                    String message = (String) args.get("message");
+                    final String message = (String) args.get("message");
 
                     Messager.debug(sender.getClass().getName());
 
-                    CommandSender callee = sender.getCallee();
+                    final CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
                         Radio.buildMessage(message, player.getName(), getCommand().getName(), null);
                     } else if (callee instanceof ConsoleCommandSender) {

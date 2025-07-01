@@ -24,6 +24,7 @@ public class ListenCreatureSpawn implements Listener {
 
     @EventHandler
     public void onCreatureSpawn(@NotNull CreatureSpawnEvent event) {
+        // Stop Withers if in region with wither flag denied
         if (event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BUILD_WITHER) {
             org.bukkit.Location bukkitLocation = event.getLocation();
             Location location = BukkitAdapter.adapt(bukkitLocation);

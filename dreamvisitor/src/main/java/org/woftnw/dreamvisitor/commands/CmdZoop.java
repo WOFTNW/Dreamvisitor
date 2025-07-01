@@ -5,6 +5,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
+import org.woftnw.dreamvisitor.data.type.DVUser;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,28 +22,28 @@ public class CmdZoop implements DVCommand {
                 .executesNative((sender, args) -> {
                     CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
-                        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+                        final DVUser user = PlayerUtility.getUser(player);
 
                         // Change data
-                        if (memory.vanished) {
+                        if (user.isVanished()) {
 
-                            memory.vanished = false;
+                            user.setVanished(false);
                             String chatMessage = "**" + callee.getName() + " joined the game**";
                             // TODO: Send a join message to Discord.
 //                            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
 //                            Bot.sendLog(chatMessage);
 
                         } else {
-                            memory.vanished = true;
+                            user.setVanished(true);
                             String chatMessage = "**" + callee.getName() + " left the game**";
                             // TODO: Send a leave message to Discord.
 //                            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
 //                            Bot.sendLog(chatMessage);
                         }
 
-                        PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
+                        PlayerUtility.saveUser(user);
 
-                        Messager.send(sender, "Discord vanish toggled to " + memory.vanished + ".");
+                        Messager.send(sender, "Discord vanish toggled to " + user.isVanished() + ".");
                     } else throw CommandAPI.failWithString("This command must be executed as a player!");
 
                 });

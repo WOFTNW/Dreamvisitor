@@ -4,8 +4,8 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.BooleanArgument;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
+import org.woftnw.dreamvisitor.data.type.DVUser;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.woftnw.dreamvisitor.functions.Sandbox;
 import net.md_5.bungee.api.ChatColor;
@@ -36,23 +36,23 @@ public class CmdSandbox implements DVCommand {
                 .executesNative((sender, args) -> {
                     Collection<Player> players = (Collection<Player>) args.get("players");
                     if (players == null) {
-                        List<Player> sandboxedPlayers = new ArrayList<>();
+                        final List<Player> sandboxedPlayers = new ArrayList<>();
 
                         for (Player player : Bukkit.getOnlinePlayers()) {
-                            PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-                            if (memory.sandbox) sandboxedPlayers.add(player);
+                            final DVUser user = PlayerUtility.getUser(player);
+                            if (user.isInSandboxMode()) sandboxedPlayers.add(player);
                         }
 
                         if (sandboxedPlayers.isEmpty()) {
                             Messager.send(sender, "No players currently online are in sandbox mode. Use /sandbox <player> [true|false] to toggle sandbox mode.");
                         }
 
-                        ComponentBuilder messageBuilder = new ComponentBuilder("Players currently sandboxed:\n");
+                        final ComponentBuilder messageBuilder = new ComponentBuilder("Players currently sandboxed:\n");
 
-                        HoverEvent tooltip = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to remove."));
+                        final HoverEvent tooltip = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to remove."));
 
                         for (Player player : sandboxedPlayers) {
-                            Location location = player.getLocation();
+                            final Location location = player.getLocation();
                             messageBuilder.append(player.getName()).color(ChatColor.YELLOW)
                                     .append(" [").color(ChatColor.WHITE)
                                     .append("Remove").color(ChatColor.RED)
@@ -64,10 +64,10 @@ public class CmdSandbox implements DVCommand {
 
                         Messager.send(sender, messageBuilder.create());
                     } else {
-                        Object stateArg = args.get("state");
+                        final Object stateArg = args.get("state");
                         if (stateArg == null) {
                             players.forEach(player -> {
-                                if (PlayerUtility.getPlayerMemory(player.getUniqueId()).sandbox) Sandbox.disableSandbox(player);
+                                if (PlayerUtility.getUser(player).isInSandboxMode()) Sandbox.disableSandbox(player);
                                 else Sandbox.enableSandbox(player);
                             });
                             Messager.send(sender, "Toggled sandbox mode for " + Messager.nameOrCountPlayer(players) + ".");

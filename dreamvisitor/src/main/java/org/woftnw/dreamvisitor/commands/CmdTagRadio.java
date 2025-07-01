@@ -21,12 +21,12 @@ public class CmdTagRadio implements DVCommand {
                 .withArguments(new StringArgument("tag"))
                 .withArguments(new GreedyStringArgument("message"))
                 .executesNative((sender, args) -> {
-                    String tag = (String) args.get("tag");
+                    final String tag = (String) args.get("tag");
                     if (tag == null) throw CommandAPI.failWithString("You must specify a tag!");
-                    String message = (String) args.get("message");
+                    final String message = (String) args.get("message");
                     if (message == null) throw CommandAPI.failWithString("You cannot send an empty message!");
 
-                    CommandSender callee = sender.getCallee();
+                    final CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
                         Radio.buildMessage(message, player.getName(), getCommand().getName(), tag);
                     } else if (callee instanceof ConsoleCommandSender) {

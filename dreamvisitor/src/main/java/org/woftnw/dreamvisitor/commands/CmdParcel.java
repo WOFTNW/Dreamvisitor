@@ -39,15 +39,15 @@ public class CmdParcel implements DVCommand {
                                 .withArguments(CommandUtils.customTribeArgument("homeTribe"))
                                 .executesNative(((sender, args) -> {
 
-                                    Location location = (Location) args.get("location");
+                                    final Location location = (Location) args.get("location");
                                     if (location == null) throw CommandAPI.failWithString("Location was not provided!");
 
-                                    String name = (String) args.get("name");
+                                    final String name = (String) args.get("name");
                                     if (name == null) throw CommandAPI.failWithString("Name was not provided!");
-                                    Object weightArg = args.get("weight");
+                                    final Object weightArg = args.get("weight");
                                     if (weightArg == null) throw CommandAPI.failWithString("Weight was not provided!");
                                     int weight = (int) weightArg;
-                                    Tribe tribe = (Tribe) args.get("homeTribe");
+                                    final Tribe tribe = (Tribe) args.get("homeTribe");
                                     if (tribe == null) throw CommandAPI.failWithString("Tribe was not provided!");
 
                                     Mail.MailLocation mailLocation = new Mail.MailLocation(location, name, weight, tribe);
@@ -64,10 +64,10 @@ public class CmdParcel implements DVCommand {
                                 )
                                 .executesNative((sender, args) -> {
 
-                                    String name = (String) args.get("name");
+                                    final String name = (String) args.get("name");
                                     if (name == null) throw CommandAPI.failWithString("Name is null!");
 
-                                    Mail.MailLocation location = Mail.getLocationByName(name);
+                                    final Mail.MailLocation location = Mail.getLocationByName(name);
                                     if (location == null) throw CommandAPI.failWithString("Mail location not found.");
                                     Mail.removeLocation(location);
                                     Messager.send(sender, "Removed location " + location.getName());
@@ -77,7 +77,7 @@ public class CmdParcel implements DVCommand {
                                 .executesNative((sender, args) -> {
                                     List<Mail.MailLocation> locations = Mail.getLocations();
 
-                                    ComponentBuilder message = new ComponentBuilder("Mail Locations");
+                                    final ComponentBuilder message = new ComponentBuilder("Mail Locations");
 
                                     for (Mail.MailLocation mailLocation : locations) {
                                         message.append("\n").append(mailLocation.getName()).color(net.md_5.bungee.api.ChatColor.YELLOW)
@@ -97,16 +97,16 @@ public class CmdParcel implements DVCommand {
                         .withSubcommand(new CommandAPICommand("terminal")
                                 .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
                                 .executesNative((sender, args) -> {
-                                    Collection<Player> players = (Collection<Player>) args.get("players");
+                                    final Collection<Player> players = (Collection<Player>) args.get("players");
                                     assert players != null;
 
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected");
 
-                                    List<Mail.Deliverer> deliverers = Mail.getDeliverers();
-                                    List<Player> playerList = deliverers.stream().map(Mail.Deliverer::getPlayer).toList();
+                                    final List<Mail.Deliverer> deliverers = Mail.getDeliverers();
+                                    final List<Player> playerList = deliverers.stream().map(Mail.Deliverer::getPlayer).toList();
 
-                                    List<Player> addPlayers = new ArrayList<>();
-                                    List<Player> removePlayers = new ArrayList<>();
+                                    final List<Player> addPlayers = new ArrayList<>();
+                                    final List<Player> removePlayers = new ArrayList<>();
 
                                     for (Player player : players) {
                                         if (playerList.contains(player)) removePlayers.add(player);
@@ -118,7 +118,7 @@ public class CmdParcel implements DVCommand {
 
                                     for (Player player : addPlayers) {
 
-                                        Mail.MailLocation endLoc;
+                                        final Mail.MailLocation endLoc;
 
                                         try {
                                             endLoc = Mail.chooseDeliveryLocation(startLoc);
@@ -133,7 +133,7 @@ public class CmdParcel implements DVCommand {
                                         try {
                                             Mail.complete(player);
                                         } catch (Exception e) {
-                                            String message = e.getMessage();
+                                            final String message = e.getMessage();
                                             switch (message) {
                                                 case "Player does not have parcel!" ->
                                                         Messager.sendDanger(player, ChatColor.RED + "You do not have the parcel that is to be delivered!");
@@ -166,15 +166,15 @@ public class CmdParcel implements DVCommand {
                                 )
                                 .executesNative((sender, args) -> {
 
-                                    String startArg = (String) args.get("start");
-                                    Mail.MailLocation start = Mail.getLocationByName(startArg);
+                                    final String startArg = (String) args.get("start");
+                                    final Mail.MailLocation start = Mail.getLocationByName(startArg);
                                     if (start == null) throw CommandAPI.failWithString(startArg + " is not a valid MailLocation!");
 
-                                    String endArg = (String) args.get("end");
-                                    Mail.MailLocation end = Mail.getLocationByName(endArg);
+                                    final String endArg = (String) args.get("end");
+                                    final Mail.MailLocation end = Mail.getLocationByName(endArg);
                                     if (end == null) throw CommandAPI.failWithString(endArg + " is not a valid MailLocation!");
 
-                                    Collection<Player> players = (Collection<Player>) args.get("players");
+                                    final Collection<Player> players = (Collection<Player>) args.get("players");
                                     assert players != null;
 
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected");
@@ -200,7 +200,7 @@ public class CmdParcel implements DVCommand {
 
                         .withSubcommand(new CommandAPICommand("list")
                                 .executesNative((sender, args) -> {
-                                    StringBuilder message = new StringBuilder();
+                                    final StringBuilder message = new StringBuilder();
                                     for (Mail.Deliverer deliverer : Mail.getDeliverers()) {
                                         message.append(deliverer.getPlayer().getName()).append(" ");
                                     }
@@ -218,7 +218,7 @@ public class CmdParcel implements DVCommand {
 
         for (Player player : players) {
             Messager.debug("Adding player " + player.getName());
-            Mail.Deliverer deliverer = new Mail.Deliverer(player, start, end);
+            final Mail.Deliverer deliverer = new Mail.Deliverer(player, start, end);
             deliverer.start();
             deliverers.add(deliverer);
             Messager.send(player, "Deliver this parcel to " + ChatColor.YELLOW + end.getName().replace("_", " ") + ChatColor.WHITE + ".\nRun " + ChatColor.AQUA + "/" + getCommand().getName() + " cancel" + ChatColor.WHITE + " to cancel.");
@@ -229,7 +229,7 @@ public class CmdParcel implements DVCommand {
     }
 
     private void remove(@NotNull Collection<Player> players) {
-        List<Mail.Deliverer> deliverers = Mail.getDeliverers();
+        final List<Mail.Deliverer> deliverers = Mail.getDeliverers();
         deliverers.removeIf(deliverer -> players.contains(deliverer.getPlayer()));
         Mail.setDeliverers(deliverers);
     }

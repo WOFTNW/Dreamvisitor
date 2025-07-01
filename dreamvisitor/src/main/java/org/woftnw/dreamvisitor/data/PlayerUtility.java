@@ -1,82 +1,71 @@
 package org.woftnw.dreamvisitor.data;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import com.earth2me.essentials.Essentials;
+import org.bukkit.entity.Player;
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.shanerx.mojang.Mojang;
+import org.woftnw.dreamvisitor.data.repository.UserRepository;
+import org.woftnw.dreamvisitor.data.type.DVUser;
 
 public class PlayerUtility {
-    private static final Map<String, PlayerMemory> MEMORY_MAP = new HashMap<>();
+    private static final List<DVUser> USER_MEMORY = new ArrayList<>();
+
+    private static final UserRepository userRepository = Dreamvisitor.getPlugin().getRepositoryManager().getUserRepository();
 
     private PlayerUtility() {
         throw new IllegalStateException("Utility class");
     }
 
-    /**
-     * Get the specified player's memory from the file.
-     * Creates a new configuration with default values if one does not exist.
-     * @param uuid The UUID of the player whose data to fetch.
-     * @return The {@link PlayerMemory} of the given player.
-     */
-    private static @NotNull PlayerMemory fetchPlayerMemory(@NotNull UUID uuid) {
-        File file = new File(Dreamvisitor.getPlayerPath(uuid));
-        FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-        return PlayerMemory.getFromFileConfig(fileConfig);
-    }
-
-    /**
-     * Saves the specified player's memory to file. Does nothing if the player is not in memory.
-     * @param uuid The UUID of the player whose data to save.
-     */
-    public static void savePlayerMemory(@NotNull UUID uuid) throws IOException {
-        if(MEMORY_MAP.containsKey(uuid.toString())) {
-            PlayerMemory memory = getPlayerMemory(uuid);
-            memory.toFileConfig().save(Dreamvisitor.getPlayerPath(uuid));
+    @NotNull
+    public static DVUser getUser(@NotNull UUID uuid) {
+        // Check if in memory map
+        for (DVUser user : USER_MEMORY) {
+            if (Objects.equals(user.getMinecraftUuid(), uuid)) {
+                return user;
+            }
         }
-    }
 
-    /**
-     * Get the specified player's memory. If it is not in memory, it will be fetched from file.
-     * @param uuid The UUID of the player whose data to get.
-     * @return The {@link PlayerMemory} of the given player.
-     */
-    public static @NotNull PlayerMemory getPlayerMemory(@NotNull UUID uuid) {
-        // If it does not exist in memory, add it
-        if(!MEMORY_MAP.containsKey(uuid.toString())) {
-            PlayerMemory memory = fetchPlayerMemory(uuid);
-            MEMORY_MAP.put(uuid.toString(), memory);
-            return memory;
+        // Get from repository
+        Optional<DVUser> optional = userRepository.findByUuid(uuid);
+        if (optional.isPresent()) {
+            // If it exists, add to memory map and return
+            USER_MEMORY.add(optional.get());
+            return optional.get();
         }
-        return MEMORY_MAP.get(uuid.toString());
+
+        // If not, create, add to memory map, and return
+        DVUser user = new DVUser();
+        user.setMinecraftUuid(uuid);
+        USER_MEMORY.add(user);
+        return user;
     }
 
-    /**
-     * Removes the specified player's memory from random access storage. This does NOT save memory first.
-     * @param uuid The UUID of the player whose data to remove.
-     */
-    public static void clearPlayerMemory(@NotNull UUID uuid) {
-        MEMORY_MAP.remove(uuid.toString());
+    @NotNull
+    public static DVUser getUser(@NotNull Player player) {
+        return getUser(player.getUniqueId());
     }
 
-    /**
-     * Update a player's memory configuration. This must be used to update a player's memory after it has been modified.
-     * @param uuid The UUID of the player whose data to modify.
-     * @param memory The modified {@link PlayerMemory}.
-     */
-    public static void setPlayerMemory(@NotNull UUID uuid, @NotNull PlayerMemory memory) {
-        MEMORY_MAP.put(uuid.toString(), memory);
+    public static void saveUser(DVUser user) {
+
+        DVUser existing = null;
+        for (DVUser dvUser : USER_MEMORY) {
+            if (Objects.equals(dvUser.getMinecraftUuid(), user.getMinecraftUuid())) {
+                existing = dvUser;
+                break;
+            }
+        }
+        if (existing != null) USER_MEMORY.remove(existing);
+
+        USER_MEMORY.add(user);
+
+        userRepository.save(existing);
     }
 
     /**

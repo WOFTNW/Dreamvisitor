@@ -37,9 +37,9 @@ public class CmdHub implements DVCommand {
                 )
                 .executesNative(((sender, args) -> {
 
-                    Collection<Entity> entitySelect = (Collection<Entity>) args.get("entities");
+                    final Collection<Entity> entitySelect = (Collection<Entity>) args.get("entities");
 
-                    CommandSender callee = sender.getCallee();
+                    final CommandSender callee = sender.getCallee();
                     if (entitySelect != null) {
 
                         if (entitySelect.isEmpty()) {
@@ -52,7 +52,7 @@ public class CmdHub implements DVCommand {
                                 Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
                                 assert Dreamvisitor.hubLocation != null;
 
-                                Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                                final Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
 
                                 for (Entity entity : entitySelect) {
 
@@ -67,7 +67,7 @@ public class CmdHub implements DVCommand {
                                         }
 
                                         player.teleport(Dreamvisitor.hubLocation);
-                                        player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                        player.spawnParticle(Particle.FIREWORK, Dreamvisitor.hubLocation, 100);
                                         player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f, 1f);
                                     } else entity.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
                                 }
@@ -91,13 +91,13 @@ public class CmdHub implements DVCommand {
 
                                 if (Mail.isPLayerDeliverer(player)) Mail.cancel(player);
 
-                                Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                                final Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
                                 if (ess != null) {
-                                    User user = ess.getUser(player);
+                                    final User user = ess.getUser(player);
                                     user.setLastLocation(player.getLocation());
                                 }
 
-                                List<LivingEntity> leashed = new ArrayList<>();
+                                final List<LivingEntity> leashed = new ArrayList<>();
 
                                 for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
                                     if (entity instanceof LivingEntity livingEntity && livingEntity.isLeashed() && livingEntity.getLeashHolder().equals(player))
@@ -106,15 +106,15 @@ public class CmdHub implements DVCommand {
 
                                 if (leashed.isEmpty() || !player.hasPermission("dreamvisitor.hub.leash")) {
                                     player.teleport(Dreamvisitor.hubLocation);
-                                    player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                    player.spawnParticle(Particle.FIREWORK, Dreamvisitor.hubLocation, 100);
                                     player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                                             1f);
                                 } else {
 
-                                    Location tpLocation = Dreamvisitor.hubLocation.clone().subtract(0, 14, 0);
+                                    final Location tpLocation = Dreamvisitor.hubLocation.clone().subtract(0, 14, 0);
 
                                     player.teleport(tpLocation);
-                                    player.spawnParticle(Particle.FIREWORKS_SPARK, tpLocation, 100);
+                                    player.spawnParticle(Particle.FIREWORK, tpLocation, 100);
                                     player.playSound(tpLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                                             1f);
                                     for (LivingEntity entity : leashed) {
@@ -153,7 +153,7 @@ public class CmdHub implements DVCommand {
                                     }
 
                                     closest.teleport(Dreamvisitor.hubLocation);
-                                    closest.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                    closest.spawnParticle(Particle.FIREWORK, Dreamvisitor.hubLocation, 100);
                                     closest.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                                             1f);
                                 }

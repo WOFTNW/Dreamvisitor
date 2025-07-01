@@ -12,6 +12,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandTree;
 import org.woftnw.dreamvisitor.commands.*;
 import org.woftnw.dreamvisitor.data.*;
+import org.woftnw.dreamvisitor.data.repository.*;
 import org.woftnw.dreamvisitor.functions.*;
 import org.woftnw.dreamvisitor.functions.worldguard.DragonFlightFlag;
 import org.woftnw.dreamvisitor.functions.worldguard.WitherFlag;
@@ -29,7 +30,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.woftnw.dreamvisitor.util.PBConfigLoader;
 
 import java.io.IOException;
 import java.util.*;
@@ -42,13 +42,16 @@ public class Dreamvisitor extends JavaPlugin {
             .getRootLogger();
     public static Dreamvisitor PLUGIN;
     public static LuckPerms luckperms;
-    public static PocketBase pocketBase;
     public static String MOTD = null;
     public static boolean chatPaused;
     public static int playerLimit;
     public static Location hubLocation;
     public static boolean debugMode;
     private static ConsoleLogger appender;
+
+    PocketBase pocketBase;
+
+    RepositoryManager repositoryManager;
 
     public static StateFlag DRAGON_FLIGHT;
     public static StateFlag WITHER;
@@ -130,6 +133,13 @@ public class Dreamvisitor extends JavaPlugin {
         getLogger().info("Configuration fetched. Starting enable.");
 
         debugMode = Config.get(ConfigKey.DEBUG);
+        Messager.debug("Debug mode is enabled.");
+
+        Messager.debug("Ensuring auto-restart is disabled...");
+        if (Config.get(ConfigKey.AUTO_RESTART)) Config.set(ConfigKey.AUTO_RESTART, false);
+
+        Messager.debug("Setting up repositories...");
+        repositoryManager = new RepositoryManager(pocketBase);
 
         Messager.debug("Registering listeners...");
         registerListeners();
@@ -151,7 +161,6 @@ public class Dreamvisitor extends JavaPlugin {
         commands.add(new CmdUser());
         commands.add(new CmdTribeUpdate());
         commands.add(new CmdUnwax());
-        commands.add(new CmdScheduleRestart());
         commands.add(new CmdInvSwap());
         commands.add(new CmdDvset());
         commands.add(new CmdSetmotd());
@@ -301,11 +310,20 @@ public class Dreamvisitor extends JavaPlugin {
             }
         };
 
+        Runnable tickFlight = new Runnable() {
+            @Override
+            public void run() {
+                Flight.tick();
+            }
+        };
+
         Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 
         Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
 
         Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20 * 10);
+
+        Bukkit.getScheduler().runTaskTimer(this, tickFlight, 0, 1);
 
         getLogger().log(Level.INFO, "Dreamvisitor has been enabled.");
 
@@ -336,7 +354,6 @@ public class Dreamvisitor extends JavaPlugin {
      */
     private void registerListeners() {
         PluginManager pluginManager = getServer().getPluginManager();
-        pluginManager.registerEvents(new ListenEntityDamage(), this);
         pluginManager.registerEvents(new ListenPlayerChat(), this);
         pluginManager.registerEvents(new ListenPlayerCmdPreprocess(), this);
         pluginManager.registerEvents(new ListenPlayerDeath(), this);
@@ -348,10 +365,9 @@ public class Dreamvisitor extends JavaPlugin {
         pluginManager.registerEvents(new ListenServerPing(), this);
         pluginManager.registerEvents(new Sandbox(), this);
         pluginManager.registerEvents(new ListenTimeSkip(), this);
-        pluginManager.registerEvents(new ListenSignChangeEvent(), this);
-        pluginManager.registerEvents(new ListenPlayerToggleFlightEvent(), this);
-        pluginManager.registerEvents(new ListenPlayerMoveEvent(), this);
-        pluginManager.registerEvents(new ListenEntityToggleGlideEvent(), this);
+        pluginManager.registerEvents(new ListenSignChange(), this);
+        pluginManager.registerEvents(new ListenPlayerToggleFlight(), this);
+        pluginManager.registerEvents(new ListenEntityToggleGlide(), this);
         pluginManager.registerEvents(new ListenPlayerChangedWorld(), this);
         pluginManager.registerEvents(new ListenPlayerRespawn(), this);
         pluginManager.registerEvents(new ListenCreatureSpawn(), this);
@@ -383,18 +399,6 @@ public class Dreamvisitor extends JavaPlugin {
         for (Moonglobe moonglobe : Moonglobe.activeMoonglobes)
             moonglobe.remove(null);
 
-        // Save all player memory
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            try {
-                PlayerUtility.savePlayerMemory(player.getUniqueId());
-                PlayerUtility.clearPlayerMemory(player.getUniqueId());
-            } catch (IOException e) {
-                getLogger().severe("Unable to save player memory! Does the server have write access?");
-                if (Dreamvisitor.debugMode)
-                    throw new RuntimeException();
-            }
-        }
-
         // Save and shutdown the Command Scheduler
         CommandScheduler.getInstance().saveConfig();
         CommandScheduler.getInstance().stopScheduler();
@@ -407,4 +411,7 @@ public class Dreamvisitor extends JavaPlugin {
         getLogger().info("Dreamvisitor has been disabled.");
     }
 
+    public RepositoryManager getRepositoryManager() {
+        return repositoryManager;
+    }
 }

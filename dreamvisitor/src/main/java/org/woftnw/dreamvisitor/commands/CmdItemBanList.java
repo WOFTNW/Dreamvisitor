@@ -18,7 +18,7 @@ public class CmdItemBanList implements DVCommand {
                 .withPermission(CommandPermission.fromString("dreamvisitor.itembanlist"))
                 .withHelp("Manage the item ban list.", "Open the item ban list inventory GUI.")
                 .executesNative(((sender, args) -> {
-                    CommandSender callee = sender.getCallee();
+                    final CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
                         if (ItemBanList.badItems != null) {
                             ItemBanList.inv.setContents(ItemBanList.badItems.toArray(new ItemStack[0]));

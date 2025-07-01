@@ -1,34 +1,34 @@
 package org.woftnw.dreamvisitor.functions;
 
-import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.data.type.DVUser;
 
 public class InvSwap {
 
     public static void swapInventories(@NotNull Player player) {
 
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+        DVUser user = PlayerUtility.getUser(player);
 
         ItemStack[] invContents;
 
-        if (memory.creative) {
-            memory.creativeInv = player.getInventory().getContents();
-            if (memory.survivalInv == null) invContents = null;
-            else invContents = memory.survivalInv;
+        if (user.isUsingCreativeInv()) {
+            user.setCreativeInv(player.getInventory().getContents());
+            if (user.getSurvivalInv() == null) invContents = null;
+            else invContents = user.getSurvivalInv();
         } else {
-            memory.survivalInv = player.getInventory().getContents();
-            if (memory.creativeInv == null) invContents = null;
-            else invContents = memory.creativeInv;
+            user.setSurvivalInv(player.getInventory().getContents());
+            if (user.getCreativeInv() == null) invContents = null;
+            else invContents = user.getCreativeInv();
         }
 
         if (invContents == null) player.getInventory().clear();
         else player.getInventory().setContents(invContents);
-        memory.creative = !memory.creative;
+        user.setUsingCreativeInv(!user.isUsingCreativeInv());
 
-        PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
+        PlayerUtility.saveUser(user);
 
     }
 

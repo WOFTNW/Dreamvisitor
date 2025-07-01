@@ -21,7 +21,7 @@ public class CmdUnwax implements DVCommand {
                 .withHelp("Unwax a sign.", "Unwax the sign you are looking at")
                 .executesNative((sender, args) -> {
                     if (sender.getCallee() instanceof Player player) {
-                        Block targetBlock = player.getTargetBlockExact(10, FluidCollisionMode.NEVER);
+                        final Block targetBlock = player.getTargetBlockExact(10, FluidCollisionMode.NEVER);
                         if (targetBlock == null) throw CommandAPI.failWithString("No nearby sign in line of sight!");
 
                         if (targetBlock.getState() instanceof Sign sign) {

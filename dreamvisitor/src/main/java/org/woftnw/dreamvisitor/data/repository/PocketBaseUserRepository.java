@@ -175,6 +175,12 @@ public class PocketBaseUserRepository implements UserRepository {
         // Parse boolean fields
         user.setIsSuspended(getBooleanOrNull(json, "is_suspended"));
         user.setIsBanned(getBooleanOrNull(json, "is_banned"));
+        user.setShowDiscordMessages(getBooleanOrNull(json, "show_discord_messages"));
+        user.setFlightDisabled(getBooleanOrNull(json, "flight_disabled"));
+        user.setVanished(getBooleanOrNull(json, "vanished"));
+        user.setAutoInvSwapEnabled(getBooleanOrNull(json, "auto_inv_swap_enabled"));
+        user.setAutoRadioEnabled(getBooleanOrNull(json, "auto_radio_enabled"));
+        user.setInSandboxMode(getBooleanOrNull(json, "in_sandbox_mode"));
 
         // Parse datetime fields
         user.setLastWork(getOffsetDateTimeOrNull(json, "last_work"));
@@ -223,6 +229,20 @@ public class PocketBaseUserRepository implements UserRepository {
             json.addProperty("is_suspended", user.getIsSuspended());
         if (user.getIsBanned() != null)
             json.addProperty("is_banned", user.getIsBanned());
+        if (user.isShowDiscordOn() != null)
+            json.addProperty("show_discord_messages", user.isShowDiscordOn());
+        if (user.isFlightDisabled() != null)
+            json.addProperty("flight_disabled", user.isFlightDisabled());
+        if (user.isVanished() != null)
+            json.addProperty("vanished", user.isVanished());
+        if (user.isAutoInvSwapEnabled() != null)
+            json.addProperty("auto_inv_swap_enabled", user.isAutoInvSwapEnabled());
+        if (user.isAutoRadioEnabled() != null)
+            json.addProperty("auto_radio_enabled", user.isAutoRadioEnabled());
+        if (user.isInSandboxMode() != null)
+            json.addProperty("in_sandbox_mode", user.isInSandboxMode());
+        if (user.isUsingCreativeInv() != null)
+            json.addProperty("using_creative_inv", user.isUsingCreativeInv());
 
         // Format and add datetime fields
         if (user.getLastWork() != null)

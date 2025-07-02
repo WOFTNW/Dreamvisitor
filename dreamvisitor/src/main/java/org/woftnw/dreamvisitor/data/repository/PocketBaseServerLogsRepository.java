@@ -3,20 +3,13 @@ package org.woftnw.dreamvisitor.data.repository;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.woftnw.dreamvisitor.data.type.Item;
 import org.woftnw.dreamvisitor.data.type.ServerLog;
 import org.woftnw.dreamvisitor.pb.PocketBase;
 
 import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * PocketBase implementation of the ServerRepository interface
@@ -50,11 +43,11 @@ public class PocketBaseServerLogsRepository implements ServerLogsRepository {
             if (log.getId() != null && !log.getId().isEmpty()) {
                 // Update existing log
                 JsonObject updatedRecord = pocketBase.updateRecord(COLLECTION_NAME, log.getId(), itemData, null, null);
-                return mapToItem(updatedRecord);
+                return mapToServerLog(updatedRecord);
             } else {
                 // Create new log
                 JsonObject newRecord = pocketBase.createRecord(COLLECTION_NAME, itemData, null, null);
-                return mapToItem(newRecord);
+                return mapToServerLog(newRecord);
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error saving log: ", e);
@@ -63,13 +56,13 @@ public class PocketBaseServerLogsRepository implements ServerLogsRepository {
     }
 
     /**
-     * Convert a JsonObject from PocketBase to an Item object
+     * Convert a JsonObject from PocketBase to an ServerLog object
      *
      * @param json JsonObject from PocketBase API
-     * @return Mapped Item object
+     * @return Mapped ServerLog object
      */
     @NotNull
-    private ServerLog mapToItem(JsonObject json) {
+    private ServerLog mapToServerLog(JsonObject json) {
         ServerLog log = new ServerLog();
 
         log.setId(getStringOrNull(json, "id"));
@@ -85,9 +78,9 @@ public class PocketBaseServerLogsRepository implements ServerLogsRepository {
     }
 
     /**
-     * Convert an Item object to a JsonObject for PocketBase
+     * Convert an ServerLog object to a JsonObject for PocketBase
      *
-     * @param log Item object to convert
+     * @param log ServerLog object to convert
      * @return JsonObject for PocketBase API
      */
     @NotNull

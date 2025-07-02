@@ -10,9 +10,12 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandTree;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scheduler.BukkitTask;
 import org.woftnw.dreamvisitor.commands.*;
 import org.woftnw.dreamvisitor.data.*;
 import org.woftnw.dreamvisitor.data.repository.*;
+import org.woftnw.dreamvisitor.data.type.ServerCommand;
 import org.woftnw.dreamvisitor.functions.*;
 import org.woftnw.dreamvisitor.functions.worldguard.DragonFlightFlag;
 import org.woftnw.dreamvisitor.functions.worldguard.WitherFlag;
@@ -128,8 +131,29 @@ public class Dreamvisitor extends JavaPlugin {
         getLogger().info("Checking local config file...");
         checkConfig();
 
+        // Create PocketBase client from config
+        getLogger().info("Initializing PocketBase client...");
+        String baseUrl = getConfig().getString("pocketbaseUrl", "http://127.0.0.1:8090/");
+        String configId = getConfig().getString("pocketbaseConfigId", "");
+        String token = getConfig().getString("pocketbaseToken", "");
+        boolean useRealtime = getConfig().getBoolean("pocketbaseUseRealtime", true);
+
+        if (baseUrl.isEmpty() || configId.isEmpty()) {
+            throw new NullPointerException("Missing PocketBase URL or Config ID");
+        }
+
+        Messager.debug("Initialized PocketBase client");
+        Map<String, Object> pbConfig = new HashMap<>();
+        pbConfig.put("pocketbaseUrl", baseUrl);
+        pbConfig.put("pocketbaseToken", token);
+        pocketBase = PocketBase.fromConfig(pbConfig);
+
         getLogger().info("Initializing PocketBase config loader...");
-        Config.init();
+        try {
+            Config.init(pocketBase, baseUrl, configId, token, useRealtime);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         getLogger().info("Configuration fetched. Starting enable.");
 
         debugMode = Config.get(ConfigKey.DEBUG);
@@ -248,21 +272,30 @@ public class Dreamvisitor extends JavaPlugin {
 
         Messager.debug("Setting up schedules...");
 
-        Runnable pushConsole = new BukkitRunnable() {
+        // Fail old commands still sent in PocketBase
+        List<ServerCommand> oldCommands = getRepositoryManager().getServerCommandsRepository().getByStatus(ServerCommand.Status.SENT);
+        for (ServerCommand command : oldCommands) {
+            command.setStatus(ServerCommand.Status.FAILED);
+            getRepositoryManager().getServerCommandsRepository().update(command);
+        }
+
+        final CommandRunner commandRunner = new CommandRunner();
+
+        Runnable runCommandsAsync = new BukkitRunnable() {
             @Override
             public void run() {
-                if (Config.get(ConfigKey.LOG_CONSOLE)) {
-
-
-
-                }
+                commandRunner.run();
             }
         };
 
         Runnable scheduledRestarts = new BukkitRunnable() {
             @Override
             public void run() {
-                Config.loadConfig();
+                try {
+                    Config.loadConfig();
+                } catch (IOException e) {
+                    getLogger().warning("Unable to load configuration!");
+                }
 
                 if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().isEmpty()) {
                     AutoRestart.sendAutoRestartMessage();
@@ -310,12 +343,9 @@ public class Dreamvisitor extends JavaPlugin {
             }
         };
 
-        Runnable tickFlight = new Runnable() {
-            @Override
-            public void run() {
-                Flight.tick();
-            }
-        };
+        Runnable tickFlight = Flight::tick;
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, runCommandsAsync, 20, 40);
 
         Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 

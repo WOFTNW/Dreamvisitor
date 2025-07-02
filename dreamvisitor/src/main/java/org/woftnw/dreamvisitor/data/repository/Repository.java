@@ -28,17 +28,29 @@ public interface Repository {
 
     @Nullable
     default Integer getIntOrNull(@NotNull JsonObject json, String key) {
-        return json.has(key) && !json.get(key).isJsonNull() ? json.get(key).getAsInt() : null;
+        try {
+            return json.has(key) && !json.get(key).isJsonNull() ? json.get(key).getAsInt() : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @Nullable
     default Long getLongOrNull(@NotNull JsonObject json, String key) {
-        return json.has(key) && !json.get(key).isJsonNull() ? json.get(key).getAsLong() : null;
+        try {
+            return json.has(key) && !json.get(key).isJsonNull() ? json.get(key).getAsLong() : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @Nullable
     default Double getDoubleOrNull(@NotNull JsonObject json, String key) {
-        return json.has(key) && !json.get(key).isJsonNull() ? json.get(key).getAsDouble() : null;
+        try {
+            return json.has(key) && !json.get(key).isJsonNull() ? json.get(key).getAsDouble() : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @Nullable

@@ -26,24 +26,13 @@ public class Config {
     private static PocketBase pocketBaseClient;
     private static final String COLLECTION_NAME = "dreamvisitor_config";
 
-    public static void init() {
-        FileConfiguration pluginConfig = Dreamvisitor.getPlugin().getConfig();
-        baseUrl = pluginConfig.getString("pocketbaseUrl", "http://127.0.0.1:8090/");
-        configId = pluginConfig.getString("pocketbaseConfigId", "");
-        token = pluginConfig.getString("pocketbaseToken", "");
-        useRealtime = pluginConfig.getBoolean("pocketbaseUseRealtime", true);
+    public static void init(PocketBase pocketBase, String baseUrl, String configId, String token, boolean useRealtime) throws IOException {
 
-        if (baseUrl.isEmpty() || configId.isEmpty()) {
-            throw new NullPointerException("Missing PocketBase URL or Config ID");
-        }
-
-        // Create PocketBase client from config
-        Map<String, Object> pbConfig = new HashMap<>();
-        pbConfig.put("pocketbaseUrl", baseUrl);
-        pbConfig.put("pocketbaseToken", token);
-        pocketBaseClient = PocketBase.fromConfig(pbConfig);
-
-        Messager.debug("Initialized PocketBase client");
+        pocketBaseClient = pocketBase;
+        Config.baseUrl = baseUrl;
+        Config.configId = configId;
+        Config.token = token;
+        Config.useRealtime = useRealtime;
 
         // Initial config load
         loadConfig();
@@ -54,27 +43,24 @@ public class Config {
         }
     }
 
-    public static void loadConfig() {
-        try {
-            if (pocketBaseClient == null) {
-                Dreamvisitor.getPlugin().getLogger().warning("PocketBase client not initialized, cannot load config");
-                return;
-            }
-
-            // Get record using PocketBase client
-            JsonObject record = pocketBaseClient.getRecord(COLLECTION_NAME, configId, null, null);
-
-            // Convert from Gson JsonObject to org.json.JSONObject
-            String jsonString = record.toString();
-            config = new JSONObject(jsonString);
-
-            Messager.debug("Loaded PocketBase configuration: " + config);
-
-            // Apply config values to the system
-            applyConfig();
-        } catch (IOException e) {
-            Bukkit.getLogger().warning("Error loading PocketBase config: " + e.getMessage());
+    public static void loadConfig() throws IOException {
+        if (pocketBaseClient == null) {
+            Dreamvisitor.getPlugin().getLogger().warning("PocketBase client not initialized, cannot load config");
+            return;
         }
+
+        // Get record using PocketBase client
+        Messager.debug("Getting record " + configId + " from collection " + COLLECTION_NAME);
+        JsonObject record = pocketBaseClient.getRecord(COLLECTION_NAME, configId, null, null);
+
+        // Convert from Gson JsonObject to org.json.JSONObject
+        String jsonString = record.toString();
+        config = new JSONObject(jsonString);
+
+        Messager.debug("Loaded PocketBase configuration: " + config);
+
+        // Apply config values to the system
+        applyConfig();
     }
 
     public static void updateLocalConfig(JSONObject newConfigData) {
@@ -167,7 +153,16 @@ public class Config {
             value = configKey.getDefaultValue();
         }
 
-        if (configKey.getType().isInstance(value)) {
+        Class<?> expectedType = configKey.getType();
+
+        // Handle numeric coercion
+        if (expectedType == Double.class && value instanceof Number) {
+            return (T) Double.valueOf(((Number) value).doubleValue());
+        } else if (expectedType == Integer.class && value instanceof Number) {
+            return (T) Integer.valueOf(((Number) value).intValue());
+        } else if (expectedType == Float.class && value instanceof Number) {
+            return (T) Float.valueOf(((Number) value).floatValue());
+        } else if (expectedType.isInstance(value)) {
             return (T) value;
         }
 

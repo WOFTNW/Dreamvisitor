@@ -5,7 +5,7 @@ import org.woftnw.dreamvisitor.data.type.ServerLog;
 import java.util.List;
 
 /**
- * Repository interface for Item data operations
+ * Repository interface for ServerLog data operations
  */
 public interface ServerLogsRepository extends Repository {
     /**
@@ -16,10 +16,10 @@ public interface ServerLogsRepository extends Repository {
     List<ServerLog> findLast(int count);
 
     /**
-     * Save an item (create or update)
+     * Save a log (create or update)
      *
-     * @param item Item to save
-     * @return Saved item
+     * @param item ServerLog to save
+     * @return Saved ServerLog
      */
     ServerLog create(ServerLog item);
 

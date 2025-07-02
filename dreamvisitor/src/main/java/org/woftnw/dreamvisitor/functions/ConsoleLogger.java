@@ -1,5 +1,6 @@
 package org.woftnw.dreamvisitor.functions;
 
+import net.md_5.bungee.api.ChatColor;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +30,7 @@ public class ConsoleLogger extends AbstractAppender {
 
         // Send message to PocketBase
         ServerLog logItem = new ServerLog();
-        logItem.setLogMsg(message);
+        logItem.setLogMsg(message.replaceAll("\u001B?(\\W1B)?\\[([0-9,;]+)m", ""));
         Dreamvisitor.getPlugin().getRepositoryManager().getServerLogsRepository().create(logItem);
 
     }

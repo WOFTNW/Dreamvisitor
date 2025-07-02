@@ -9,10 +9,12 @@ public class RepositoryManager {
 
     final ServerLogsRepository serverLogsRepository;
     final UserRepository userRepository;
+    final ServerCommandsRepository serverCommandsRepository;
 
     public RepositoryManager(PocketBase pocketBase) {
         serverLogsRepository = new PocketBaseServerLogsRepository(pocketBase);
         userRepository = new PocketBaseUserRepository(pocketBase);
+        serverCommandsRepository = new PocketBaseServerCommandsRepository(pocketBase);
     }
 
     public ServerLogsRepository getServerLogsRepository() {
@@ -21,5 +23,9 @@ public class RepositoryManager {
 
     public UserRepository getUserRepository() {
         return userRepository;
+    }
+
+    public ServerCommandsRepository getServerCommandsRepository() {
+        return serverCommandsRepository;
     }
 }

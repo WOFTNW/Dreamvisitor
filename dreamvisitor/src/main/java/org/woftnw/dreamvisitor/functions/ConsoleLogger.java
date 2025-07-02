@@ -1,6 +1,5 @@
 package org.woftnw.dreamvisitor.functions;
 
-import net.md_5.bungee.api.ChatColor;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;

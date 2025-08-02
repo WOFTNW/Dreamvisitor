@@ -29,7 +29,7 @@ public class Flight {
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
     private static final Map<Player, Boolean> falling = new HashMap<>();
     private static final Map<Player, Vector> lastPosition = new HashMap<>();
-    private static final Map<Player, Float> fallDistance =new HashMap<>();
+    private static final Map<Player, Float> fallDistance = new HashMap<>();
 
     public static void init() {
         Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
@@ -157,6 +157,10 @@ public class Flight {
     public static void tick() {
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
+
+            fallDistance.putIfAbsent(player, 0f);
+            falling.putIfAbsent(player, false);
+
             final Input input = player.getCurrentInput();
 
             if (player.isFlying() && !inFlightGameMode(player)) {

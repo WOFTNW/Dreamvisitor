@@ -365,37 +365,37 @@ public class Dreamvisitor extends JavaPlugin {
                 }
             };
 
-          Runnable autoRestarts = new BukkitRunnable() {
-            @Override
-            public void run() {
-              // Restart if requested and no players are online
-              if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().size() <= AutoRestart.getMaxPlayers()) {
-                AutoRestart.sendAutoRestartMessage();
-                Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
-                Bot.sendLog("**Restarting the server as scheduled.**");
-                getServer().broadcastMessage("!=\nThe server is performing an automatic restart in 30 seconds.\n!=");
-                EmbedBuilder embed = new EmbedBuilder();
-                embed.setDescription("The server is performing an automatic restart in 30 seconds.");
-                Bot.getGameChatChannel().sendMessageEmbeds(embed.build()).queue();
+            Runnable autoRestarts = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    // Restart if requested and no players are online
+                    if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().size() <= AutoRestart.getMaxPlayers()) {
+                        AutoRestart.sendAutoRestartMessage();
+                        Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
+                        Bot.sendLog("**Restarting the server as scheduled.**");
+                        getServer().broadcastMessage("!=\nThe server is performing an automatic restart in 30 seconds.\n!=");
+                        EmbedBuilder embed = new EmbedBuilder();
+                        embed.setDescription("The server is performing an automatic restart in 30 seconds.");
+                        Bot.getGameChatChannel().sendMessageEmbeds(embed.build()).queue();
 
-                MOTD = net.md_5.bungee.api.ChatColor.RED + "The server is restarting. Please wait.";
-                getServer().setMaxPlayers(0);
+                        MOTD = net.md_5.bungee.api.ChatColor.RED + "The server is restarting. Please wait.";
+                        getServer().setMaxPlayers(0);
 
-                // Schedule task
-                Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> getServer().spigot().restart(), 30*20);
-              }
+                        // Schedule task
+                        Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> getServer().spigot().restart(), 30 * 20);
+                    }
 
-              // also check if memory usage is high and schedule restart
-              long maxMemory = Runtime.getRuntime().maxMemory();
-              long freeMemory = Runtime.getRuntime().freeMemory();
-              double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
-              if (freeMemoryPercent <= 10) {
-                AutoRestart.enableAutoRestart(null);
-                Bukkit.getLogger()
-                    .info("Dreamvisitor enabled automatic restart because free memory usage is at or less than 10%.");
-              }
-            }
-          };
+                    // also check if memory usage is high and schedule restart
+                    long maxMemory = Runtime.getRuntime().maxMemory();
+                    long freeMemory = Runtime.getRuntime().freeMemory();
+                    double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
+                    if (freeMemoryPercent <= 10) {
+                        AutoRestart.enableAutoRestart(null);
+                        Bukkit.getLogger()
+                                .info("Dreamvisitor enabled automatic restart because free memory usage is at or less than 10%.");
+                    }
+                }
+            };
 
             Runnable tick = new BukkitRunnable() {
                 @Override
@@ -457,8 +457,8 @@ public class Dreamvisitor extends JavaPlugin {
             if (!botFailed)
                 Bukkit.getScheduler().runTaskTimer(this, pushConsole, 0, 40);
 
-          // Check for scheduled restart every minute
-          Bukkit.getScheduler().runTaskTimer(this, autoRestarts, 200, 1200);
+            // Check for scheduled restart every minute
+            Bukkit.getScheduler().runTaskTimer(this, autoRestarts, 200, 1200);
 
             // Check for warns that need to be reminded every hour
             Bukkit.getScheduler().runTaskTimer(this, remindWarns, 200, 20 * 60 * 60);

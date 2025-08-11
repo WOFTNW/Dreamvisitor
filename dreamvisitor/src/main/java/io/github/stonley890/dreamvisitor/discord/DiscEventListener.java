@@ -22,6 +22,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -61,91 +62,94 @@ public class DiscEventListener extends ListenerAdapter {
             Dreamvisitor.debug("Whitelist ID: " + Bot.getWhitelistChannel().getId());
             Dreamvisitor.debug("Game chat ID: " + Bot.getGameChatChannel().getId());
             Dreamvisitor.debug("Log chat ID: " + Bot.getGameLogChannel().getId());
-            if (channel.getId().equals(Bot.getWhitelistChannel().getId()) && !user.isBot() && !p.matcher(username).find()) {
+            if (channel.getId().equals(Bot.getWhitelistChannel().getId())) {
+                if (username.startsWith("\\")) return;
+                if (!p.matcher(username).find()) {
 
-                EmbedBuilder builder = new EmbedBuilder();
+                    EmbedBuilder builder = new EmbedBuilder();
 
-                // banned users cannot add accounts to whitelist
-                if (Infraction.hasBan(user.getIdLong())) {
-                    builder.setColor(Color.RED).setTitle("You aren't allowed.")
-                            .setDescription("You aren't allowed to add accounts to the whitelist. Ask a staff member for help.");
-                    event.getMessage().replyEmbeds(builder.build()).queue();
-                    event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
-                    return;
-                }
-
-                // Check for valid UUID
-                Dreamvisitor.debug("Checking for valid UUID");
-                UUID uuid = PlayerUtility.getUUIDOfUsername(username);
-                if (uuid == null) {
-                    // username does not exist alert
-                    Dreamvisitor.debug("Username does not exist.");
-
-                    builder.setTitle("❌ `" + username + "` could not be found!")
-                            .setDescription("Make sure you type your username exactly as shown in the bottom-right corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
-                            .setColor(Color.RED);
-                    event.getMessage().replyEmbeds(builder.build()).queue();
-
-                    event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
-                    Dreamvisitor.debug("Failed whitelist.");
-                } else {
-
-                    Dreamvisitor.debug("Got UUID");
-
-                    // Link accounts if not already linked
-                    Dreamvisitor.debug("Do accounts need to be linked?");
-                    if (AccountLink.getUuid(user.getIdLong()) == null) {
-                        Dreamvisitor.debug("Yes, linking account.");
-                        AccountLink.linkAccounts(uuid, user.getIdLong());
-                        Dreamvisitor.debug("Linked.");
+                    // banned users cannot add accounts to whitelist
+                    if (Infraction.hasBan(user.getIdLong())) {
+                        builder.setColor(Color.RED).setTitle("You aren't allowed.")
+                                .setDescription("You aren't allowed to add accounts to the whitelist. Ask a staff member for help.");
+                        event.getMessage().replyEmbeds(builder.build()).queue();
+                        event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+                        return;
                     }
 
-                    try {
-                        if (Whitelist.isUserWhitelisted(uuid)) {
-                            Dreamvisitor.debug("Already whitelisted.");
+                    // Check for valid UUID
+                    Dreamvisitor.debug("Checking for valid UUID");
+                    UUID uuid = PlayerUtility.getUUIDOfUsername(username);
+                    if (uuid == null) {
+                        // username does not exist alert
+                        Dreamvisitor.debug("Username does not exist.");
 
-                            builder.setTitle("☑️ `" + username + "` is already whitelisted!")
-                                    .setDescription("Check <#914620824332435456> for the server address and version.")
-                                    .setColor(Color.BLUE);
-                            event.getMessage().replyEmbeds(builder.build()).queue();
+                        builder.setTitle("❌ `" + username + "` could not be found!")
+                                .setDescription("Make sure you type your username exactly as shown in the bottom-right corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
+                                .setColor(Color.RED);
+                        event.getMessage().replyEmbeds(builder.build()).queue();
 
-                            event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
-                            Dreamvisitor.debug("Resolved.");
-                        } else {
-                            Dreamvisitor.debug("Player is not whitelisted.");
+                        event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+                        Dreamvisitor.debug("Failed whitelist.");
+                    } else {
 
-                            Whitelist.add(username, uuid);
+                        Dreamvisitor.debug("Got UUID");
 
-                            // success message
-                            Dreamvisitor.debug("Success.");
-
-                            builder.setTitle("✅ `" + username + "` has been whitelisted!")
-                                    .setDescription("Check <#914620824332435456> for the server address and version.")
-                                    .setColor(Color.GREEN);
-                            event.getMessage().replyEmbeds(builder.build()).queue();
-
-                            event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
-
-                            // Report this to system log channel
-                            Whitelist.report(username, uuid, event.getAuthor());
+                        // Link accounts if not already linked
+                        Dreamvisitor.debug("Do accounts need to be linked?");
+                        if (AccountLink.getUuid(user.getIdLong()) == null) {
+                            Dreamvisitor.debug("Yes, linking account.");
+                            AccountLink.linkAccounts(uuid, user.getIdLong());
+                            Dreamvisitor.debug("Linked.");
                         }
-                    } catch (IOException e) {
-                        channel.sendMessage("There was a problem accessing the whitelist file. Please try again later.").queue();
-                        if (Dreamvisitor.debugMode) throw new RuntimeException();
+
+                        try {
+                            if (Whitelist.isUserWhitelisted(uuid)) {
+                                Dreamvisitor.debug("Already whitelisted.");
+
+                                builder.setTitle("☑️ `" + username + "` is already whitelisted!")
+                                        .setDescription("Check <#914620824332435456> for the server address and version.")
+                                        .setColor(Color.BLUE);
+                                event.getMessage().replyEmbeds(builder.build()).queue();
+
+                                event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
+                                Dreamvisitor.debug("Resolved.");
+                            } else {
+                                Dreamvisitor.debug("Player is not whitelisted.");
+
+                                Whitelist.add(username, uuid);
+
+                                // success message
+                                Dreamvisitor.debug("Success.");
+
+                                builder.setTitle("✅ `" + username + "` has been whitelisted!")
+                                        .setDescription("Check <#914620824332435456> for the server address and version.")
+                                        .setColor(Color.GREEN);
+                                event.getMessage().replyEmbeds(builder.build()).queue();
+
+                                event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
+
+                                // Report this to system log channel
+                                Whitelist.report(username, uuid, event.getAuthor());
+                            }
+                        } catch (IOException e) {
+                            channel.sendMessage("There was a problem accessing the whitelist file. Please try again later.").queue();
+                            if (Dreamvisitor.debugMode) throw new RuntimeException();
+                        }
                     }
+
+                } else if (!user.isBot()) {
+
+                    EmbedBuilder builder = new EmbedBuilder();
+
+                    // illegal username
+                    builder.setTitle("⚠️ `" + username + "` contains illegal characters!")
+                            .setDescription("Please send only your username in this channel. Usernames are alphanumeric and cannot contain spaces. Move conversation or questions elsewhere.")
+                            .setColor(Color.YELLOW);
+                    event.getMessage().replyEmbeds(builder.build()).queue();
+
+                    event.getMessage().addReaction(Emoji.fromFormatted("⚠")).queue();
                 }
-
-            } else if (channel.getId().equals(Bot.getWhitelistChannel().getId()) && !user.isBot()) {
-
-                EmbedBuilder builder = new EmbedBuilder();
-
-                // illegal username
-                builder.setTitle("⚠️ `" + username + "` contains illegal characters!")
-                        .setDescription("Please send only your username in this channel. Usernames are alphanumeric and cannot contain spaces. Move conversation or questions elsewhere.")
-                        .setColor(Color.YELLOW);
-                event.getMessage().replyEmbeds(builder.build()).queue();
-
-                event.getMessage().addReaction(Emoji.fromFormatted("⚠")).queue();
             }
         } catch (InsufficientPermissionException e) {
             Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions in the whitelist channel! " + e.getMessage());
@@ -156,6 +160,21 @@ public class DiscEventListener extends ListenerAdapter {
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
+
+                List<String> badWords = BadWords.getBadWords();
+
+                Message chatMessage = event.getMessage();
+
+                for (String badWord : badWords) {
+
+                    Pattern pattern = Pattern.compile(".*\\b" + badWord + "\\b.*");
+
+                    if (pattern.matcher(chatMessage.getContentRaw()).matches()) {
+                        chatMessage.addReaction(Emoji.fromFormatted("\uD83D\uDEAB")).queue();
+                        return;
+                    }
+                }
+
                 // Build message
                 Member author = event.getMessage().getMember();
                 assert author != null;
@@ -473,7 +492,13 @@ Let's see if you remember this one.
                 }
                 BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
                 assert username != null;
-                banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
+                BanEntry<PlayerProfile> banEntry = banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
+                assert banEntry != null;
+                banEntry.save();
+
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null && player.isOnline()) player.kickPlayer("Banned by Dreamvisitor.");
+
                 event.reply("Banned `" + username + "`.").queue();
 
             } catch (IOException e) {

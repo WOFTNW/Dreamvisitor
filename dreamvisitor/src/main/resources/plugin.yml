@@ -1,13 +1,15 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
 version: "${project.version}"
-api-version: 1.20
+api-version: 1.21
 description: A plugin created by Bog for WOFTNW to add various features.
 authors: [
            BogTheMudWing,
            iHeron,
            Mustfa-IT,
-           Brijeshthummar02
+           Brijeshthummar02,
+           Abadraco,
+           Snoodew
 ]
 softdepend:
   - EyeOfOnyx

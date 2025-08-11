@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.discord.commands;
 
 import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.Infraction;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -60,8 +61,8 @@ public class DCmdWarn extends ListenerAdapter implements DiscordCommand {
         }
 
         int value = Objects.requireNonNull(event.getOption("value")).getAsInt();
-        if (value > 6) {
-            event.getHook().editOriginal("Slow down there. You cannot give an infraction a value higher than **3**.").queue();
+        if (value > Infraction.BAN_POINT) {
+            event.getHook().editOriginal("Slow down there. You cannot give an infraction a value higher than **" + Infraction.BAN_POINT + "**.").queue();
             return;
         }
 
@@ -138,7 +139,12 @@ public class DCmdWarn extends ListenerAdapter implements DiscordCommand {
                 }
 
                 try {
-                    event.getHook().editOriginal("Infraction recorded.").queue(null, throwable -> Bukkit.getLogger().warning("There was a problem responding to a /warn command: " + throwable.getMessage()));
+                    EmbedBuilder embed = new EmbedBuilder();
+
+                    embed.setDescription("Recorded infraction of value " + value + " for " + member.getAsMention() + ".")
+                                    .addField("Reason", reason, false);
+
+                    event.getHook().editOriginalEmbeds(embed.build()).queue(null, throwable -> Bukkit.getLogger().warning("There was a problem responding to a /warn command: " + throwable.getMessage()));
                 } catch (IllegalArgumentException e) {
                     Bukkit.getLogger().warning("There was a problem responding to a /warn command: " + e.getMessage());
                 }

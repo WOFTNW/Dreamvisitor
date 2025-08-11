@@ -2,8 +2,13 @@ package io.github.stonley890.dreamvisitor.listeners;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import com.earth2me.essentials.Essentials;
+import com.earth2me.essentials.User;
+import io.github.stonley890.dreamvisitor.data.BadWords;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Chatback;
@@ -18,6 +23,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -34,12 +40,40 @@ public class ListenPlayerChat implements Listener {
     @SuppressWarnings({"null"})
     public void onPlayerChatEvent(@NotNull AsyncPlayerChatEvent event) {
 
-        if (event.getPlayer().hasPermission("dreamvisitor.set.autoradio")) {
-            PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
+        Player player = event.getPlayer();
+        if (player.hasPermission("dreamvisitor.set.autoradio")) {
+            PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
             if (memory.autoRadio) {
                 event.setCancelled(true);
-                Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Bukkit.dispatchCommand(event.getPlayer(), "radio " + event.getMessage()));
+                Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Bukkit.dispatchCommand(player, "radio " + event.getMessage()));
+                return;
+            }
+        }
+
+        List<String> badWords = BadWords.getBadWords();
+
+        String message = event.getMessage();
+
+        for (String badWord : badWords) {
+
+            Pattern pattern = Pattern.compile(".*\\b" + badWord + "\\b.*", Pattern.CASE_INSENSITIVE);
+
+            if (pattern.matcher(message).matches()) {
+                player.sendMessage(ChatColor.RED + "You can't say " + ChatColor.YELLOW + badWord + ChatColor.RED + "!");
+
+                Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                if (ess != null) {
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        User user = ess.getUser(onlinePlayer);
+                        if (user.isSocialSpyEnabled()) {
+                            onlinePlayer.sendMessage(Dreamvisitor.PREFIX + "SocialSpy: " + player.getName() + " tried to say " + badWord + ", but it was blocked by Dreamvisitor.");
+                        }
+                    }
+                }
+                Dreamvisitor.getPlugin().getLogger().info("SocialSpy: " + player.getName() + " tried to say " + badWord + ", but it was blocked by Dreamvisitor.");
+
+                event.setCancelled(true);
                 return;
             }
         }
@@ -50,14 +84,16 @@ public class ListenPlayerChat implements Listener {
         operator, send message
         */
 
-        String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + "**: " + event.getMessage();
+        String chatMessage = "**" + Bot.escapeMarkdownFormatting(player.getName()) + "**: " + event.getMessage();
+
+
 
         if (!Dreamvisitor.chatPaused || event.isCancelled()) {
             if (event.isCancelled()) return;
 
             try {
-                if (Chatback.nextChatback.containsKey(event.getPlayer())) {
-                    Chatback.ReplyMessage replyMessage = Chatback.nextChatback.get(event.getPlayer());
+                if (Chatback.nextChatback.containsKey(player)) {
+                    Chatback.ReplyMessage replyMessage = Chatback.nextChatback.get(player);
 
                     ComponentBuilder replyNotice = new ComponentBuilder();
                     replyNotice.append("↱ Reply to ").color(ChatColor.GRAY);
@@ -70,7 +106,7 @@ public class ListenPlayerChat implements Listener {
 
                     Bukkit.spigot().broadcast(replyNotice.create());
 
-                    Chatback.nextChatback.remove(event.getPlayer());
+                    Chatback.nextChatback.remove(player);
                 } else {
                     Bot.getGameChatChannel().sendMessage(chatMessage).queue();
                 }
@@ -97,12 +133,12 @@ public class ListenPlayerChat implements Listener {
             bypassedPlayers = (fileConfig.getStringList("players"));
 
             // If player is on soft whitelist or is op, allow.
-            if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
-                    || event.getPlayer().hasPermission("dreamvisitor.nopause")) {
+            if (bypassedPlayers.contains(player.getUniqueId().toString())
+                    || player.hasPermission("dreamvisitor.nopause")) {
 
                 try {
-                    if (Chatback.nextChatback.containsKey(event.getPlayer())) {
-                        Chatback.ReplyMessage replyMessage = Chatback.nextChatback.get(event.getPlayer());
+                    if (Chatback.nextChatback.containsKey(player)) {
+                        Chatback.ReplyMessage replyMessage = Chatback.nextChatback.get(player);
 
                         ComponentBuilder replyNotice = new ComponentBuilder();
                         replyNotice.append("↱ Reply to ").color(ChatColor.GRAY);
@@ -113,7 +149,7 @@ public class ListenPlayerChat implements Listener {
                         Bukkit.spigot().broadcast(replyNotice.create());
                         Bot.getGameChatChannel().sendMessage(chatMessage).setMessageReference(replyMessage.messageId).failOnInvalidReply(false).queue();
 
-                        Chatback.nextChatback.remove(event.getPlayer());
+                        Chatback.nextChatback.remove(player);
                     } else {
                         Bot.getGameChatChannel().sendMessage(chatMessage).queue();
                     }
@@ -124,7 +160,7 @@ public class ListenPlayerChat implements Listener {
 
             } else {
                 event.setCancelled(true);
-                event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
+                player.sendMessage(ChatColor.RED + "Chat is currently paused.");
 
                 Bot.sendLog("Blocked: " + chatMessage);
 

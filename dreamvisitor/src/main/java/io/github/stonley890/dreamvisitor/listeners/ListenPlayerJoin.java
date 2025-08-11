@@ -3,7 +3,9 @@ package io.github.stonley890.dreamvisitor.listeners;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
+import io.github.stonley890.dreamvisitor.data.PlayerTribe;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.data.Tribe;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.luckperms.api.model.user.User;
@@ -22,10 +24,24 @@ public class ListenPlayerJoin implements Listener {
 
         final Player player = event.getPlayer();
 
+        // Edit player list name if staff
         final User lpUser = Dreamvisitor.getLuckPerms().getUserManager().getUser(player.getUniqueId());
         if (lpUser != null) {
+
+            // Get the player's tribe
+            Tribe tribeOfPlayer = PlayerTribe.getTribeOfPlayer(player.getUniqueId());
+            // Create a variable that represents the color to set the player's name to
+            ChatColor tribeColor;
+            // If the player has a tribe, set it to tribe color
+            // If not, set to white.
+            if (tribeOfPlayer != null) {
+                tribeColor = tribeOfPlayer.getColor();
+            } else {
+                tribeColor = ChatColor.WHITE;
+            }
+
             String prefix = lpUser.getCachedData().getMetaData().getPrefix();
-            if (prefix != null) player.setPlayerListName(prefix.replace('&', '§') + player.getName());
+            if (prefix != null) player.setPlayerListName(prefix.replace('&', '§') + tribeColor + player.getName());
         }
 
         // Enable flight

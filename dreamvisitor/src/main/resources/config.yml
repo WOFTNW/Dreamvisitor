@@ -191,3 +191,8 @@ inactiveTaxStop: 50000
 # The last time the inactive tax occurred. This should not be manually tampered with.
 # Default: 0
 lastInactiveTax: 0
+
+# The default maximum number of players for an auto restart.
+# This can be bypassed on a per-command basis by including the "max-players" argument.
+# Default: 0
+autoRestartMaxPlayers: 0

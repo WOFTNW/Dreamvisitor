@@ -18,6 +18,7 @@ import io.github.stonley890.dreamvisitor.functions.*;
 import io.github.stonley890.dreamvisitor.functions.worldguard.DragonFlightFlag;
 import io.github.stonley890.dreamvisitor.functions.worldguard.WitherFlag;
 import io.github.stonley890.dreamvisitor.listeners.*;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.luckperms.api.LuckPerms;
 import org.apache.logging.log4j.LogManager;
@@ -179,7 +180,6 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdUser());
             commands.add(new CmdTribeUpdate());
             commands.add(new CmdUnwax());
-            commands.add(new CmdScheduleRestart());
             commands.add(new CmdInvSwap());
             commands.add(new CmdDvset());
             commands.add(new CmdSetmotd());
@@ -365,15 +365,24 @@ public class Dreamvisitor extends JavaPlugin {
                 }
             };
 
-            Runnable scheduledRestarts = new BukkitRunnable() {
+            Runnable autoRestarts = new BukkitRunnable() {
                 @Override
                 public void run() {
                     // Restart if requested and no players are online
-                    if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().isEmpty()) {
+                    if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().size() <= AutoRestart.getMaxPlayers()) {
                         AutoRestart.sendAutoRestartMessage();
                         Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
                         Bot.sendLog("**Restarting the server as scheduled.**");
-                        getServer().spigot().restart();
+                        getServer().broadcastMessage("\nThe server is performing an automatic restart in 30 seconds.\n");
+                        EmbedBuilder embed = new EmbedBuilder();
+                        embed.setDescription("The server is performing an automatic restart in 30 seconds.");
+                        Bot.getGameChatChannel().sendMessageEmbeds(embed.build()).queue();
+
+                        MOTD = net.md_5.bungee.api.ChatColor.RED + "The server is restarting. Please wait.";
+                        getServer().setMaxPlayers(0);
+
+                        // Schedule task
+                        Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> getServer().spigot().restart(), 30 * 20);
                     }
 
                     // also check if memory usage is high and schedule restart
@@ -383,7 +392,7 @@ public class Dreamvisitor extends JavaPlugin {
                     if (freeMemoryPercent <= 10) {
                         AutoRestart.enableAutoRestart(null);
                         Bukkit.getLogger()
-                                .info("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
+                                .info("Dreamvisitor enabled automatic restart because free memory usage is at or less than 10%.");
                     }
                 }
             };
@@ -449,7 +458,7 @@ public class Dreamvisitor extends JavaPlugin {
                 Bukkit.getScheduler().runTaskTimer(this, pushConsole, 0, 40);
 
             // Check for scheduled restart every minute
-            Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
+            Bukkit.getScheduler().runTaskTimer(this, autoRestarts, 200, 1200);
 
             // Check for warns that need to be reminded every hour
             Bukkit.getScheduler().runTaskTimer(this, remindWarns, 200, 20 * 60 * 60);

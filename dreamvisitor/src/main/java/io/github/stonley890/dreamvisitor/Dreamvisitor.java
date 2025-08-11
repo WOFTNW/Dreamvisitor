@@ -373,7 +373,7 @@ public class Dreamvisitor extends JavaPlugin {
                         AutoRestart.sendAutoRestartMessage();
                         Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
                         Bot.sendLog("**Restarting the server as scheduled.**");
-                        getServer().broadcastMessage("!=\nThe server is performing an automatic restart in 30 seconds.\n!=");
+                        getServer().broadcastMessage("\nThe server is performing an automatic restart in 30 seconds.\n");
                         EmbedBuilder embed = new EmbedBuilder();
                         embed.setDescription("The server is performing an automatic restart in 30 seconds.");
                         Bot.getGameChatChannel().sendMessageEmbeds(embed.build()).queue();

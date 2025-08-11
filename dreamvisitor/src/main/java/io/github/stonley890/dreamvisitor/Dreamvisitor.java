@@ -180,7 +180,6 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdUser());
             commands.add(new CmdTribeUpdate());
             commands.add(new CmdUnwax());
-            commands.add(new CmdScheduleRestart());
             commands.add(new CmdInvSwap());
             commands.add(new CmdDvset());
             commands.add(new CmdSetmotd());

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.macver.pausechat.PauseChat;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import org.woftnw.dreamvisitor.data.type.DVUser;
 import org.woftnw.dreamvisitor.functions.Mail;
@@ -69,7 +70,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
         if ((cmd.startsWith("/me " ) || cmd.startsWith("/rp" )) && !event.isCancelled()) {
 
             // IF chatPaused stop /me unless bypassing
-            if (Dreamvisitor.chatPaused) {
+            if (PauseChat.isChatPaused()) {
 
                 // Init bypassed players file
                 File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
@@ -104,8 +105,8 @@ public class ListenPlayerCmdPreprocess implements Listener {
 //                    Bot.sendLog(message);
                 } // If list does not contain player, stop the command
                 else {
-                    event.setCancelled(true);
-                    Messager.sendDanger(player, "Chat is currently paused.");
+//                    event.setCancelled(true);
+//                    Messager.sendDanger(player, "Chat is currently paused.");
                 }
             } // If chat is not paused, allow
             else {

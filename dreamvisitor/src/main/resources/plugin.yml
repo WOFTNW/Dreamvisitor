@@ -9,6 +9,8 @@ authors: [
            Mustfa-IT,
            Brijeshthummar02
 ]
+depend:
+  - PauseChat
 softdepend:
   - EyeOfOnyx
   - Essentials

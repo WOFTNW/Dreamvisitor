@@ -120,6 +120,13 @@
             <artifactId>adventure-api</artifactId>
             <version>4.24.0</version>
         </dependency>
+        <dependency>
+            <!--Pause Chat-->
+            <groupId>org.macver</groupId>
+            <artifactId>pausechat</artifactId>
+            <version>v1-2.0.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -13,6 +13,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
+import org.macver.pausechat.PauseChat;
 import org.woftnw.dreamvisitor.data.BadWords;
 import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
@@ -100,44 +101,6 @@ public class ListenPlayerChat implements Listener {
         IF chat is not paused AND the player is not an operator OR the player is an
         operator, send message
         */
-
-        // Make sure the chat is not paused and the event is not cancelled.
-        if (!Dreamvisitor.chatPaused || event.isCancelled()) {
-            if (event.isCancelled()) return;
-
-            sendMessage(player, plainMessage);
-
-        } else {
-            // The chat is paused.
-
-            // Load pauseBypass file
-            File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
-            FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-            List<String> bypassedPlayers;
-
-			// Load file
-            try {
-                fileConfig.load(file);
-            } catch (IOException | InvalidConfigurationException ignored) {
-            }
-
-			// Fetch bypassed players
-            bypassedPlayers = (fileConfig.getStringList("players"));
-
-            // If player is on soft whitelist or is op, allow.
-            if (bypassedPlayers.contains(player.getUniqueId().toString())
-                    || player.hasPermission("dreamvisitor.nopause")) {
-
-                sendMessage(player, plainMessage);
-
-            } else {
-                event.setCancelled(true);
-                Messager.sendDanger(player, "Chat is currently paused.");
-
-                Dreamvisitor.getPlugin().getLogger().info("Message from " + player.getName() + " was blocked: " + message);
-
-            }
-        }
     }
 
     private static void sendMessage(Player player, String message) {

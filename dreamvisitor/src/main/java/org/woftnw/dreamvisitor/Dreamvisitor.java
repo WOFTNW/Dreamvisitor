@@ -43,7 +43,6 @@ public class Dreamvisitor extends JavaPlugin {
     public static Dreamvisitor PLUGIN;
     public static LuckPerms luckperms;
     public static String MOTD = null;
-    public static boolean chatPaused;
     public static Location hubLocation;
     public static boolean debugMode;
     private static ConsoleLogger appender;
@@ -203,8 +202,6 @@ public class Dreamvisitor extends JavaPlugin {
         commands.add(new CmdAdminRadio());
         commands.add(new CmdHub());
         commands.add(new CmdPanic());
-        commands.add(new CmdPauseBypass());
-        commands.add(new CmdPausechat());
         commands.add(new CmdRadio());
         commands.add(new CmdSethub());
         commands.add(new CmdSoftwhitelist());
@@ -245,12 +242,6 @@ public class Dreamvisitor extends JavaPlugin {
         SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
         sessionManager.registerHandler(DragonFlightFlag.FACTORY, null);
         sessionManager.registerHandler(WitherFlag.FACTORY, null);
-
-        Messager.debug("Restoring chat pause...");
-        if (Config.get(ConfigKey.PAUSE_CHAT)) {
-            chatPaused = true;
-            getLogger().info("Chat is currently paused from last session! Use /pausechat to allow users to chat.");
-        }
 
         Messager.debug("Setting up console logging...");
         appender = new ConsoleLogger();

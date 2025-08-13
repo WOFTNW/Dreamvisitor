@@ -72,12 +72,7 @@ public class CmdHub implements DVCommand {
                                     } else entity.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
                                 }
                             }
-                            if (entitySelect.size() == 1) {
-                                Messager.send(callee, "Teleported " + entitySelect.stream().findFirst().get().getName() + " to the hub.");
-                            }
-                            else {
-                                Messager.send(callee, "Teleported " + entitySelect.size() + " entities to the hub.");
-                            }
+                            Messager.send(callee, "Teleported " + Messager.nameOrCountEntity(entitySelect) + " to the hub.");
                         }
 
                     } else {

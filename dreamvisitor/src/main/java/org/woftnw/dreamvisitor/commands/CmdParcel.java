@@ -148,7 +148,7 @@ public class CmdParcel implements DVCommand {
                                         }
                                     }
 
-                                    Messager.send(sender, "Toggled mail for " + players.size() + ".");
+                                    Messager.send(sender, "Toggled mail for " + Messager.nameOrCountPlayer(players) + ".");
                                 })
                         )
 

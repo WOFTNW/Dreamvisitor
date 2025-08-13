@@ -36,7 +36,7 @@ public class CmdMoonglobe implements DVCommand {
             if (!alreadyHasGlobe) new Moonglobe(player.getUniqueId(), location, maxDistance);
         }
 
-        return ("Created moon globes for " + players.size() + " players.");
+        return ("Created moon globes for " + Messager.nameOrCountPlayer(players) + ".");
 
     }
 

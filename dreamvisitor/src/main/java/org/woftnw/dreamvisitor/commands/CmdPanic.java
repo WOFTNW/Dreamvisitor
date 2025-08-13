@@ -38,7 +38,8 @@ public class CmdPanic implements DVCommand {
                                 player.kickPlayer("Panic!");
                             }
                         }
-                        plugin.getConfig().set("playerlimit", 0);
+                        // TODO: Set player limit through PlayerCap
+//                        plugin.getConfig().set("playerlimit", 0);
                         plugin.saveConfig();
                         Bukkit.getServer().broadcastMessage(
                                 ChatColor.RED + "Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.");

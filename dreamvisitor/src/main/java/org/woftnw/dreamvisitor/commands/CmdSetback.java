@@ -78,7 +78,7 @@ public class CmdSetback implements DVCommand {
 
                     Messager.send(sender, "Set back location to " + location.getBlockX() + ", " + location.getBlockY() +
                             ", " + location.getBlockZ() + " of " + Objects.requireNonNull(location.getWorld()).getName() + " for " +
-                            players.size() + " player(s).");
+                            Messager.nameOrCountPlayer(players) + ".");
 
                 });
     }

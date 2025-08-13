@@ -1,5 +1,6 @@
 package org.woftnw.dreamvisitor.functions;
 
+import org.bukkit.entity.Entity;
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -74,6 +75,20 @@ public class Messager {
             return targets.iterator().next().getName();
         }
         return chooseCountForm(targets, "player ", "players");
+    }
+
+    /**
+     * Get the name of a {@link Collection} of {@link Player}s.
+     *
+     * @param targets the {@link Collection} of {@link Player}s.
+     * @return the name of the {@link Collection} of {@link Player)s.
+     */
+    @NotNull
+    public static String nameOrCountEntity(@NotNull Collection<Entity> targets) {
+        if (targets.size() == 1) {
+            return targets.iterator().next().getName();
+        }
+        return chooseCountForm(targets, "entity ", "entities");
     }
 
     /**

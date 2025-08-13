@@ -47,8 +47,8 @@ public class CmdVelocity implements DVCommand {
                         } else {
                             entity.setVelocity(entity.getVelocity().add(force.toVector()));
                         }
-                        Messager.send(sender, "Applied velocity to " + Messager.chooseCountForm(entities, "entity", "entities") + ".");
                     }
+                    Messager.send(sender, "Applied velocity to " + Messager.nameOrCountEntity(entities) + ".");
 
                 });
     }

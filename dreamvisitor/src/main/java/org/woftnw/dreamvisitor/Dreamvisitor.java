@@ -221,7 +221,6 @@ public class Dreamvisitor extends JavaPlugin {
         commands.add(new CmdSoftwhitelist());
         commands.add(new CmdTagRadio());
         commands.add(new CmdZoop());
-        commands.add(new CmdItemBanList());
         commands.add(new CmdUser());
         commands.add(new CmdTribeUpdate());
         commands.add(new CmdUnwax());
@@ -267,13 +266,6 @@ public class Dreamvisitor extends JavaPlugin {
         Messager.debug("Restoring player limit override...");
         playerLimit = Config.get(ConfigKey.PLAYER_LIMIT);
         getLogger().info("Player limit override is currently set to " + playerLimit);
-
-        Messager.debug("Restoring item banlist...");
-        try {
-            ItemBanList.init();
-        } catch (IOException e) {
-            getLogger().warning("Unable to load banned items from " + ItemBanList.file + ": " + e.getMessage());
-        }
 
         Messager.debug("Setting up console logging...");
         appender = new ConsoleLogger();
@@ -330,28 +322,6 @@ public class Dreamvisitor extends JavaPlugin {
             }
         };
 
-        Runnable checkBannedItems = new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (!player.isOp() && ItemBanList.badItems != null) {
-
-                        for (ItemStack item : ItemBanList.badItems) {
-                            if (item == null)
-                                continue;
-                            for (ItemStack content : player.getInventory().getContents()) {
-                                if (content == null || !content.isSimilar(item))
-                                    continue;
-                                player.getInventory().remove(item);
-                                getLogger().info("Removed " + item.getType().name() + " ("
-                                        + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
         Runnable tickFlight = Flight::tick;
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, runCommandsAsync, 20, 40);
@@ -359,8 +329,6 @@ public class Dreamvisitor extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 
         Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
-
-        Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20 * 10);
 
         Bukkit.getScheduler().runTaskTimer(this, tickFlight, 0, 1);
 
@@ -399,7 +367,6 @@ public class Dreamvisitor extends JavaPlugin {
         pluginManager.registerEvents(new ListenPlayerJoin(), this);
         pluginManager.registerEvents(new ListenPlayerLogin(), this);
         pluginManager.registerEvents(new ListenPlayerQuit(), this);
-        pluginManager.registerEvents(new ItemBanList(), this);
         pluginManager.registerEvents(new ListenPlayerGameModeChange(), this);
         pluginManager.registerEvents(new ListenServerPing(), this);
         pluginManager.registerEvents(new Sandbox(), this);

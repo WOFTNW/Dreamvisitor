@@ -38,7 +38,6 @@ public class CmdPanic implements DVCommand {
                                 player.kickPlayer("Panic!");
                             }
                         }
-                        Dreamvisitor.playerLimit = 0;
                         plugin.getConfig().set("playerlimit", 0);
                         plugin.saveConfig();
                         Bukkit.getServer().broadcastMessage(

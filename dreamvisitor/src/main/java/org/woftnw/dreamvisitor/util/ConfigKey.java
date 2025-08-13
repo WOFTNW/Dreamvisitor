@@ -11,7 +11,6 @@ public enum ConfigKey {
     AUTO_RESTART("auto_restart", false, Boolean.class),
     PAUSE_CHAT("pause_chat", false, Boolean.class),
     SOFT_WHITELIST("soft_whitelist", false, Boolean.class),
-    PLAYER_LIMIT("player_limit", -1, Integer.class),
     RESOURCE_PACK_REPO("resource_pack_repo", "WOFTNW/Dragonspeak", String.class),
     HUB_LOCATION("hub_location", null, Location.class),
     LOG_CONSOLE("log_console", false, Boolean.class),

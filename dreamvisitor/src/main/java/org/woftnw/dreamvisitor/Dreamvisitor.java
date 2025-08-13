@@ -10,9 +10,7 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandTree;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.IllegalPluginAccessException;
-import org.bukkit.scheduler.BukkitTask;
 import org.woftnw.dreamvisitor.commands.*;
 import org.woftnw.dreamvisitor.data.*;
 import org.woftnw.dreamvisitor.data.repository.*;
@@ -27,8 +25,6 @@ import net.luckperms.api.LuckPerms;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -48,7 +44,6 @@ public class Dreamvisitor extends JavaPlugin {
     public static LuckPerms luckperms;
     public static String MOTD = null;
     public static boolean chatPaused;
-    public static int playerLimit;
     public static Location hubLocation;
     public static boolean debugMode;
     private static ConsoleLogger appender;
@@ -215,7 +210,6 @@ public class Dreamvisitor extends JavaPlugin {
         commands.add(new CmdPanic());
         commands.add(new CmdPauseBypass());
         commands.add(new CmdPausechat());
-        commands.add(new CmdPlayerlimit());
         commands.add(new CmdRadio());
         commands.add(new CmdSethub());
         commands.add(new CmdSoftwhitelist());
@@ -262,10 +256,6 @@ public class Dreamvisitor extends JavaPlugin {
             chatPaused = true;
             getLogger().info("Chat is currently paused from last session! Use /pausechat to allow users to chat.");
         }
-
-        Messager.debug("Restoring player limit override...");
-        playerLimit = Config.get(ConfigKey.PLAYER_LIMIT);
-        getLogger().info("Player limit override is currently set to " + playerLimit);
 
         Messager.debug("Setting up console logging...");
         appender = new ConsoleLogger();

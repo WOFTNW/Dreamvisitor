@@ -48,6 +48,6 @@ public class Radio {
         if (command.equals("aradio")) radioType = "[Admin Radio]";
         else if (command.equals("tagradio")) radioType = "[Tag Radio]";
 
-        return Component.text(radioType + nameColor + " <" + name + "> ", NamedTextColor.AQUA).append(Component.text(message, NamedTextColor.WHITE));
+        return Component.text(radioType, NamedTextColor.DARK_AQUA).append(Component.text(" <" + name + "> ", nameColor)).append(Component.text(message, NamedTextColor.WHITE));
     }
 }

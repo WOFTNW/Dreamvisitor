@@ -168,6 +168,43 @@ public class Dreamvisitor extends JavaPlugin {
         Messager.debug("Setting up repositories...");
         repositoryManager = new RepositoryManager(pocketBase);
 
+        // Set up files. This must happen first because setting up commands require some files to exist.
+
+        Messager.debug("Creating data folder...");
+        boolean directoryCreated = getDataFolder().mkdir();
+        if (!directoryCreated)
+            Messager.debug("Dreamvisitor did not create a data folder. It may already exist.");
+        saveDefaultConfig();
+
+        Messager.debug("Initializing mail.yml");
+        try {
+            Mail.init();
+        } catch (IOException e) {
+            getLogger().warning("Unable to mail locations from " + PlayerTribe.file + ": " + e.getMessage());
+        }
+
+        Messager.debug("Initializing player-tribes.yml");
+        try {
+            PlayerTribe.setup();
+        } catch (IOException e) {
+            getLogger().warning("Unable to load tribes from " + PlayerTribe.file + ": " + e.getMessage());
+        }
+
+        Messager.debug("Initializing energy");
+        Flight.init();
+
+        Messager.debug("Initializing command scheduler");
+        CommandScheduler.getInstance().loadConfig();
+
+        Messager.debug("Initializing badwords.yml");
+        try {
+            BadWords.init();
+        } catch (IOException e) {
+            getLogger().warning("Unable to load bad words from " + BadWords.file + ": " + e.getMessage());
+        }
+
+        // Set up listeners and commands
+
         Messager.debug("Registering listeners...");
         registerListeners();
 
@@ -209,38 +246,7 @@ public class Dreamvisitor extends JavaPlugin {
         Messager.debug("Registering " + commands.size() + " commands...");
         registerCommands(commands);
 
-        Messager.debug("Creating data folder...");
-        boolean directoryCreated = getDataFolder().mkdir();
-        if (!directoryCreated)
-            Messager.debug("Dreamvisitor did not create a data folder. It may already exist.");
-        saveDefaultConfig();
-
-        Messager.debug("Initializing mail.yml");
-        try {
-            Mail.init();
-        } catch (IOException e) {
-            getLogger().warning("Unable to mail locations from " + PlayerTribe.file + ": " + e.getMessage());
-        }
-
-        Messager.debug("Initializing player-tribes.yml");
-        try {
-            PlayerTribe.setup();
-        } catch (IOException e) {
-            getLogger().warning("Unable to load tribes from " + PlayerTribe.file + ": " + e.getMessage());
-        }
-
-        Messager.debug("Initializing energy");
-        Flight.init();
-
-        Messager.debug("Initializing command scheduler");
-        CommandScheduler.getInstance().loadConfig();
-
-        Messager.debug("Initializing badwords.yml");
-        try {
-            BadWords.init();
-        } catch (IOException e) {
-            getLogger().warning("Unable to load bad words from " + BadWords.file + ": " + e.getMessage());
-        }
+        // Set up misc
 
         Messager.debug("Initializing LuckPerms API...");
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);

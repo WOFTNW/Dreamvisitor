@@ -36,7 +36,7 @@ import java.util.*;
 
 public class Mail {
 
-    static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getPath() + "/mail.yml");
+    static final File file = new File(Dreamvisitor.getPlugin().getDataFolder(), "/mail.yml");
     static List<Deliverer> activeDeliverers = new ArrayList<>();
     static double maxDistance;
 

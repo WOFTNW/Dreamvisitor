@@ -11,6 +11,7 @@ import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandTree;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitTask;
 import org.woftnw.dreamvisitor.commands.*;
 import org.woftnw.dreamvisitor.data.*;
@@ -139,7 +140,9 @@ public class Dreamvisitor extends JavaPlugin {
         boolean useRealtime = getConfig().getBoolean("pocketbaseUseRealtime", true);
 
         if (baseUrl.isEmpty() || configId.isEmpty()) {
-            throw new NullPointerException("Missing PocketBase URL or Config ID");
+            getLogger().severe("PocketBase URL or Config ID is not defined. Check the config and restart the server. Dreamvisitor is disabling to prevent issues.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
         }
 
         Messager.debug("Initialized PocketBase client");
@@ -430,11 +433,19 @@ public class Dreamvisitor extends JavaPlugin {
             moonglobe.remove(null);
 
         // Save and shutdown the Command Scheduler
-        CommandScheduler.getInstance().saveConfig();
-        CommandScheduler.getInstance().stopScheduler();
+        try {
+            CommandScheduler.getInstance().saveConfig();
+            CommandScheduler.getInstance().stopScheduler();
+        } catch (IllegalPluginAccessException ignored) {
+            // This might happen if Dreamvisitor fails to start correctly
+        }
 
         // Unattach the server logger
-        logger.removeAppender(appender);
+        try {
+            logger.removeAppender(appender);
+        } catch (NullPointerException ignored) {
+            // This might happen if Dreamvisitor fails to start correctly
+        }
 
         // TODO: Send shutdown signal to PocketBase.
 

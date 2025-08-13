@@ -8,6 +8,8 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.data.Config;
+import org.woftnw.dreamvisitor.util.ConfigKey;
 
 import java.awt.*;
 import java.util.Collection;
@@ -58,7 +60,7 @@ public class Messager {
      * @param message the message to log.
      */
     public static void debug(String message) {
-        if (Dreamvisitor.getPlugin().getConfig().getBoolean("debug")) {
+        if (Config.get(ConfigKey.DEBUG)) {
             Dreamvisitor.getPlugin().getLogger().info("DEBUG: " + message);
         }
     }

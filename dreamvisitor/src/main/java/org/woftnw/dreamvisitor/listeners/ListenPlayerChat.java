@@ -7,6 +7,11 @@ import java.util.regex.Pattern;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.woftnw.dreamvisitor.data.BadWords;
 import org.woftnw.dreamvisitor.data.PlayerMemory;
@@ -14,7 +19,6 @@ import org.woftnw.dreamvisitor.data.PlayerUtility;
 import org.woftnw.dreamvisitor.data.type.DVUser;
 import org.woftnw.dreamvisitor.functions.Chatback;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
@@ -36,9 +40,10 @@ public class ListenPlayerChat implements Listener {
     
     @EventHandler
     @SuppressWarnings({"null"})
-    public void onPlayerChatEvent(@NotNull AsyncPlayerChatEvent event) {
+    public void onPlayerChatEvent(@NotNull AsyncChatEvent event) {
 
-        String message = event.getMessage();
+        Component message = event.message();
+        String plainMessage = PlainTextComponentSerializer.plainText().serialize(message);
         Player player = event.getPlayer();
 
         // If the player has autoradio on, send there and cancel event
@@ -64,9 +69,9 @@ public class ListenPlayerChat implements Listener {
             Pattern pattern = Pattern.compile(".*\\b" + badWord.toLowerCase() + "\\b.*");
 
             // Check if the message matches the pattern
-            if (pattern.matcher(message.toLowerCase()).matches()) {
+            if (pattern.matcher(plainMessage.toLowerCase()).matches()) {
                 // Tell the player that they can't say that word
-                Messager.sendDanger(player, "You aren't allowed to say " + ChatColor.YELLOW + badWord);
+                Messager.sendDanger(player, Component.text("You aren't allowed to say ").append(Component.text(badWord, NamedTextColor.YELLOW)));
 
                 // Notify social spies
                 String report = "SocialSpy: " + player.getName() + " tried to say \"" + message + "\", but it was blocked because it contained the word " + badWord;
@@ -100,7 +105,7 @@ public class ListenPlayerChat implements Listener {
         if (!Dreamvisitor.chatPaused || event.isCancelled()) {
             if (event.isCancelled()) return;
 
-            sendMessage(player, message);
+            sendMessage(player, plainMessage);
 
         } else {
             // The chat is paused.
@@ -123,11 +128,11 @@ public class ListenPlayerChat implements Listener {
             if (bypassedPlayers.contains(player.getUniqueId().toString())
                     || player.hasPermission("dreamvisitor.nopause")) {
 
-                sendMessage(player, message);
+                sendMessage(player, plainMessage);
 
             } else {
                 event.setCancelled(true);
-                player.sendMessage(ChatColor.RED + "Chat is currently paused.");
+                Messager.sendDanger(player, "Chat is currently paused.");
 
                 Dreamvisitor.getPlugin().getLogger().info("Message from " + player.getName() + " was blocked: " + message);
 
@@ -139,13 +144,11 @@ public class ListenPlayerChat implements Listener {
         if (Chatback.nextChatback.containsKey(player)) {
             Chatback.ReplyMessage replyMessage = Chatback.nextChatback.get(player);
 
-            ComponentBuilder replyNotice = new ComponentBuilder();
-            replyNotice.append("↱ Reply to ").color(ChatColor.GRAY);
-            TextComponent replyUser = new TextComponent(replyMessage.authorEffectiveName);
-            replyUser.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(replyMessage.authorUsername)));
-            replyNotice.append(replyUser);
+            Component replyUser = Component.text(replyMessage.authorEffectiveName).hoverEvent(HoverEvent.showText(Component.text(replyMessage.authorUsername)));
+            Component replyNotice = Component.text("↱ Reply to " + replyUser, NamedTextColor.GRAY);
 
-            Bukkit.spigot().broadcast(replyNotice.create());
+            Messager.broadcast(replyNotice);
+
             // TODO: Send message as reply
 //                        Bot.getGameChatChannel().sendMessage(chatMessage).setMessageReference(replyMessage.messageId).failOnInvalidReply(false).queue();
 

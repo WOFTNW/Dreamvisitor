@@ -1,12 +1,13 @@
 package org.woftnw.dreamvisitor.functions;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
+import io.papermc.paper.ban.BanListType;
+import org.bukkit.ban.ProfileBanList;
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -224,9 +225,9 @@ public class Whitelist extends ListenerAdapter {
                     assert username != null;
                     Whitelist.remove(username, UUID.fromString(uuid));
                 }
-                BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
+                ProfileBanList banList = Bukkit.getBanList(BanListType.PROFILE);
                 assert username != null;
-                banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
+                banList.addBan(Bukkit.createProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
                 event.reply("Banned `" + username + "`.").queue();
 
             } catch (IOException e) {

@@ -17,6 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.functions.Messager;
 
 import java.util.Collection;
 
@@ -49,7 +50,7 @@ public class ListenCreatureSpawn implements Listener {
                 Collection<Entity> nearbyEntities = world.getNearbyEntities(bukkitLocation, 10, 10, 10);
                 for (Entity entity : nearbyEntities) {
                     if (entity instanceof Player player) {
-                        player.sendMessage(ChatColor.RED + Dreamvisitor.getPlugin().getConfig().getString("noWitherNotice"));
+                        Messager.sendDanger(player, Dreamvisitor.getPlugin().getConfig().getString("noWitherNotice"));
                     }
                 }
             }

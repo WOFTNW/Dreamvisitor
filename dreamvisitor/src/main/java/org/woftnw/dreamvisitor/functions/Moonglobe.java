@@ -111,7 +111,7 @@ public class Moonglobe {
         remove = true;
         hideGlobe();
         Player onlinePlayer = Bukkit.getPlayer(player);
-        if (onlinePlayer != null && reason != null) onlinePlayer.sendMessage(ChatColor.RED + "Your moon globe was removed: " + reason);
+        if (onlinePlayer != null && reason != null) Messager.sendDanger(onlinePlayer, "Your moon globe was removed: " + reason);
 
     }
 

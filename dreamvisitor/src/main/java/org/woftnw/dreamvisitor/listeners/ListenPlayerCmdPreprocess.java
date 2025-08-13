@@ -26,6 +26,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
 
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     final String[] tpAliases = {
+            "/back", "/eback", "/return", "/ereturn",
             "/call","/ecall","/tpa","/etpa","/tpask","/etpask",
             "/tpaccept","/etpaccept","/tpyes","/etpyes",
             "/home", "/ehome", "/homes", "/ehomes", "/claimspawn"
@@ -58,10 +59,9 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 if (event.getMessage().contains(disallowedCommand))
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers())
                         if (PlayerUtility.getUser(onlinePlayer).isInSandboxMode() && event.getMessage().contains(onlinePlayer.getName())) {
-                            event.getPlayer().sendMessage(ChatColor.RED + "That player is currently in Sandbox Mode.");
+                            Messager.sendDanger(event.getPlayer(), "That player is currently in Sandbox Mode.");
                             event.setCancelled(true);
                         }
-
             }
         }
 
@@ -80,7 +80,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 try {
                     fileConfig.load(file);
                 } catch (IOException | InvalidConfigurationException e1) {
-                    Bukkit.getLogger().warning("Could not load 'pauseBypass.yml' file! " + e1.getMessage());
+                    Dreamvisitor.getPlugin().getLogger().warning("Could not load 'pauseBypass.yml' file! " + e1.getMessage());
                 }
 
                 // Remember bypassed players
@@ -105,7 +105,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 } // If list does not contain player, stop the command
                 else {
                     event.setCancelled(true);
-                    player.sendMessage(ChatColor.RED + "Chat is currently paused.");
+                    Messager.sendDanger(player, "Chat is currently paused.");
                 }
             } // If chat is not paused, allow
             else {

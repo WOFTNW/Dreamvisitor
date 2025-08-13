@@ -16,7 +16,7 @@ public class ListenPlayerDeath implements Listener {
         Player player = event.getEntity().getPlayer();
         if (player != null && Mail.isPLayerDeliverer(player)) Mail.cancel(player);
 
-        if (event.getDeathMessage() == null) return;
+        if (event.deathMessage() == null) return;
 
         // TODO: Send death messages
 //        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(event.getDeathMessage())) + "**";

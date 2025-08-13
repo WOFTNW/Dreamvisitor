@@ -27,10 +27,10 @@ public class SoftWhitelist {
         try {
             config.load(file);
         } catch (IOException e) {
-            Bukkit.getLogger().severe(file.getName() + " cannot be read! Does the server have read/write access? " + e.getMessage());
+            Dreamvisitor.getPlugin().getLogger().severe(file.getName() + " cannot be read! Does the server have read/write access? " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         } catch (InvalidConfigurationException e) {
-            Bukkit.getLogger().severe(file.getName() + " is not a valid configuration! Is it formatted correctly? " + e.getMessage());
+            Dreamvisitor.getPlugin().getLogger().severe(file.getName() + " is not a valid configuration! Is it formatted correctly? " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
         return config;
@@ -40,7 +40,7 @@ public class SoftWhitelist {
         try {
             config.save(file);
         } catch (IOException e) {
-            Bukkit.getLogger().severe( file.getName() + " cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
+            Dreamvisitor.getPlugin().getLogger().severe( file.getName() + " cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
     }

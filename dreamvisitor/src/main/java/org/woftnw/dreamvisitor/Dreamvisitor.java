@@ -59,10 +59,6 @@ public class Dreamvisitor extends JavaPlugin {
         return PLUGIN;
     }
 
-    public static @NotNull String getPlayerPath(@NotNull UUID uuid) {
-        return PLUGIN.getDataFolder().getAbsolutePath() + "/player/" + uuid + ".yml";
-    }
-
     @NotNull
     public static LuckPerms getLuckPerms() throws NullPointerException {
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
@@ -140,7 +136,7 @@ public class Dreamvisitor extends JavaPlugin {
             return;
         }
 
-        Messager.debug("Initialized PocketBase client");
+        getLogger().info("Initialized PocketBase client");
         Map<String, Object> pbConfig = new HashMap<>();
         pbConfig.put("pocketbaseUrl", baseUrl);
         pbConfig.put("pocketbaseToken", token);
@@ -290,7 +286,7 @@ public class Dreamvisitor extends JavaPlugin {
                 if (AutoRestart.isAutoRestart() && Bukkit.getOnlinePlayers().isEmpty()) {
                     AutoRestart.sendAutoRestartMessage();
                     getLogger().info("Restarting the server as scheduled.");
-                    getServer().spigot().restart();
+                    getServer().restart();
                 }
 
                 long maxMemory = Runtime.getRuntime().maxMemory();

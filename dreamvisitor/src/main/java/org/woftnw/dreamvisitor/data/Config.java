@@ -50,14 +50,14 @@ public class Config {
         }
 
         // Get record using PocketBase client
-        Messager.debug("Getting record " + configId + " from collection " + COLLECTION_NAME);
+        Dreamvisitor.getPlugin().getLogger().info("Getting record " + configId + " from collection " + COLLECTION_NAME);
         JsonObject record = pocketBaseClient.getRecord(COLLECTION_NAME, configId, null, null);
 
         // Convert from Gson JsonObject to org.json.JSONObject
         String jsonString = record.toString();
         config = new JSONObject(jsonString);
 
-        Messager.debug("Loaded PocketBase configuration: " + config);
+        Dreamvisitor.getPlugin().getLogger().info("Loaded PocketBase configuration: " + config);
 
         // Apply config values to the system
         applyConfig();

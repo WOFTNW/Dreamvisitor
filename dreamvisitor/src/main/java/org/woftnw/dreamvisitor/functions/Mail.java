@@ -2,12 +2,11 @@ package org.woftnw.dreamvisitor.functions;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.woftnw.dreamvisitor.data.Tribe;
 import org.woftnw.dreamvisitor.data.TribeUtil;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -57,14 +56,14 @@ public class Mail {
             if (activeDeliverers.isEmpty()) return;
 
             for (Deliverer activeDeliverer : activeDeliverers) {
-                ComponentBuilder builder = new ComponentBuilder("You are currently delivering a parcel to ").color(ChatColor.WHITE);
+                Component message = Component.text("You are currently delivering a parcel to ", NamedTextColor.WHITE);
                 String distance = "unknown";
                 try {
                     distance = String.valueOf(Math.round(calculateDistanceWithPantalaOffset(activeDeliverer.player.getLocation(), activeDeliverer.endLoc.location)));
                 } catch (IllegalArgumentException ignored) {}
-                builder.append(activeDeliverer.endLoc.name.replace("_", " ")).color(ChatColor.AQUA).append(", ").color(ChatColor.WHITE)
-                        .append(distance).color(ChatColor.AQUA).append(" meters away.").color(ChatColor.WHITE);
-                activeDeliverer.player.spigot().sendMessage(ChatMessageType.ACTION_BAR, builder.create());
+                message = message.append(Component.text(activeDeliverer.endLoc.name.replace("_", " "), NamedTextColor.AQUA)).append(Component.text(", "))
+                        .append(Component.text(distance, NamedTextColor.AQUA)).append(Component.text(" meters away.", NamedTextColor.WHITE));
+                activeDeliverer.player.sendActionBar(message);
             }
         }, 20, 20);
     }
@@ -76,10 +75,10 @@ public class Mail {
         try {
             config.load(file);
         } catch (IOException e) {
-            Bukkit.getLogger().severe(file.getName() + " cannot be read! Does the server have read/write access? " + e.getMessage());
+            Dreamvisitor.getPlugin().getLogger().severe(file.getName() + " cannot be read! Does the server have read/write access? " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         } catch (InvalidConfigurationException e) {
-            Bukkit.getLogger().severe(file.getName() + " is not a valid configuration! Is it formatted correctly? " + e.getMessage());
+            Dreamvisitor.getPlugin().getLogger().severe(file.getName() + " is not a valid configuration! Is it formatted correctly? " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
         return config;
@@ -89,7 +88,7 @@ public class Mail {
         try {
             config.save(file);
         } catch (IOException e) {
-            Bukkit.getLogger().severe( file.getName() + " cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
+            Dreamvisitor.getPlugin().getLogger().severe( file.getName() + " cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
     }
@@ -318,7 +317,7 @@ public class Mail {
         try {
             nameConfig.load(inputStreamReader);
         } catch (IOException | InvalidConfigurationException e) {
-            Bukkit.getLogger().warning("There was a problem accessing embedded names.yml: " + e.getMessage());
+            Dreamvisitor.getPlugin().getLogger().warning("There was a problem accessing embedded names.yml: " + e.getMessage());
             return placeholder;
         }
         int roll = random.nextInt(100);
@@ -511,8 +510,8 @@ public class Mail {
             ItemMeta itemMeta = Bukkit.getItemFactory().getItemMeta(parcel.getType());
             assert itemMeta != null;
 
-            itemMeta.setDisplayName(ChatColor.RESET + "Parcel for " + name);
-            itemMeta.setLore(Arrays.stream(lore[new Random().nextInt(lore.length)].split("\n")).toList());
+            itemMeta.displayName(Component.text("Parcel for " + name));
+            itemMeta.lore(Arrays.stream(lore[new Random().nextInt(lore.length)].split("\n")).map(Component::text).toList());
             PersistentDataContainer data = itemMeta.getPersistentDataContainer();
             data.set(new NamespacedKey(Dreamvisitor.getPlugin(), "mail_deliverer"), PersistentDataType.STRING, player.getUniqueId().toString());
             data.set(new NamespacedKey(Dreamvisitor.getPlugin(), "mail_deliver_start"), PersistentDataType.STRING, startTime.toString());
@@ -525,10 +524,6 @@ public class Mail {
         @Nullable
         public ItemStack getParcel() {
             return parcel;
-        }
-
-        public String getParcelName() {
-            return Objects.requireNonNull(createParcel().getItemMeta()).getDisplayName().split(" ")[2];
         }
 
         public boolean started() {

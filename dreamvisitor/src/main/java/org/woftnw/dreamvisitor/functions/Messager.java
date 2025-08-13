@@ -1,26 +1,45 @@
 package org.woftnw.dreamvisitor.functions;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.woftnw.dreamvisitor.Dreamvisitor;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.woftnw.dreamvisitor.data.Config;
 import org.woftnw.dreamvisitor.util.ConfigKey;
 
-import java.awt.*;
 import java.util.Collection;
 
 public class Messager {
 
-    public static final Color PREFIX_COLOR = Color.decode("#3B3BD1");
-    public static final Color MESSAGE_COLOR = Color.decode("#C9C9FB");
-    public static final Color DANGER_COLOR = Color.decode("#E0505B");
+    public static final TextColor PREFIX_COLOR = TextColor.fromCSSHexString("#3B3BD1");
+    public static final TextColor MESSAGE_COLOR = TextColor.fromCSSHexString("#C9C9FB");
+    public static final TextColor DANGER_COLOR = TextColor.fromCSSHexString("#E0505B");
 
-    static final String PREFIX = ChatColor.of(PREFIX_COLOR) + "✧ ";
+    static final TextComponent PREFIX = Component.text("✧ ").color(PREFIX_COLOR);
+    static final TextComponent BROADCAST_PREFIX = Component.text("[BROADCAST] ").color(PREFIX_COLOR);
+
+    /**
+     * Send a {@link String} message to all players.
+     *
+     * @param message the message to send.
+     */
+    public static void broadcast(String message) {
+        Bukkit.getServer().broadcast(PREFIX.append(Component.text(message).color(MESSAGE_COLOR)));
+    }
+
+    /**
+     * Send a {@link Component} message to all players.
+     *
+     * @param message the message to send.
+     */
+    public static void broadcast(@NotNull Component message) {
+        Bukkit.getServer().broadcast(PREFIX.append(message.color(MESSAGE_COLOR)));
+    }
 
     /**
      * Send a {@link String} message to a target.
@@ -29,19 +48,18 @@ public class Messager {
      * @param message the message to send.
      */
     public static void send(@NotNull CommandSender target, String message) {
-        target.sendMessage(PREFIX + ChatColor.of(MESSAGE_COLOR) + message);
+        target.sendMessage(PREFIX.append(Component.text(message).color(MESSAGE_COLOR)));
     }
 
     /**
-     * Send a {@link BaseComponent} message to a target.
+     * Send a {@link Component} message to a target.
      *
      * @param target  the target to send the message to.
      * @param message the message to send.
      */
-    public static void send(@NotNull CommandSender target, BaseComponent[] message) {
-        ComponentBuilder builder = new ComponentBuilder();
-        builder.append(PREFIX).append(message).color(ChatColor.of(MESSAGE_COLOR));
-        target.spigot().sendMessage(builder.build());
+    public static void send(@NotNull CommandSender target, @NotNull Component message) {
+        Component result = PREFIX.append(message.color(MESSAGE_COLOR));
+        target.sendMessage(result);
     }
 
     /**
@@ -51,7 +69,17 @@ public class Messager {
      * @param message the message to send.
      */
     public static void sendDanger(@NotNull CommandSender target, String message) {
-        target.sendMessage(PREFIX + ChatColor.of(DANGER_COLOR) + message);
+        target.sendMessage(PREFIX.append(Component.text(message).color(DANGER_COLOR)));
+    }
+
+    /**
+     * Send a {@link String} message to a target with a color that indicates danger.
+     *
+     * @param target  the target to send the message to.
+     * @param message the message to send.
+     */
+    public static void sendDanger(@NotNull CommandSender target, @NotNull Component message) {
+        target.sendMessage(PREFIX.append(message.color(DANGER_COLOR)));
     }
 
     /**
@@ -60,7 +88,12 @@ public class Messager {
      * @param message the message to log.
      */
     public static void debug(String message) {
-        if (Config.get(ConfigKey.DEBUG)) {
+        try {
+            if (Config.get(ConfigKey.DEBUG)) {
+                Dreamvisitor.getPlugin().getLogger().info("DEBUG: " + message);
+            }
+        } catch (NullPointerException e) {
+            Dreamvisitor.getPlugin().getLogger().warning("Debug messager was called before config was ready. This is not fatal, but should not happen because I don't know if debug is enabled yet. Here is the message:");
             Dreamvisitor.getPlugin().getLogger().info("DEBUG: " + message);
         }
     }

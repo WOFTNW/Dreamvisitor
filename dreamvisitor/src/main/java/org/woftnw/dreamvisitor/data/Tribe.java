@@ -1,6 +1,7 @@
 package org.woftnw.dreamvisitor.data;
 
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +21,7 @@ public enum Tribe {
     @NotNull
     private String name = "Undefined.";
     @NotNull
-    private ChatColor color = ChatColor.WHITE;
+    private TextColor color = NamedTextColor.WHITE;
 
     static {
         HIVE.name = "Hive";
@@ -34,16 +35,16 @@ public enum Tribe {
         SILK.name = "Silk";
         SKY.name = "Sky";
 
-        HIVE.color = ChatColor.GOLD;
-        ICE.color = ChatColor.AQUA;
-        LEAF.color = ChatColor.DARK_GREEN;
-        MUD.color = ChatColor.RED;
-        NIGHT.color = ChatColor.DARK_PURPLE;
-        RAIN.color = ChatColor.GREEN;
-        SAND.color = ChatColor.YELLOW;
-        SEA.color = ChatColor.BLUE;
-        SILK.color = ChatColor.LIGHT_PURPLE;
-        SKY.color = ChatColor.DARK_RED;
+        HIVE.color = NamedTextColor.GOLD;
+        ICE.color = NamedTextColor.AQUA;
+        LEAF.color = NamedTextColor.DARK_GREEN;
+        MUD.color = NamedTextColor.RED;
+        NIGHT.color = NamedTextColor.DARK_PURPLE;
+        RAIN.color = NamedTextColor.GREEN;
+        SAND.color = NamedTextColor.YELLOW;
+        SEA.color = NamedTextColor.BLUE;
+        SILK.color = NamedTextColor.LIGHT_PURPLE;
+        SKY.color = NamedTextColor.DARK_RED;
     }
 
     /**
@@ -70,10 +71,10 @@ public enum Tribe {
     /**
      * Get the color of this tribe.
      *
-     * @return The {@link ChatColor} of this tribe.
+     * @return The {@link TextColor} of this tribe.
      */
     @NotNull
-    public ChatColor getColor() {
+    public TextColor getColor() {
         return color;
     }
 

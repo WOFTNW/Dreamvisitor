@@ -1,5 +1,7 @@
 package org.woftnw.dreamvisitor.functions;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -42,17 +44,17 @@ public class Sandbox implements Listener {
         player.setGameMode(GameMode.CREATIVE);
         player.setGlowing(true);
 
-        ComponentBuilder messageBuilder = new ComponentBuilder();
-        messageBuilder.append("You are now in sandbox mode.\n").bold(true)
-                .append("A staff member put you into sandbox mode. You are now in creative mode. " +
-                        "Your inventory has been cleared and stored for later restore. " +
-                        "In sandbox mode, the following limitations are imposed:\n").bold(false)
-                .append("- You cannot access containers.\n")
-                .append("- You cannot drop items.\n")
-                .append("- You cannot use spawn eggs.\n")
-                .append("- You cannot teleport.\n")
-                .append("Please notify a staff member if you require assistance with any of these rules.");
-        player.spigot().sendMessage(messageBuilder.create());
+        Component message = Component.text("You are now in sandbox mode.\n").decorate(TextDecoration.BOLD)
+                .append(Component.text("""
+                        A staff member put you into sandbox mode. You are now in creative mode. \
+                        Your inventory has been cleared and stored for later restore. \
+                        In sandbox mode, the following limitations are imposed:
+                        - You cannot access containers.
+                        - You cannot drop items.
+                        - You cannot use spawn eggs.
+                        - You cannot teleport.
+                        Please notify a staff member if you require assistance with any of these rules."""));
+        player.sendMessage(message);
 
     }
 
@@ -71,7 +73,7 @@ public class Sandbox implements Listener {
         player.setGameMode(GameMode.SURVIVAL);
         player.setGlowing(false);
 
-        player.sendMessage(ChatColor.BOLD + "You are no longer in sandbox mode.");
+        player.sendMessage(Component.text("You are no longer in sandbox mode.").decorate(TextDecoration.BOLD));
     }
 
 

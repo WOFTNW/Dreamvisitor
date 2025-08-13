@@ -3,6 +3,8 @@ package org.woftnw.dreamvisitor.commands;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.LongArgument;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.woftnw.dreamvisitor.functions.Chatback;
 import net.md_5.bungee.api.ChatColor;
 import org.jetbrains.annotations.NotNull;
@@ -16,10 +18,10 @@ public class CmdChatback implements DVCommand {
                 .executesPlayer((sender, args) -> {
                     Long messageID = (Long) args.get(0);
                     if (messageID == null) {
-                        sender.sendMessage(ChatColor.GRAY + "Canceled chatback.");
+                        sender.sendMessage(Component.text("Canceled chatback.").color(NamedTextColor.GRAY));
                         Chatback.nextChatback.remove(sender);
                     } else {
-                        sender.sendMessage(ChatColor.GRAY + "Your next message will be a reply. Run /chatback to cancel.");
+                        sender.sendMessage(Component.text("Your next message will be a reply. Run /chatback to cancel.").color(NamedTextColor.GRAY));
                         // TODO: Implement chatback.
 //                        Bot.getGameChatChannel().retrieveMessageById(messageID).queue(message -> {
 //                            User author = message.getAuthor();

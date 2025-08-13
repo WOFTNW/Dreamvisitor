@@ -4,6 +4,8 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.*;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.woftnw.dreamvisitor.data.Tribe;
 import org.woftnw.dreamvisitor.functions.Mail;
 import org.woftnw.dreamvisitor.functions.Messager;
@@ -77,18 +79,17 @@ public class CmdParcel implements DVCommand {
                                 .executesNative((sender, args) -> {
                                     List<Mail.MailLocation> locations = Mail.getLocations();
 
-                                    final ComponentBuilder message = new ComponentBuilder("Mail Locations");
+                                    Component message = Component.text("Mail Locations");
 
                                     for (Mail.MailLocation mailLocation : locations) {
-                                        message.append("\n").append(mailLocation.getName()).color(net.md_5.bungee.api.ChatColor.YELLOW)
-                                                .append(": ").reset().append(String.valueOf(mailLocation.getLocation().getX()))
-                                                .append(" ").append(String.valueOf(mailLocation.getLocation().getY()))
-                                                .append(" ").append(String.valueOf(mailLocation.getLocation().getZ()))
-                                                .append(" in ").append(Objects.requireNonNull(mailLocation.getLocation().getWorld()).getName())
-                                                .append("\n Weight: ").append(String.valueOf(mailLocation.getWeight()))
-                                                .append(", Home Tribe: ").append(mailLocation.getHomeTribe().getName());
+                                        Location location = mailLocation.getLocation();
+                                        message = message.append(Component.text("\n" + mailLocation.getName(), NamedTextColor.YELLOW))
+                                                .append(Component.text(
+                                                        ": " + location.getX() + " " + location.getY() + " " + location.getZ() + " in " + Objects.requireNonNull(location.getWorld()).getName() +
+                                                                "\n Weight: " + mailLocation.getWeight() + ", Home Tribe: " + mailLocation.getHomeTribe().getName()
+                                                ));
                                     }
-                                    Messager.send(sender, message.create());
+                                    Messager.send(sender, message);
                                 })
                         )
                 )
@@ -136,13 +137,13 @@ public class CmdParcel implements DVCommand {
                                             final String message = e.getMessage();
                                             switch (message) {
                                                 case "Player does not have parcel!" ->
-                                                        Messager.sendDanger(player, ChatColor.RED + "You do not have the parcel that is to be delivered!");
+                                                        Messager.sendDanger(player, "You do not have the parcel that is to be delivered!");
                                                 case "EssentialsX is not currently active!" ->
-                                                        Messager.sendDanger(player, ChatColor.RED + "EssentialsX is not enabled! Contact a staff member!");
+                                                        Messager.sendDanger(player, "EssentialsX is not enabled! Contact a staff member!");
                                                 case "Not at the destination location!" ->
-                                                        Messager.sendDanger(player, ChatColor.RED + "This is not your delivery location!");
+                                                        Messager.sendDanger(player, "This is not your delivery location!");
                                                 default ->
-                                                        Messager.sendDanger(player, ChatColor.RED + "There was a problem: " + message + "\nPlease contact a staff member.");
+                                                        Messager.sendDanger(player, "There was a problem: " + message + "\nPlease contact a staff member.");
                                             }
                                             return;
                                         }
@@ -221,7 +222,12 @@ public class CmdParcel implements DVCommand {
             final Mail.Deliverer deliverer = new Mail.Deliverer(player, start, end);
             deliverer.start();
             deliverers.add(deliverer);
-            Messager.send(player, "Deliver this parcel to " + ChatColor.YELLOW + end.getName().replace("_", " ") + ChatColor.WHITE + ".\nRun " + ChatColor.AQUA + "/" + getCommand().getName() + " cancel" + ChatColor.WHITE + " to cancel.");
+            Messager.send(player, Component.text("Deliver this parcel to ", NamedTextColor.YELLOW)
+                    .append(Component.text(end.getName().replace("_", " "), NamedTextColor.WHITE))
+                    .append(Component.text(".\nRun "))
+                    .append(Component.text("/" + getCommand().getName() + " cancel", NamedTextColor.AQUA))
+                    .append(Component.text(" to cancel."))
+            );
         }
 
         Messager.debug("Size of deliverers now: " + deliverers.size());

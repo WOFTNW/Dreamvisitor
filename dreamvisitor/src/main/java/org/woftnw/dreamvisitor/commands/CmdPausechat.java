@@ -2,11 +2,13 @@ package org.woftnw.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
+import org.woftnw.dreamvisitor.functions.Messager;
 
 public class CmdPausechat implements DVCommand {
 
@@ -26,7 +28,7 @@ public class CmdPausechat implements DVCommand {
                         plugin.getConfig().set("chatPaused", Dreamvisitor.chatPaused);
 
                         // Broadcast to server
-                        Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been unpaused.");
+                        Messager.broadcast(Component.text("Chat has been unpaused."));
 
                         // TODO: Broadcast to chat channel
 //                        Bot.getGameChatChannel().sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft**").queue();
@@ -38,7 +40,7 @@ public class CmdPausechat implements DVCommand {
                         plugin.getConfig().set("chatPaused", Dreamvisitor.chatPaused);
 
                         // Broadcast to server
-                        Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been paused.");
+                        Messager.broadcast(Component.text("Chat has been paused."));
 
                         // TODO: Broadcast to chat channel
 //                        Bot.getGameChatChannel().sendMessage("**Chat has been paused. Messages will not be sent to Minecraft**").queue();

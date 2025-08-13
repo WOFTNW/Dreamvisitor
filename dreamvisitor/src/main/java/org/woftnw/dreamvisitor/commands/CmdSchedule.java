@@ -7,10 +7,11 @@ import dev.jorel.commandapi.arguments.GreedyStringArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.arguments.TextArgument;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.woftnw.dreamvisitor.functions.CommandScheduler;
 import org.woftnw.dreamvisitor.functions.CommandScheduler.Schedule;
 import org.woftnw.dreamvisitor.functions.Messager;
-import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalTime;
@@ -159,20 +160,25 @@ public class CmdSchedule implements DVCommand {
                                     Messager.send(sender, "Scheduled commands:");
                                     for (Schedule schedule : schedules) {
                                         final List<String> commands = schedule.getCommands();
-                                        final String typeInfo = getTypeInfo(schedule);
+                                        final Component typeInfo = getTypeInfo(schedule);
 
-                                        Messager.send(sender, ChatColor.YELLOW + schedule.getName() + ChatColor.WHITE +
-                                                ": "
-                                                + (commands.size() > 1 ? commands.size() + " commands "
-                                                : "'" + ChatColor.GRAY + commands.get(0) + ChatColor.WHITE + "' ")
-                                                +
-                                                typeInfo + ". " +
-                                                ChatColor.AQUA + schedule.getTimeUntilNextRun() + ChatColor.WHITE + " until next run.");
+                                        Messager.send(sender, Component.text(schedule.getName(), NamedTextColor.YELLOW)
+                                                .append(Component.text(": "))
+                                                .append(
+                                                        (commands.size() > 1 ? Component.text(commands.size() + (" commands ")) :
+                                                                Component.text("'").append(Component.text(commands.get(0), NamedTextColor.GRAY)).append(Component.text("' "))
+                                                        )
+                                                )
+                                                .append(typeInfo)
+                                                .append(Component.text(". "))
+                                                .append(Component.text(schedule.getTimeUntilNextRun(), NamedTextColor.AQUA))
+                                                .append(Component.text(" until next run."))
+                                        );
 
                                         if (commands.size() > 1) {
-                                            sender.sendMessage(ChatColor.GRAY + "  Commands: ");
+                                            Messager.send(sender, Component.text("  Commands: ", NamedTextColor.GRAY));
                                             for (int i = 0; i < commands.size(); i++) {
-                                                sender.sendMessage(ChatColor.GRAY + "  " + (i + 1) + ". " + commands.get(i));
+                                                Messager.send(sender, Component.text("  " + (i + 1) + ". " + commands.get(i), NamedTextColor.GRAY));
                                             }
                                         }
                                     }
@@ -286,15 +292,19 @@ public class CmdSchedule implements DVCommand {
     }
 
     @NotNull
-    private static String getTypeInfo(@NotNull Schedule schedule) {
-        String typeInfo;
+    private static Component getTypeInfo(@NotNull Schedule schedule) {
+        Component typeInfo;
 
         switch (schedule.getType()) {
-            case INTERVAL -> typeInfo = "every " + ChatColor.GREEN + schedule.getIntervalMinutes()
-                    + ChatColor.WHITE + " minutes";
-            case DAILY -> typeInfo = "daily at " + ChatColor.GREEN + schedule.getDailyTime();
-            case CRON -> typeInfo = "using cron pattern " + ChatColor.GREEN + schedule.getCronPattern().getPattern();
-            default -> typeInfo = "unknown schedule type";
+            case INTERVAL -> typeInfo = Component.text("every ")
+                    .append(Component.text(schedule.getIntervalMinutes(), NamedTextColor.GREEN))
+                    .append(Component.text(" minutes"));
+            case DAILY -> typeInfo = Component.text("daily at ")
+                    .append(Component.text(String.valueOf(schedule.getDailyTime()), NamedTextColor.GREEN))
+                    .append(Component.text(" minutes"));
+            case CRON -> typeInfo = Component.text("using cron pattern ")
+                    .append(Component.text(String.valueOf(schedule.getCronPattern().getPattern()), NamedTextColor.GREEN));
+            default -> typeInfo = Component.text("unknown schedule type", Messager.DANGER_COLOR);
         }
         return typeInfo;
     }

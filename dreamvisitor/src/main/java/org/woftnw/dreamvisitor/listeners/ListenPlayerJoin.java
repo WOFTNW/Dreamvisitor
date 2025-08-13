@@ -1,7 +1,9 @@
 package org.woftnw.dreamvisitor.listeners;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.woftnw.dreamvisitor.Dreamvisitor;
-import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerTribe;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import org.woftnw.dreamvisitor.data.Tribe;
@@ -10,7 +12,6 @@ import org.woftnw.dreamvisitor.functions.Flight;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.woftnw.dreamvisitor.functions.Sandbox;
 import net.luckperms.api.model.user.User;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,19 +33,19 @@ public class ListenPlayerJoin implements Listener {
             // Get the player's tribe
             Tribe tribeOfPlayer = PlayerTribe.getTribeOfPlayer(player.getUniqueId());
             // Create a variable that represents the color to set the player's name to
-            ChatColor tribeColor;
+            TextColor tribeColor;
             // If the player has a tribe, set it to tribe color
             // If not, set to white.
             if (tribeOfPlayer != null) {
                 tribeColor = tribeOfPlayer.getColor();
             } else {
-                tribeColor = ChatColor.WHITE;
+                tribeColor = NamedTextColor.WHITE;
             }
 
             // Get the prefix from LuckPerms data
             String prefix = lpUser.getCachedData().getMetaData().getPrefix();
             // Set the player list name with the prefix
-            if (prefix != null) player.setPlayerListName(prefix.replace('&', '§') + tribeColor + player.getName());
+            if (prefix != null) player.playerListName(LegacyComponentSerializer.legacyAmpersand().deserialize(prefix.replace('&', '§') + tribeColor + player.getName()));
         }
 
         // Enable flight

@@ -3,6 +3,7 @@ package org.woftnw.dreamvisitor.commands;
 import java.util.TimerTask;
 
 import dev.jorel.commandapi.CommandAPICommand;
+import net.kyori.adventure.text.Component;
 import org.woftnw.dreamvisitor.functions.Messager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,14 +36,13 @@ public class CmdPanic implements DVCommand {
                     } else {
                         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                             if (!player.isOp()) {
-                                player.kickPlayer("Panic!");
+                                player.kick(Component.text("Panic mode activated. The server is temporarily closed."));
                             }
                         }
                         // TODO: Set player limit through PlayerCap
 //                        plugin.getConfig().set("playerlimit", 0);
                         plugin.saveConfig();
-                        Bukkit.getServer().broadcastMessage(
-                                ChatColor.RED + "Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.");
+                        Messager.broadcast(Component.text("Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.", Messager.DANGER_COLOR));
                         // TODO: Send a message to the server log.
 //                        Bot.sendLog("**Panicked by " + sender.getName());
                     }

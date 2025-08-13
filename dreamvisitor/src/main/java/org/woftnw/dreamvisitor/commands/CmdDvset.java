@@ -2,12 +2,14 @@ package org.woftnw.dreamvisitor.commands;
 
 import dev.jorel.commandapi.*;
 import dev.jorel.commandapi.arguments.StringArgument;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
 import org.woftnw.dreamvisitor.data.type.DVUser;
 import org.woftnw.dreamvisitor.functions.Messager;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.*;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -20,82 +22,81 @@ public class CmdDvset implements DVCommand {
 
         DVUser user = PlayerUtility.getUser(player);
 
-        ComponentBuilder builder = new ComponentBuilder();
-        builder.append("User Options ");
+        Component message = Component.text("User Options ");
 
         if (player.hasPermission("dreamvisitor.set.discord")) {
-            builder.append("\n\nDiscord Visibility: ").color(ChatColor.WHITE)
-                    .append("\nWhether to show messages from Discord's chat bridge.").color(ChatColor.GRAY)
-                    .append("\n[").color(ChatColor.DARK_GRAY)
+            message = message.append(Component.text("\n\nDiscord Visibility: ").color(NamedTextColor.WHITE))
+                    .append(Component.text("\nWhether to show messages from Discord's chat bridge.").color(NamedTextColor.GRAY))
+                    .append(Component.text("\n[").color(NamedTextColor.DARK_GRAY))
                     .append(booleanToggle(user.isShowDiscordOn(), "discord"))
-                    .append("").reset().append("]").color(ChatColor.DARK_GRAY);
+                    .append(Component.text("]").color(NamedTextColor.DARK_GRAY));
         }
 
         if (player.hasPermission("dreamvisitor.set.flight")) {
-            builder.append("\n\nFlight Disabled: ").color(ChatColor.WHITE)
-                    .append("\nWhether Flight Mode cannot be activated.").color(ChatColor.GRAY)
-                    .append("\n[").color(ChatColor.DARK_GRAY)
+            message = message.append(Component.text("\n\nFlight Disabled: ").color(NamedTextColor.WHITE))
+                    .append(Component.text("\nWhether Flight Mode cannot be activated.").color(NamedTextColor.GRAY))
+                    .append(Component.text("\n[").color(NamedTextColor.DARK_GRAY))
                     .append(booleanToggle(user.isFlightDisabled(), "flight"))
-                    .append("").reset().append("]").color(ChatColor.DARK_GRAY);
+                    .append(Component.text("]").color(NamedTextColor.DARK_GRAY));
         }
 
         if (player.hasPermission("dreamvisitor.set.zoop")) {
-            builder.append("\n\nDiscord Vanish: ").color(ChatColor.WHITE)
-                    .append("\nWhether to appear offline in Dreamvisitor.").color(ChatColor.GRAY)
-                    .append("\n[").color(ChatColor.DARK_GRAY)
+            message = message.append(Component.text("\n\nDiscord Vanish: ").color(NamedTextColor.WHITE))
+                    .append(Component.text("\nWhether to appear offline in Dreamvisitor.").color(NamedTextColor.GRAY))
+                    .append(Component.text("\n[").color(NamedTextColor.DARK_GRAY))
                     .append(booleanToggle(user.isVanished(), "vanished"))
-                    .append("").reset().append("]").color(ChatColor.DARK_GRAY);
+                    .append(Component.text("]").color(NamedTextColor.DARK_GRAY));
         }
 
         if (player.hasPermission("dreamvisitor.set.autoinvswap")) {
-            builder.append("\n\nAutomatic Inventory Swap: ").color(ChatColor.WHITE)
-                    .append("\nWhether to automatically swap inventories on game mode change.").color(ChatColor.GRAY)
-                    .append("\n[").color(ChatColor.DARK_GRAY)
+            message = message.append(Component.text("\n\nAutomatic Inventory Swap: ").color(NamedTextColor.WHITE))
+                    .append(Component.text("\nWhether to automatically swap inventories on game mode change.").color(NamedTextColor.GRAY))
+                    .append(Component.text("\n[").color(NamedTextColor.DARK_GRAY))
                     .append(booleanToggle(user.isAutoInvSwapEnabled(), "autoinvswap"))
-                    .append("").reset().append("]").color(ChatColor.DARK_GRAY);
+                    .append(Component.text("]").color(NamedTextColor.DARK_GRAY));
         }
 
         if (player.hasPermission("dreamvisitor.set.autoradio")) {
-            builder.append("\n\nAutomatic Radio: ").color(ChatColor.WHITE)
-                    .append("\nWhether to send all messages to staff radio.").color(ChatColor.GRAY)
-                    .append("\n[").color(ChatColor.DARK_GRAY)
+            message = message.append(Component.text("\n\nAutomatic Radio: ").color(NamedTextColor.WHITE))
+                    .append(Component.text("\nWhether to send all messages to staff radio.").color(NamedTextColor.GRAY))
+                    .append(Component.text("\n[").color(NamedTextColor.DARK_GRAY))
                     .append(booleanToggle(user.isAutoRadioEnabled(), "autoradio"))
-                    .append("").reset().append("]").color(ChatColor.DARK_GRAY);
+                    .append(Component.text("]").color(NamedTextColor.DARK_GRAY));
         }
 
-        builder.append("").reset().append("\n");
-        Messager.send(player, builder.create());
+        message = message.append(Component.text("\n"));
+        Messager.send(player, message);
 
     }
 
     /**
-     * Creates a {@link TextComponent} representing a {@code boolean} value with a
+     * Creates a {@link Component} representing a {@code boolean} value with a
      * command to change it.
      *
      * @param value   the {@code boolean} to display.
      * @param cmdName the command to run. This will be formatted as
      *                {@code /dvset <state> <cmdName> !value}
-     * @return a {@link TextComponent} representing the value with a command to
+     * @return a {@link Component} representing the value with a command to
      * change it.
      */
-    private static @NotNull TextComponent booleanToggle(boolean value, String cmdName) {
-        TextComponent toggle = new TextComponent();
-        toggle.setUnderlined(true);
+    private static @NotNull Component booleanToggle(boolean value, String cmdName) {
+        Component toggle = Component.empty();
 
         if (value) {
-            toggle.setText("-O");
-            toggle.setColor(ChatColor.GREEN);
+            toggle = toggle.append(
+                    Component.text("-O")
+                            .decorate(TextDecoration.UNDERLINED)
+                            .color(NamedTextColor.GREEN)
+            );
         } else {
-            toggle.setText("O-");
-            toggle.setColor(ChatColor.RED);
+            toggle = toggle.append(Component.text("0-").decorate(TextDecoration.UNDERLINED).color(NamedTextColor.RED));
         }
 
-        toggle.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
-                ChatColor.GRAY + "Currently toggled to " + ChatColor.WHITE + String.valueOf(value).toUpperCase() + ".")));
-        toggle.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                "/dvset " + cmdName + " " + String.valueOf(!value).toLowerCase()));
-
-        return toggle;
+        return toggle.hoverEvent(HoverEvent.showText(
+                Component.text("Currently toggled to ")
+                        .append(Component.text(String.valueOf(value).toUpperCase())).color(NamedTextColor.WHITE)
+                        .append(Component.text("."))
+        )).clickEvent(ClickEvent.runCommand("/dvset " + cmdName + " " + String.valueOf(!value).toLowerCase()));
     }
 
     @NotNull
@@ -132,32 +133,32 @@ public class CmdDvset implements DVCommand {
                                 case "discord" -> {
                                     if (!player.hasPermission("dreamvisitor.set.discord"))
                                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                    Messager.send(callee, ChatColor.GRAY + "Discord Visibility is currently set to "
-                                            + ChatColor.WHITE + user.isShowDiscordOn());
+                                    Messager.send(callee, Component.text("Discord Visibility is currently set to ").color(NamedTextColor.GRAY)
+                                            .append(Component.text(user.isShowDiscordOn()).color(NamedTextColor.WHITE)));
                                 }
                                 case "flight" -> {
                                     if (!player.hasPermission("dreamvisitor.set.flight"))
                                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                    Messager.send(callee, ChatColor.GRAY + "Flight Enabled is currently set to "
-                                            + ChatColor.WHITE + user.isFlightDisabled());
+                                    Messager.send(callee, Component.text("Flight Enabled is currently set to ").color(NamedTextColor.GRAY)
+                                            .append(Component.text(user.isFlightDisabled()).color(NamedTextColor.WHITE)));
                                 }
                                 case "vanished" -> {
                                     if (!player.hasPermission("dreamvisitor.set.zoop"))
                                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                    Messager.send(callee, ChatColor.GRAY + "Discord Vanish is currently set to "
-                                            + ChatColor.WHITE + user.isVanished());
+                                    Messager.send(callee, Component.text("Discord Vanish is currently set to ").color(NamedTextColor.GRAY)
+                                            .append(Component.text(user.isVanished()).color(NamedTextColor.WHITE)));
                                 }
                                 case "autoinvswap" -> {
                                     if (!player.hasPermission("dreamvisitor.set.autoinvswap"))
                                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                    Messager.send(callee, ChatColor.GRAY
-                                            + "Automatic Inventory Swap is currently set to " + ChatColor.WHITE + user.isAutoInvSwapEnabled());
+                                    Messager.send(callee, Component.text("Automatic Inventory Swap is currently set to ").color(NamedTextColor.GRAY)
+                                            .append(Component.text(user.isAutoInvSwapEnabled()).color(NamedTextColor.WHITE)));
                                 }
                                 case "autoradio" -> {
                                     if (!player.hasPermission("dreamvisitor.set.autoradio"))
                                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                    Messager.send(callee, ChatColor.GRAY + "Automatic Radio is currently set to "
-                                            + ChatColor.WHITE + user.isAutoRadioEnabled());
+                                    Messager.send(callee, Component.text("Automatic Radio is currently set to ").color(NamedTextColor.GRAY)
+                                            .append(Component.text(user.isAutoRadioEnabled()).color(NamedTextColor.WHITE)));
                                 }
                                 default ->
                                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
@@ -190,15 +191,15 @@ public class CmdDvset implements DVCommand {
                                             if (!player.hasPermission("dreamvisitor.set.discord"))
                                                 throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                                             user.setShowDiscordMessages(Boolean.parseBoolean(modification));
-                                            Messager.send(callee, ChatColor.GRAY + "Discord Visibility toggled to "
-                                                    + ChatColor.WHITE + user.isShowDiscordOn());
+                                            Messager.send(callee, Component.text("Discord Visibility is currently set to ").color(NamedTextColor.GRAY)
+                                                    .append(Component.text(user.isShowDiscordOn()).color(NamedTextColor.WHITE)));
                                         }
                                         case "flight" -> {
                                             if (!player.hasPermission("dreamvisitor.set.flight"))
                                                 throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                                             user.setFlightDisabled(Boolean.parseBoolean(modification));
-                                            Messager.send(callee, ChatColor.GRAY + "Flight Enabled toggled to "
-                                                    + ChatColor.WHITE + user.isFlightDisabled());
+                                            Messager.send(callee, Component.text("Flight Enabled is currently set to ").color(NamedTextColor.GRAY)
+                                                    .append(Component.text(user.isFlightDisabled()).color(NamedTextColor.WHITE)));
                                         }
                                         case "vanished" -> {
                                             if (!player.hasPermission("dreamvisitor.set.zoop"))
@@ -215,22 +216,22 @@ public class CmdDvset implements DVCommand {
 //                      Bot.getGameChatChannel().sendMessage(chatMessage).queue();
 //                      Bot.sendLog(chatMessage);
 
-                                            Messager.send(callee, ChatColor.GRAY + "Discord Vanish toggled to "
-                                                    + ChatColor.WHITE + user.isVanished());
+                                            Messager.send(callee, Component.text("Discord Vanish is currently set to ").color(NamedTextColor.GRAY)
+                                                    .append(Component.text(user.isVanished()).color(NamedTextColor.WHITE)));
                                         }
                                         case "autoinvswap" -> {
                                             if (!player.hasPermission("dreamvisitor.set.autoinvswap"))
                                                 throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                                             user.setAutoInvSwapEnabled(Boolean.parseBoolean(modification));
-                                            Messager.send(callee, ChatColor.GRAY + "Automatic Inventory Swap toggled to "
-                                                    + ChatColor.WHITE + user.isAutoInvSwapEnabled());
+                                            Messager.send(callee, Component.text("Automatic Inventory is currently set to ").color(NamedTextColor.GRAY)
+                                                    .append(Component.text(user.isAutoInvSwapEnabled()).color(NamedTextColor.WHITE)));
                                         }
                                         case "autoradio" -> {
                                             if (!player.hasPermission("dreamvisitor.set.autoradio"))
                                                 throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                                             user.setAutoRadioEnabled(Boolean.parseBoolean(modification));
-                                            Messager.send(callee, ChatColor.GRAY + "Automatic Radio toggled to "
-                                                    + ChatColor.WHITE + user.isAutoRadioEnabled());
+                                            Messager.send(callee, Component.text("Automatic Radio is currently set to ").color(NamedTextColor.GRAY)
+                                                    .append(Component.text(user.isAutoRadioEnabled()).color(NamedTextColor.WHITE)));
                                         }
                                         default ->
                                                 throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");

@@ -1,19 +1,24 @@
 package org.woftnw.dreamvisitor.functions;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.woftnw.dreamvisitor.Dreamvisitor;
 
 public class Radio {
     public static void buildMessage(String message, @NotNull String name, @NotNull String command, @Nullable String tag) {
 
         // Set color of name to red if from console
-        String finalMessage = getString(message, name, command);
+        Component finalMessage = getComponent(message, name, command);
 
         // Send messageBuilder
-        Bukkit.getLogger().info(ChatColor.stripColor(finalMessage));
+        Dreamvisitor.getPlugin().getLogger().info(PlainTextComponentSerializer.plainText().serialize(finalMessage));
         for (Player operator : Bukkit.getServer().getOnlinePlayers())
         {
             switch (command) {
@@ -32,10 +37,10 @@ public class Radio {
         }
     }
 
-    private static @NotNull String getString(String message, @NotNull String name, @NotNull String command) {
-        ChatColor nameColor = ChatColor.YELLOW;
+    private static @NotNull Component getComponent(String message, @NotNull String name, @NotNull String command) {
+        TextColor nameColor = NamedTextColor.YELLOW;
         if (name.equals("Console")) {
-            nameColor = ChatColor.RED;
+            nameColor = NamedTextColor.RED;
         }
 
         // Build messageBuilder
@@ -43,6 +48,6 @@ public class Radio {
         if (command.equals("aradio")) radioType = "[Admin Radio]";
         else if (command.equals("tagradio")) radioType = "[Tag Radio]";
 
-        return ChatColor.DARK_AQUA + radioType + nameColor + " <" + name + "> " + ChatColor.WHITE + message;
+        return Component.text(radioType + nameColor + " <" + name + "> ", NamedTextColor.AQUA).append(Component.text(message, NamedTextColor.WHITE));
     }
 }

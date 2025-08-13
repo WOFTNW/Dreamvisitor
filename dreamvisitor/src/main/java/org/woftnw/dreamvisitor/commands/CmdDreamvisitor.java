@@ -25,7 +25,7 @@ public class CmdDreamvisitor implements DVCommand {
     public CommandAPICommand getCommand() {
         return new CommandAPICommand("dreamvisitor")
                 .executes((sender, args) -> {
-                    Messager.send(sender, "Dreamvisitor " + Dreamvisitor.getPlugin().getDescription().getVersion() + "\nDeveloped by Bog\nOpen source at https://github.com/WOFTNW/Dreamvisitor");
+                    Messager.send(sender, "Dreamvisitor " + Dreamvisitor.getPlugin().getPluginMeta().getVersion() + "\nDeveloped by Bog\nOpen source at https://github.com/WOFTNW/Dreamvisitor");
                 })
                 .withSubcommand(new CommandAPICommand("reload")
                         .withPermission(CommandPermission.OP)

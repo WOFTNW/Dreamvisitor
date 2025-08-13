@@ -265,7 +265,7 @@ public class Dreamvisitor extends JavaPlugin {
             }
         };
 
-        Runnable scheduledRestarts = new BukkitRunnable() {
+        Runnable autoRestarts = new BukkitRunnable() {
             @Override
             public void run() {
                 try {
@@ -291,22 +291,31 @@ public class Dreamvisitor extends JavaPlugin {
             }
         };
 
-        Runnable tick = new BukkitRunnable() {
+        Runnable tickMoonglobe = Moonglobe::tick;
+
+        Runnable checkInactivityTax = new BukkitRunnable() {
             @Override
             public void run() {
-                Moonglobe.tick();
+                InactivityTax.tax();
             }
         };
 
         Runnable tickFlight = Flight::tick;
 
+        // Run commands every two seconds
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, runCommandsAsync, 20, 40);
 
-        Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
+        // Tick moon globes
+        Bukkit.getScheduler().runTaskTimer(this, tickMoonglobe, 0, 0);
 
-        Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
+        // Check for auto restart every minute
+        Bukkit.getScheduler().runTaskTimer(this, autoRestarts, 200, 1200);
 
+        // Tick flight
         Bukkit.getScheduler().runTaskTimer(this, tickFlight, 0, 1);
+
+        // Check inactivity tax every day
+        Bukkit.getScheduler().runTaskTimer(this, checkInactivityTax, 200, 24 * 60 * 60 * 20);
 
         getLogger().log(Level.INFO, "Dreamvisitor has been enabled.");
 

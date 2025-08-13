@@ -1,6 +1,9 @@
 package org.woftnw.dreamvisitor.functions;
 
 import org.bukkit.Input;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.util.Vector;
 import org.woftnw.dreamvisitor.Dreamvisitor;
 import org.woftnw.dreamvisitor.data.Config;
@@ -27,7 +30,9 @@ public class Flight {
     public static final Map<Player, Double> energy = new HashMap<>();
     private static final Map<Player, Boolean> energyDepletion = new HashMap<>();
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
+    private static final Map<Player, Boolean> falling = new HashMap<>();
     private static final Map<Player, Vector> lastPosition = new HashMap<>();
+    private static final Map<Player, Float> fallDistance = new HashMap<>();
 
     public static void init() {
         Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
@@ -196,8 +201,49 @@ public class Flight {
                     // If the energy for the player doesn't exist for some reason, set it to full
                     energy.put(player, energyCapacity);
                 }
+            } else if (!isFlightRestricted(player) && !isPlayerDepleted(player)) {
+
+                // This is a reimplementation of fall damage because enabling flight disables fall damage.
+
+                // If the player is not flying (but is able to), check falling
+                if (player.getFallDistance() > 0 && !falling.get(player) && !player.isFlying()) {
+                    // If the player is falling, record that
+                    falling.put(player, true);
+                } else if (player.getFallDistance() == 0) {
+                    // If not, check if they hit ground or are flying
+                    if (player.isFlying()) {
+                        // If flying, mark not falling
+                        falling.put(player, false);
+                    } else {
+                        // FALL DAMAGER TIME
+                        int damage = calculateFallDamage(
+                                fallDistance.get(player),
+                                Objects.requireNonNull(player.getAttribute(Attribute.SAFE_FALL_DISTANCE)).getValue(),
+                                Objects.requireNonNull(player.getAttribute(Attribute.FALL_DAMAGE_MULTIPLIER)).getValue()
+                        );
+                        player.damage(damage, DamageSource.builder(DamageType.FALL).build());
+                        falling.put(player, false);
+                    }
+                }
+                fallDistance.put(player, player.getFallDistance());
             }
         }
+    }
 
+    /**
+     * Calculates fall damage using the formula:
+     * fallDamage = Max(0, Ceiling[(fallDistance − safeFallDistance) × fallDamageMultiplier])
+     *
+     * @param fallDistance The total distance the entity has fallen (in meters or game units).
+     * @param safeFallDistance The distance that can be fallen without taking any damage.
+     * @param fallDamageMultiplier The multiplier applied to the damage taken per unit over the safe distance.
+     * @return The total fall damage (rounded up, never less than 0).
+     */
+    public static int calculateFallDamage(double fallDistance, double safeFallDistance, double fallDamageMultiplier) {
+        double excessFall = fallDistance - safeFallDistance;
+        double rawDamage = excessFall * fallDamageMultiplier;
+
+        // Ensure damage is not negative and round up to nearest whole number
+        return (int) Math.max(0, Math.ceil(rawDamage));
     }
 }

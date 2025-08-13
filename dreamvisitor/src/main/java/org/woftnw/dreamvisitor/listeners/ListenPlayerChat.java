@@ -81,7 +81,6 @@ public class ListenPlayerChat implements Listener {
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         User user = ess.getUser(onlinePlayer);
                         if (user.isSocialSpyEnabled()) {
-
                             Messager.send(onlinePlayer, report);
                         }
                     }

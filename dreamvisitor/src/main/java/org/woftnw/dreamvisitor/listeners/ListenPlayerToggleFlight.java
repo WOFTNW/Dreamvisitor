@@ -56,6 +56,7 @@ public class ListenPlayerToggleFlight implements Listener {
                 // Set speed accordingly
                 player.setFlySpeed(0.1f);
                 player.setFlying(true);
+                player.setGliding(false);
             } else {
                 player.setFlying(false);
             }

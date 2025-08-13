@@ -36,7 +36,11 @@ public class CmdTribeUpdate implements DVCommand {
 
                             final UUID uuid = player.getUniqueId();
 
-                            PlayerTribe.updateTribeOfPlayer(uuid);
+                            try {
+                                PlayerTribe.updateTribeOfPlayer(uuid);
+                            } catch (NullPointerException e) {
+                                Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Messager.sendDanger(sender, player.getName() + " does not have a tag or team associated with a tribe."));
+                            }
 
                             // Get tribe
                             final Tribe playerTribe = PlayerTribe.getTribeOfPlayer(uuid);

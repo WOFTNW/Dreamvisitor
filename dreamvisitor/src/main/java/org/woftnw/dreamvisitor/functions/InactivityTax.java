@@ -26,11 +26,12 @@ public class InactivityTax {
         final int taxFrequency = config.getInt("inactiveDayFrequency");
         if (taxFrequency < 1) return; // Return if inactiveDayFrequency is 0 or less
 
-        try {
-            Instant lastTax = Instant.ofEpochMilli(config.getLong("lastInactiveTax"));
+        long lastInactiveTax = config.getLong("lastInactiveTax");
+        if (lastInactiveTax != 0) {
+            Instant lastTax = Instant.ofEpochMilli(lastInactiveTax);
             final Duration durationSinceLastTax = Duration.between(lastTax, Instant.now());
             if (durationSinceLastTax.minusDays(taxFrequency).isNegative()) return; // Return if last tax was less than lastTax days ago
-        } catch (Exception ignored) {} // Exception means this has never run. So we want to run it for the first time.
+        }
 
 
         plugin.getLogger().info("Collecting inactivity taxes");

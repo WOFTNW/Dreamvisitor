@@ -205,7 +205,6 @@ public class Dreamvisitor extends JavaPlugin {
 
         List<DVCommand> commands = new ArrayList<>();
         commands.add(new CmdAdminRadio());
-        commands.add(new CmdDiscord());
         commands.add(new CmdHub());
         commands.add(new CmdPanic());
         commands.add(new CmdPauseBypass());

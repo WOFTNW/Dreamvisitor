@@ -81,12 +81,12 @@ public class CmdParcel implements DVCommand {
 
                                     for (Mail.MailLocation mailLocation : locations) {
                                         message.append("\n").append(mailLocation.getName()).color(net.md_5.bungee.api.ChatColor.YELLOW)
-                                                .append("\n").reset().append(String.valueOf(mailLocation.getLocation().getX()))
+                                                .append(": ").reset().append(String.valueOf(mailLocation.getLocation().getX()))
                                                 .append(" ").append(String.valueOf(mailLocation.getLocation().getY()))
                                                 .append(" ").append(String.valueOf(mailLocation.getLocation().getZ()))
-                                                .append(" in world ").append(Objects.requireNonNull(mailLocation.getLocation().getWorld()).getName())
+                                                .append(" in ").append(Objects.requireNonNull(mailLocation.getLocation().getWorld()).getName())
                                                 .append("\n Weight: ").append(String.valueOf(mailLocation.getWeight()))
-                                                .append("\n Home Tribe: ").append(mailLocation.getHomeTribe().getName());
+                                                .append(", Home Tribe: ").append(mailLocation.getHomeTribe().getName());
                                     }
                                     Messager.send(sender, message.create());
                                 })

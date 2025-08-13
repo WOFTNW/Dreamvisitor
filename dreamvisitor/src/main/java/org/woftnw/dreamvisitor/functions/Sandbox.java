@@ -27,8 +27,6 @@ import java.util.Objects;
 
 public class Sandbox implements Listener {
 
-    public static final String[] DISALLOWED_COMMANDS = {"tpaccept", "tpa", "hub", "etpa", "etpaccept", "home", "ehome"};
-
     /**
      * Enable sandbox mode for the given {@link Player}. If they are not already in sandbox mode, they will be put into creative mode and their inventory will be swapped.
      *

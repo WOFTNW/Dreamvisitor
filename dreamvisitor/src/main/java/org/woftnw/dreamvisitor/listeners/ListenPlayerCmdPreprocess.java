@@ -52,11 +52,11 @@ public class ListenPlayerCmdPreprocess implements Listener {
         // Don't allow TP for sandbox players
         DVUser user = PlayerUtility.getUser(player);
         if (user.isInSandboxMode()) {
-            for (String disallowedCommand : Sandbox.DISALLOWED_COMMANDS) {
+            for (String disallowedCommand : tpAliases) {
                 if (event.getMessage().contains(disallowedCommand)) event.setCancelled(true);
             }
         } else {
-            for (String disallowedCommand : Sandbox.DISALLOWED_COMMANDS) {
+            for (String disallowedCommand : tpAliases) {
                 if (event.getMessage().contains(disallowedCommand))
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers())
                         if (PlayerUtility.getUser(onlinePlayer).isInSandboxMode() && event.getMessage().contains(onlinePlayer.getName())) {

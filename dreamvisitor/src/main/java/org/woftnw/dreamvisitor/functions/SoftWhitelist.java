@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class SoftWhitelist {
-    private static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
+    private static final File file = new File(Dreamvisitor.getPlugin().getDataFolder(),"softWhitelist.yml");
 
     public static void init() throws IOException {
         if (!file.exists()) {

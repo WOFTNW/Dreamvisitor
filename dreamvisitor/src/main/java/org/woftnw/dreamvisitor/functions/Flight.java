@@ -58,7 +58,9 @@ public class Flight {
                     if (!player.isFlying() || inFlightGameMode(player)) {
                         // Regenerate energy if not flying or in creative/spectator mode
                         try {
-                            energy.compute(player, (k, i) -> i + 1);
+                            // If player is not falling or gliding (they are on the ground), regenerate twice as fast
+                            if (!falling.get(player) && !player.isGliding()) energy.compute(player, (k, i) -> i + 2);
+                            else energy.compute(player, (k, i) -> i + 1);
                         } catch (NullPointerException e) {
                             energy.put(player, energyCapacity);
                         }

@@ -26,6 +26,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     final String[] msgAliases = {"/msg ","/tell ","/whisper ","/reply ","/t ","/w ","/r ", "/mail send "};
     final String[] tpAliases = {
+            "/back", "/eback", "/return", "/ereturn",
             "/call","/ecall","/tpa","/etpa","/tpask","/etpask",
             "/tpaccept","/etpaccept","/tpyes","/etpyes",
             "/home", "/ehome", "/homes", "/ehomes", "/claimspawn"

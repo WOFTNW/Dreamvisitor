@@ -226,7 +226,7 @@ public class Infraction implements ConfigurationSerializable {
                     ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
                     BanEntry<PlayerProfile> banEntry;
                     if (!hasTempban) {
-                        LocalDateTime localDateTime = LocalDateTime.now().plusDays(7);
+                        LocalDateTime localDateTime = LocalDateTime.now().plusDays(14);
                         banEntry = banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), "Dreamvisitor");
                     } else {
                         banEntry = banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");

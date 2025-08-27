@@ -3,16 +3,11 @@ package io.github.stonley890.dreamvisitor.functions;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Input;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
-import org.bukkit.damage.DamageSource;
-import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -27,9 +22,7 @@ public class Flight {
     public static final Map<Player, Double> energy = new HashMap<>();
     private static final Map<Player, Boolean> energyDepletion = new HashMap<>();
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
-    private static final Map<Player, Boolean> falling = new HashMap<>();
     private static final Map<Player, Vector> lastPosition = new HashMap<>();
-    private static final Map<Player, Float> fallDistance = new HashMap<>();
 
     public static void init() {
         Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
@@ -112,6 +105,7 @@ public class Flight {
 
     /**
      * Whether flight is restricted by a WorldGuard region.
+     *
      * @param player the player to check for
      * @return whether flying is permitted by the player's region
      */
@@ -129,8 +123,7 @@ public class Flight {
                     player.setGliding(true);
                 }
                 player.setAllowFlight(false);
-            }
-            else setupFlight(player);
+            } else setupFlight(player);
 
         }
 
@@ -147,6 +140,7 @@ public class Flight {
 
     /**
      * Whether a player is in a flight-enabled game mode like Creative or Spectator.
+     *
      * @param player
      * @return
      */
@@ -157,9 +151,6 @@ public class Flight {
     public static void tick() {
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
-
-            fallDistance.putIfAbsent(player, 0f);
-            falling.putIfAbsent(player, false);
 
             final Input input = player.getCurrentInput();
 
@@ -177,7 +168,8 @@ public class Flight {
                     // If sprinting, multiply that by 2
                     if (player.isSprinting()) movement2d *= 2;
                     // If not actually moving, don't remove energy
-                    if (lastLoc != null && Objects.equals(currentLoc.getX(), lastLoc.getX()) && Objects.equals(currentLoc.getZ(), lastLoc.getZ())) movement2d = 0;
+                    if (lastLoc != null && Objects.equals(currentLoc.getX(), lastLoc.getX()) && Objects.equals(currentLoc.getZ(), lastLoc.getZ()))
+                        movement2d = 0;
 
                     // Check vertical movement
                     double movementY = 0;
@@ -206,48 +198,28 @@ public class Flight {
                 }
             } else if (!isFlightRestricted(player) && !isPlayerDepleted(player)) {
 
-                // This is a reimplementation of fall damage because enabling flight disables fall damage.
-
-                // If the player is not flying (but is able to), check falling
-                if (player.getFallDistance() > 0 && !falling.get(player) && !player.isFlying()) {
-                    // If the player is falling, record that
-                    falling.put(player, true);
-                } else if (player.getFallDistance() == 0) {
-                    // If not, check if they hit ground or are flying
-                    if (player.isFlying()) {
-                        // If flying, mark not falling
-                        falling.put(player, false);
-                    } else {
-                        // FALL DAMAGER TIME
-                        int damage = calculateFallDamage(
-                                fallDistance.get(player),
-                                Objects.requireNonNull(player.getAttribute(Attribute.SAFE_FALL_DISTANCE)).getValue(),
-                                Objects.requireNonNull(player.getAttribute(Attribute.FALL_DAMAGE_MULTIPLIER)).getValue()
-                        );
-                        player.damage(damage, DamageSource.builder(DamageType.FALL).build());
-                        falling.put(player, false);
-                    }
+                if (isGonnaTouchGround(player)) {
+                    player.setAllowFlight(false);
                 }
-                fallDistance.put(player, player.getFallDistance());
             }
         }
 
     }
 
-    /**
-     * Calculates fall damage using the formula:
-     * fallDamage = Max(0, Ceiling[(fallDistance − safeFallDistance) × fallDamageMultiplier])
-     *
-     * @param fallDistance The total distance the entity has fallen (in meters or game units).
-     * @param safeFallDistance The distance that can be fallen without taking any damage.
-     * @param fallDamageMultiplier The multiplier applied to the damage taken per unit over the safe distance.
-     * @return The total fall damage (rounded up, never less than 0).
-     */
-    public static int calculateFallDamage(double fallDistance, double safeFallDistance, double fallDamageMultiplier) {
-        double excessFall = fallDistance - safeFallDistance;
-        double rawDamage = excessFall * fallDamageMultiplier;
-
-        // Ensure damage is not negative and round up to nearest whole number
-        return (int) Math.max(0, Math.ceil(rawDamage));
+    public static boolean isGonnaTouchGround(@NotNull Player player) {
+        Vector velocity = player.getVelocity();
+        double hitboxWidth = Objects.requireNonNull(player.getAttribute(Attribute.SCALE)).getValue() * 0.6;
+        Location location = player.getLocation();
+        World world = player.getWorld();
+        Location point1 = location.clone().add((hitboxWidth / 2), 0, (hitboxWidth / 2));
+        Location point2 = location.clone().add(-(hitboxWidth / 2), 0, (hitboxWidth / 2));
+        Location point3 = location.clone().add((hitboxWidth / 2), 0, -(hitboxWidth / 2));
+        Location point4 = location.clone().add(-(hitboxWidth / 2), 0, -(hitboxWidth / 2));
+        return (
+                !world.getBlockAt(point1.add(velocity)).isPassable() ||
+                        !world.getBlockAt(point2.add(velocity)).isPassable() ||
+                        !world.getBlockAt(point3.add(velocity)).isPassable() ||
+                        !world.getBlockAt(point4.add(velocity)).isPassable()
+        );
     }
 }

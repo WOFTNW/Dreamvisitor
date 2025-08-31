@@ -1,6 +1,7 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Flight;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -22,7 +23,7 @@ public class ListenPlayerToggleFlightEvent implements Listener {
     public void onToggleFlight(@NotNull PlayerToggleFlightEvent event) {
 
         Player player = event.getPlayer();
-        if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
+        if (!Flight.inFlightGameMode(player)) {
             if (event.isFlying()) {
                 player.setGliding(false);
                 player.setFlySpeed(0.05f);

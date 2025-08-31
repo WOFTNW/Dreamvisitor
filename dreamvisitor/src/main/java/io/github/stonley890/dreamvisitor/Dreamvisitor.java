@@ -401,7 +401,7 @@ public class Dreamvisitor extends JavaPlugin {
                 @Override
                 public void run() {
                     Moonglobe.tick();
-                    Flight.tick();
+//                    Flight.tick();
                 }
             };
 

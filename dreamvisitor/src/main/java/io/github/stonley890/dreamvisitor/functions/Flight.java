@@ -198,7 +198,7 @@ public class Flight {
                 }
             } else if (!isFlightRestricted(player) && !isPlayerDepleted(player)) {
 
-                if (isGonnaTouchGround(player)) {
+                if (isGonnaTouchGround(player) && !inFlightGameMode(player)) {
                     player.setAllowFlight(false);
                 }
             }

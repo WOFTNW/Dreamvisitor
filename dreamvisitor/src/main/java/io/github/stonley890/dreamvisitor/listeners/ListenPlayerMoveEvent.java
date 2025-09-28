@@ -24,13 +24,17 @@ public class ListenPlayerMoveEvent implements Listener {
         LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(event.getPlayer());
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionQuery query = container.createQuery();
-        ApplicableRegionSet set = query.getApplicableRegions(BukkitAdapter.adapt(event.getTo()));
-        String invTemplateName = set.queryValue(localPlayer, Dreamvisitor.INV_TEMPLATE);
+        ApplicableRegionSet toSet = query.getApplicableRegions(BukkitAdapter.adapt(event.getTo()));
+        ApplicableRegionSet fromSet = query.getApplicableRegions(BukkitAdapter.adapt(event.getFrom()));
+        String toInvTemplateName = toSet.queryValue(localPlayer, Dreamvisitor.INV_TEMPLATE);
+        String fromInvTemplateName = fromSet.queryValue(localPlayer, Dreamvisitor.INV_TEMPLATE);
 
-        InvTemplate template = InvTemplates.getInvTemplateByName(invTemplateName);
+        InvTemplate toTemplate = InvTemplates.getInvTemplateByName(toInvTemplateName);
+        InvTemplate fromTemplate = InvTemplates.getInvTemplateByName(fromInvTemplateName);
 
-        if (template == null) InvTemplates.unapplyPlayer(event.getPlayer());
-        else InvTemplates.applyToPlayer(event.getPlayer(), template, false);
+        // We check that fromtemplate is not null because we only want to unapply if a player leaves a region that has applied one
+        if (toTemplate == null && fromTemplate != null) InvTemplates.unapplyPlayer(event.getPlayer());
+        else if (toTemplate != null) InvTemplates.applyToPlayer(event.getPlayer(), toTemplate, false);
     }
 
 }

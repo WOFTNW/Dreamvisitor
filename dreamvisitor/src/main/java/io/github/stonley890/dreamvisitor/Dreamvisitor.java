@@ -191,7 +191,8 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdDreamvisitor());
             commands.add(new CmdChatback());
             commands.add(new CmdVelocity());
-            commands.add(new CmdSchedule()); // Add the new schedule command
+            commands.add(new CmdSchedule());
+            commands.add(new CmdInvTemplate());
 
             debug("Initializing commands...");
             CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
@@ -240,6 +241,10 @@ public class Dreamvisitor extends JavaPlugin {
             // Init bad words
             debug("Initializing badwords.yml");
             BadWords.init();
+
+            // Init inventory templates
+            debug("Initializing invTemplates.yml");
+            InvTemplates.init();
 
             // LuckPerms API
             RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);

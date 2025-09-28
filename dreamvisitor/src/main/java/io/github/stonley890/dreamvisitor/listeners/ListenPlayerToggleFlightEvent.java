@@ -1,6 +1,8 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.PlayerMemory;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Flight;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -42,7 +44,8 @@ public class ListenPlayerToggleFlightEvent implements Listener {
 
             } else {
                 player.setFlying(false);
-                player.setGliding(true);
+                PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+                if (!memory.flightDisabled) player.setGliding(true);
             }
         } else {
             if (event.isFlying()) {

@@ -7,6 +7,8 @@ import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.InvSwap;
+import io.github.stonley890.dreamvisitor.functions.InvTemplates;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -68,13 +70,24 @@ public class CmdSandbox implements DVCommand {
                         if (stateArg == null) {
                             players.forEach(player -> {
                                 if (PlayerUtility.getPlayerMemory(player.getUniqueId()).sandbox) Sandbox.disableSandbox(player);
-                                else Sandbox.enableSandbox(player);
+                                else {
+                                    // Unapply any inventory template
+                                    InvTemplates.unapplyPlayer(player);
+                                    try {
+                                        Sandbox.enableSandbox(player);
+                                    } catch (InvSwap.UsingInventoryTemplateException ignored) {}
+                                }
                             });
                             sender.sendMessage(Dreamvisitor.PREFIX + "Toggled sandbox mode for " + players.size() + " players.");
                         } else {
                             boolean sandboxState = (boolean) stateArg;
                             if (sandboxState) {
-                                players.forEach(Sandbox::enableSandbox);
+                                players.forEach(player -> {
+                                    InvTemplates.unapplyPlayer(player);
+                                    try {
+                                        Sandbox.enableSandbox(player);
+                                    } catch (InvSwap.UsingInventoryTemplateException ignored) {}
+                                });
                                 sender.sendMessage(Dreamvisitor.PREFIX + "Enabled sandbox mode for " + players.size() + " players.");
                             } else {
                                 players.forEach(Sandbox::disableSandbox);

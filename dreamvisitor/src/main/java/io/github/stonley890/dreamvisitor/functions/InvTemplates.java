@@ -128,8 +128,9 @@ public class InvTemplates {
         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
         // Determine if the player is already using a template
         boolean isAlreadyUsingTemplate = memory.currentInventoryTemplate != null;
-        if (!isAlreadyUsingTemplate) {
-            // If the player is not using a template, save their inventory to PlayerMemory
+        boolean isInSandbox = memory.sandbox;
+        if (!isAlreadyUsingTemplate && !isInSandbox) {
+            // If the player is not using a template and is not in sandbox mode, save their inventory to PlayerMemory
             if (memory.creative) memory.creativeInv = player.getInventory().getContents();
             else memory.survivalInv = player.getInventory().getContents();
         } else if (Objects.equals(memory.currentInventoryTemplate, template.getName()) && !overwrite) {

@@ -61,4 +61,6 @@ public class InvTemplate implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         return Map.of("contents", contents, "name", name);
     }
+
+    public static class MissingInventoryTemplateException extends Exception {}
 }

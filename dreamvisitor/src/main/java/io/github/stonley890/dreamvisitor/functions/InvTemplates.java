@@ -2,9 +2,13 @@ package io.github.stonley890.dreamvisitor.functions;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.InvTemplate;
+import io.github.stonley890.dreamvisitor.data.PlayerMemory;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -109,4 +113,108 @@ public class InvTemplates {
         saveLocations(templates);
     }
 
+    private static void applyTemplateToInventory(@NotNull PlayerInventory inventory, @NotNull InvTemplate template) {
+        inventory.setContents(template.getContents());
+    }
+
+    /**
+     * Apply an inventory template to a player.
+     * @param player the player to apply the template to.
+     * @param template the template to apply.
+     * @param overwrite whether to overwrite if the same template is already applied
+     */
+    public static void applyToPlayer(@NotNull Player player, @NotNull InvTemplate template, boolean overwrite) {
+        // Get player memory
+        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+        // Determine if the player is already using a template
+        boolean isAlreadyUsingTemplate = memory.currentInventoryTemplate != null;
+        if (!isAlreadyUsingTemplate) {
+            // If the player is not using a template, save their inventory to PlayerMemory
+            if (memory.creative) memory.creativeInv = player.getInventory().getContents();
+            else memory.survivalInv = player.getInventory().getContents();
+        } else if (Objects.equals(memory.currentInventoryTemplate, template.getName()) && !overwrite) {
+            // If the template is already applied and overwrite is false, don't do anything.
+            return;
+        }
+        // Overwrite the player's inventory
+        applyTemplateToInventory(player.getInventory(), template);
+        // Set value in PlayerMemory
+        memory.currentInventoryTemplate = template.getName();
+        // Save changes to PlayerMemory
+        PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
+    }
+
+    /**
+     * Apply an inventory template by name to a player.
+     * @param player the player to apply the template to.
+     * @param invTemplateName the template to apply.
+     * @param overwrite whether to overwrite if the same template is already applied
+     * @throws InvTemplate.MissingInventoryTemplateException if the template does not exist.
+     */
+    public static void applyToPlayer(@NotNull Player player, @NotNull String invTemplateName, boolean overwrite) throws InvTemplate.MissingInventoryTemplateException {
+        InvTemplate template = getInvTemplateByName(invTemplateName);
+        if (template == null) throw new InvTemplate.MissingInventoryTemplateException();
+        applyToPlayer(player, template, overwrite);
+    }
+
+    /**
+     * Apply an inventory template to a collection of players.
+     * @param players the players to apply the template to.
+     * @param template the template to apply.
+     */
+    public static void applyToPlayers(@NotNull Collection<Player> players, @NotNull InvTemplate template, boolean overwrite) {
+        for (Player player : players) {
+            applyToPlayer(player, template, overwrite);
+        }
+    }
+
+    /**
+     * Apply an inventory template to a collection of players.
+     * @param players the players to apply the template to.
+     * @param templateName the name of the template to apply.
+     * @throws InvTemplate.MissingInventoryTemplateException if the template does not exist.
+     */
+    public static void applyToPlayers(@NotNull Collection<Player> players, @NotNull String templateName, boolean overwrite) throws InvTemplate.MissingInventoryTemplateException {
+        InvTemplate template = getInvTemplateByName(templateName);
+        if (template == null) throw new InvTemplate.MissingInventoryTemplateException();
+        for (Player player : players) {
+            applyToPlayer(player, template, overwrite);
+        }
+    }
+
+    /**
+     * Reset a player's inventory back to their saved inventory.
+     * @param player the player to reset the inventory of.
+     * @return true if the player was using a template, false otherwise.
+     */
+    public static boolean unapplyPlayer(@NotNull Player player) {
+        // Get player memory
+        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+        // Determine if the player is already using a template
+        boolean isUsingTemplate = memory.currentInventoryTemplate != null;
+        // Only do this if the player is using a template
+        if (isUsingTemplate) {
+            if (memory.creative) player.getInventory().setContents(memory.creativeInv);
+            else player.getInventory().setContents(memory.survivalInv);
+            // Set value in PlayerMemory
+            memory.currentInventoryTemplate = null;
+            // Save changes to PlayerMemory
+            PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
+        }
+        return isUsingTemplate;
+    }
+
+    /**
+     * Reset a player's inventory back to their saved inventory.
+     * @param players the players to reset the inventory of.
+     * @return the number of players who were using a template.
+     */
+    public static int unapplyPlayers(@NotNull Collection<Player> players) {
+        int playersUnapplied = 0;
+
+        // Run this for each player
+        for (Player player : players) if (unapplyPlayer(player)) playersUnapplied++;
+
+        return playersUnapplied;
+    }
 }

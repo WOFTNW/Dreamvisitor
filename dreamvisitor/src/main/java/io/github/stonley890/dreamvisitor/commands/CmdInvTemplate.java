@@ -4,26 +4,22 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
+import dev.jorel.commandapi.arguments.BooleanArgument;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.InvTemplate;
-import io.github.stonley890.dreamvisitor.data.PlayerMemory;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.InvTemplates;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class CmdInvTemplate implements DVCommand {
@@ -130,12 +126,17 @@ public class CmdInvTemplate implements DVCommand {
                                         new EntitySelectorArgument.ManyPlayers("players"),
                                         new StringArgument("template").includeSuggestions(getTemplateSuggestions())
                                 )
+                                .withOptionalArguments(
+                                        new BooleanArgument("overwrite")
+                                )
                                 .executesNative((sender, args) -> {
                                     // Get args
                                     String templateName = (String) args.get("template");
                                     assert templateName != null;
                                     Collection<Player> players = (Collection<Player>) args.get("players");
                                     assert players != null;
+                                    Boolean overwrite = (Boolean) args.get("overwrite");
+                                    if (overwrite == null) overwrite = false;
 
                                     // Fail if no players
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected.");
@@ -145,23 +146,7 @@ public class CmdInvTemplate implements DVCommand {
                                     if (template == null) throw CommandAPI.failWithString("No template by that name exists.");
 
                                     // Run this for each player
-                                    for (Player player : players) {
-                                        // Get player memory
-                                        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-                                        // Determine if the player is already using a template
-                                        boolean isAlreadyUsingTemplate = memory.currentInventoryTemplate != null;
-                                        if (!isAlreadyUsingTemplate) {
-                                            // If the player is not using a template, save their inventory to PlayerMemory
-                                            if (memory.creative) memory.creativeInv = player.getInventory().getContents();
-                                            else memory.survivalInv = player.getInventory().getContents();
-                                        }
-                                        // Overwrite the player's inventory
-                                        applyTemplateToInventory(player.getInventory(), template);
-                                        // Set value in PlayerMemory
-                                        memory.currentInventoryTemplate = templateName;
-                                        // Save changes to PlayerMemory
-                                        PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
-                                    }
+                                    InvTemplates.applyToPlayers(players, template, overwrite);
 
                                     sender.sendMessage(Dreamvisitor.PREFIX + "Applied template to " + players.size() + " player(s).");
                                 }),
@@ -175,24 +160,7 @@ public class CmdInvTemplate implements DVCommand {
                                     // Fail if no players
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected.");
 
-                                    int playersUnapplied = 0;
-
-                                    // Run this for each player
-                                    for (Player player : players) {
-                                        // Get player memory
-                                        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-                                        // Determine if the player is already using a template
-                                        boolean isUsingTemplate = memory.currentInventoryTemplate != null;
-                                        // Only do this if the player is using a template
-                                        if (isUsingTemplate) {
-                                            if (memory.creative) player.getInventory().setContents(memory.creativeInv);
-                                            else player.getInventory().setContents(memory.survivalInv);
-                                            // Set value in PlayerMemory
-                                            memory.currentInventoryTemplate = null;
-                                            // Save changes to PlayerMemory
-                                            PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
-                                        }
-                                    }
+                                    int playersUnapplied = InvTemplates.unapplyPlayers(players);
 
                                     sender.sendMessage(Dreamvisitor.PREFIX + "Unapplied template to " + playersUnapplied + " player(s).");
                                 })
@@ -204,7 +172,4 @@ public class CmdInvTemplate implements DVCommand {
         return ArgumentSuggestions.strings(InvTemplates.getTemplates().stream().map(InvTemplate::getName).toList());
     }
 
-    private void applyTemplateToInventory(@NotNull PlayerInventory inventory, @NotNull InvTemplate template) {
-        inventory.setContents(template.getContents());
-    }
 }

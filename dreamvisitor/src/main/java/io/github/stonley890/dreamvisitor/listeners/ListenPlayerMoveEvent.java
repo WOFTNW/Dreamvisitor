@@ -34,7 +34,7 @@ public class ListenPlayerMoveEvent implements Listener {
 
         // We check that fromtemplate is not null because we only want to unapply if a player leaves a region that has applied one
         if (toTemplate == null && fromTemplate != null) InvTemplates.unapplyPlayer(event.getPlayer());
-        else if (toTemplate != null) InvTemplates.applyToPlayer(event.getPlayer(), toTemplate, false);
+        else if (toTemplate != null && toTemplate != fromTemplate) InvTemplates.applyToPlayer(event.getPlayer(), toTemplate, false);
     }
 
 }

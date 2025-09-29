@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.flags.StringFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import com.sk89q.worldguard.session.SessionManager;
@@ -65,6 +66,7 @@ public class Dreamvisitor extends JavaPlugin {
 
     // WorldGuard flags
     public static StateFlag DRAGON_FLIGHT;
+    public static StringFlag INV_TEMPLATE;
     public static StateFlag WITHER;
 
     public static Dreamvisitor getPlugin() {
@@ -140,6 +142,25 @@ public class Dreamvisitor extends JavaPlugin {
                     getLogger().severe("A flag with the name wither already exists! Some other plugin claimed it already :(");
                 }
             }
+            try {
+                // create a string flag with the name "inv-template"
+                StringFlag flag = new StringFlag("inv-template");
+                registry.register(flag);
+                INV_TEMPLATE = flag; // only set our field if there was no error
+
+            } catch (FlagConflictException e) {
+                // some other plugin registered a flag by the same name already.
+                // you can use the existing flag, but this may cause conflicts - be sure to
+                // check type
+                Flag<?> existing = registry.get("inv-template");
+                if (existing instanceof StateFlag) {
+                    WITHER = (StateFlag) existing;
+                } else {
+                    // types don't match - this is bad news! some other plugin conflicts with you
+                    // hopefully this never actually happens
+                    getLogger().severe("A flag with the name inv-template already exists! Some other plugin claimed it already :(");
+                }
+            }
         } catch (NoClassDefFoundError e) {
             getLogger().info("WorldGuard is not installed, so no flags will be created.");
         } catch (IllegalStateException e) {
@@ -191,7 +212,8 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdDreamvisitor());
             commands.add(new CmdChatback());
             commands.add(new CmdVelocity());
-            commands.add(new CmdSchedule()); // Add the new schedule command
+            commands.add(new CmdSchedule());
+            commands.add(new CmdInvTemplate());
 
             debug("Initializing commands...");
             CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
@@ -240,6 +262,10 @@ public class Dreamvisitor extends JavaPlugin {
             // Init bad words
             debug("Initializing badwords.yml");
             BadWords.init();
+
+            // Init inventory templates
+            debug("Initializing invTemplates.yml");
+            InvTemplates.init();
 
             // LuckPerms API
             RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
@@ -539,6 +565,7 @@ public class Dreamvisitor extends JavaPlugin {
         pluginManager.registerEvents(new ListenPlayerChangedWorld(), this);
         pluginManager.registerEvents(new ListenPlayerRespawn(), this);
         pluginManager.registerEvents(new ListenCreatureSpawn(), this);
+        pluginManager.registerEvents(new ListenPlayerMoveEvent(), this);
     }
 
     private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {

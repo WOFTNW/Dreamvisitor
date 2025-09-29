@@ -8,9 +8,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class InvSwap {
 
-    public static void swapInventories(@NotNull Player player) {
+    public static void swapInventories(@NotNull Player player) throws UsingInventoryTemplateException {
 
         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+
+        if (memory.currentInventoryTemplate != null) {
+            throw new UsingInventoryTemplateException();
+        }
 
         ItemStack[] invContents;
 
@@ -31,5 +35,7 @@ public class InvSwap {
         PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
 
     }
+
+    public static class UsingInventoryTemplateException extends Exception {}
 
 }

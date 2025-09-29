@@ -33,7 +33,7 @@ public class Sandbox implements Listener {
      *
      * @param player the player to enable sandbox mode for.
      */
-    public static void enableSandbox(@NotNull Player player) {
+    public static void enableSandbox(@NotNull Player player) throws InvSwap.UsingInventoryTemplateException {
         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
         if (memory.sandbox) return;
@@ -59,6 +59,7 @@ public class Sandbox implements Listener {
 
     /**
      * Disable sandbox mode for the given {@link Player}. If they are still in sandbox mode, they will be put into survival mode and their inventory will be swapped.
+     * If the player has an inventory template applied, it will be unapplied.
      *
      * @param player the player to disable sandbox mode for.
      */
@@ -68,7 +69,10 @@ public class Sandbox implements Listener {
         if (!memory.sandbox) return;
 
         memory.sandbox = false;
-        InvSwap.swapInventories(player);
+        InvTemplates.unapplyPlayer(player);
+        try {
+            InvSwap.swapInventories(player);
+        } catch (InvSwap.UsingInventoryTemplateException ignored) {} // should be impossible
         player.setGameMode(GameMode.SURVIVAL);
         player.setGlowing(false);
 

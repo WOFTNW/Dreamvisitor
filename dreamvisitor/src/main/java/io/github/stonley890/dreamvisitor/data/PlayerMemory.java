@@ -4,6 +4,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,8 @@ public class PlayerMemory {
     public ItemStack[] survivalInv;
     public ItemStack[] creativeInv;
     public boolean sandbox;
+    @Nullable
+    public String currentInventoryTemplate;
 
     @SuppressWarnings("unchecked")
     public static @NotNull PlayerMemory getFromFileConfig(@NotNull FileConfiguration fileConfig) {
@@ -57,6 +60,7 @@ public class PlayerMemory {
         memory.creativeInv = creativeInvList.toArray(ItemStack[]::new);
 
         memory.sandbox = fileConfig.getBoolean("sandbox");
+        memory.currentInventoryTemplate = fileConfig.getString("currentInventoryTemplate");
 
         return memory;
     }
@@ -72,6 +76,7 @@ public class PlayerMemory {
         fileConfig.set("autoinvswap", autoinvswap);
         fileConfig.set("autoRadio", autoRadio);
         fileConfig.set("sandbox", sandbox);
+        fileConfig.set("currentInventoryTemplate", currentInventoryTemplate);
 
         return fileConfig;
     }

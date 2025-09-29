@@ -52,6 +52,11 @@ public class DiscEventListener extends ListenerAdapter {
         MessageChannel channel = event.getChannel();
         String username = event.getMessage().getContentRaw();
 
+        // Delete poll results
+        if (event.getMessage().getEmbeds().stream().anyMatch((embed) -> embed.getType() == EmbedType.fromKey("poll_result"))) {
+            event.getMessage().delete().queue();
+        }
+
         Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");

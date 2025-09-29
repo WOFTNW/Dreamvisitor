@@ -1,17 +1,13 @@
 package io.github.stonley890.dreamvisitor.functions;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +31,7 @@ public class Flight {
 
                 setupFlight(player);
 
-                if (isGonnaTouchGround(player)) player.setAllowFlight(false);
+                if (isGonnaTouchGround(player) && !inFlightGameMode(player)) player.setAllowFlight(false);
 
                 energy.putIfAbsent(player, energyCapacity);
 
@@ -226,26 +222,28 @@ public class Flight {
 
         Vector velocity = player.getVelocity();
         double hitboxWidth = Objects.requireNonNull(player.getAttribute(Attribute.SCALE)).getValue() * 0.6;
-        Location location = player.getLocation();
+        Location centerPoint = player.getLocation();
         World world = player.getWorld();
 
         if (velocity.getY() >= -0.08) return false;
 
-        Location point1 = location.clone().add((hitboxWidth / 2), 0, (hitboxWidth / 2));
-        Location point2 = location.clone().add(-(hitboxWidth / 2), 0, (hitboxWidth / 2));
-        Location point3 = location.clone().add((hitboxWidth / 2), 0, -(hitboxWidth / 2));
-        Location point4 = location.clone().add(-(hitboxWidth / 2), 0, -(hitboxWidth / 2));
+        Location point1 = centerPoint.clone().add((hitboxWidth / 2), 0, (hitboxWidth / 2));
+        Location point2 = centerPoint.clone().add(-(hitboxWidth / 2), 0, (hitboxWidth / 2));
+        Location point3 = centerPoint.clone().add((hitboxWidth / 2), 0, -(hitboxWidth / 2));
+        Location point4 = centerPoint.clone().add(-(hitboxWidth / 2), 0, -(hitboxWidth / 2));
 
         RayTraceResult traceResult1 = world.rayTraceBlocks(point1, velocity, 1);
         RayTraceResult traceResult2 = world.rayTraceBlocks(point2, velocity, 1);
         RayTraceResult traceResult3 = world.rayTraceBlocks(point3, velocity, 1);
         RayTraceResult traceResult4 = world.rayTraceBlocks(point4, velocity, 1);
+        RayTraceResult traceResult5 = world.rayTraceBlocks(centerPoint, velocity, 1);
 
         boolean overlapsPoint1 = (traceResult1 != null);
         boolean overlapsPoint2 = (traceResult2 != null);
         boolean overlapsPoint3 = (traceResult3 != null);
         boolean overlapsPoint4 = (traceResult4 != null);
+        boolean overlapsPoint5 = (traceResult5 != null);
 
-        return (overlapsPoint1 || overlapsPoint2 || overlapsPoint3 || overlapsPoint4);
+        return (overlapsPoint1 || overlapsPoint2 || overlapsPoint3 || overlapsPoint4 || overlapsPoint5);
     }
 }

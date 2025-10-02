@@ -243,7 +243,7 @@ public class DiscEventListener extends ListenerAdapter {
 
         if (event.getChannel().getId().equals(Bot.getGameLogChannel().getId())) {
 
-            if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
+            if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && Objects.requireNonNull(event.getMember()).hasPermission(Permission.MANAGE_PERMISSIONS)) {
 
                 Dreamvisitor.debug("Sending console command from log channel...");
 

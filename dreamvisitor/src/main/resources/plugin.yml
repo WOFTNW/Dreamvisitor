@@ -65,8 +65,11 @@ permissions:
   dreamvisitor.panic:
     description: Allows the panic command.
     default: op
-  dreamvisitor.itembanlist:
-    description: Allows the itemblacklist command.
+  dreamvisitor.itembanlist.manage:
+    description: Allows the itembanlist command.
+    default: op
+  dreamvisitor.itembanlist.bypass:
+    description: Allows bypassing the item banlist.
     default: op
   dreamvisitor.user:
     description: Allows the user command.

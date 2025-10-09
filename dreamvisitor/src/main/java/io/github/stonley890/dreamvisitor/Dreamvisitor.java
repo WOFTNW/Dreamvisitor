@@ -321,7 +321,12 @@ public class Dreamvisitor extends JavaPlugin {
                 ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) PLUGIN.getConfig().getList("itemBlacklist");
                 if (itemList != null) {
                     debug("Item banlist is null. Creating an empty banlist...");
-                    ItemBanList.badItems = itemList.toArray(new ItemStack[0]);
+                    ItemBanList.badItemsComponents = itemList.toArray(new ItemStack[0]);
+                }
+                ArrayList<ItemStack> datalessItemList = (ArrayList<ItemStack>) PLUGIN.getConfig().getList("datalessItemBlacklist");
+                if (datalessItemList != null) {
+                    debug("Dataless item banlist is null. Creating an empty banlist...");
+                    ItemBanList.badItemsComponentless = datalessItemList.toArray(new ItemStack[0]);
                 }
             }
 
@@ -452,20 +457,7 @@ public class Dreamvisitor extends JavaPlugin {
                 @Override
                 public void run() {
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (!player.isOp() && ItemBanList.badItems != null) {
-
-                            for (ItemStack item : ItemBanList.badItems) {
-                                if (item == null)
-                                    continue;
-                                for (ItemStack content : player.getInventory().getContents()) {
-                                    if (content == null || !content.isSimilar(item))
-                                        continue;
-                                    player.getInventory().remove(item);
-                                    Bot.sendLog("Removed " + item.getType().name() + " ("
-                                            + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
-                                }
-                            }
-                        }
+                        ItemBanList.checkBannedItems(player);
                     }
                 }
             };

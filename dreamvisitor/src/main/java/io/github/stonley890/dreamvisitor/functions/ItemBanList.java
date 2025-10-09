@@ -14,13 +14,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class ItemBanList implements Listener {
-    public static final Inventory inv = Bukkit.createInventory(null, 27, "Blacklisted Items");
-    public static ItemStack[] badItems;
+    public static final Inventory componentsInv = Bukkit.createInventory(null, 27, "Banned Items (Including data)");
+    public static final Inventory componentlessInv = Bukkit.createInventory(null, 27, "Banned Items (Not including data)");
+    public static ItemStack[] badItemsComponents;
+    public static ItemStack[] badItemsComponentless;
 
     public static void saveItems() {
         Dreamvisitor plugin = Dreamvisitor.getPlugin();
-        badItems = inv.getContents();
-        plugin.getConfig().set("itemBlacklist", badItems);
+        badItemsComponents = componentsInv.getContents();
+        badItemsComponentless = componentlessInv.getContents();
+        plugin.getConfig().set("itemBlacklist", badItemsComponents);
+        plugin.getConfig().set("datalessItemBlacklist", badItemsComponentless);
         plugin.saveConfig();
     }
 
@@ -28,21 +32,38 @@ public class ItemBanList implements Listener {
     public void onInventoryClose(@NotNull InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
 
-        if (!player.isOp() && ItemBanList.badItems != null) {
+        checkBannedItems(player);
 
-            for (ItemStack item : ItemBanList.badItems) {
-                if (item == null) continue;
-                for (ItemStack content : player.getInventory().getContents()) {
-                    if (content == null || !content.isSimilar(item)) continue;
-                    player.getInventory().remove(item);
-                    Bot.sendLog("Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
-                }
-            }
-        }
-
-        if (event.getInventory().equals(ItemBanList.inv)) {
+        if (event.getInventory().equals(ItemBanList.componentsInv) || event.getInventory().equals(ItemBanList.componentlessInv)) {
             ItemBanList.saveItems();
         }
     }
+
+    public static void checkBannedItems(@NotNull Player player) {
+        if (!player.hasPermission("dreamvisitor.itembanlist.bypass")) {
+            if (ItemBanList.badItemsComponents != null) removeItems(player, badItemsComponents, false);
+            if (ItemBanList.badItemsComponentless != null) removeItems(player, badItemsComponentless, true);
+        }
+    }
+
+    private static void removeItems(Player player, @NotNull ItemStack[] items, boolean ignoreData) {
+        for (ItemStack item : items) {
+            if (item == null) continue;
+            Dreamvisitor.debug("Checking against item " + item.getType());
+            for (ItemStack content : player.getInventory().getContents()) {
+                if (content == null) continue;
+                Dreamvisitor.debug("Checking player item " + content.getType());
+                Dreamvisitor.debug("Ignore data? " + ignoreData);
+                if (ignoreData) {
+                    Dreamvisitor.debug("Types:" + content.getType() + " and " + item.getType());
+                    if (content.getType() != item.getType()) continue;
+                } else if (!content.isSimilar(item)) continue;
+                player.getInventory().remove(content);
+                Bot.sendLog("Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
+            }
+        }
+    }
+
+
 
 }

@@ -37,7 +37,7 @@ public class ListenPlayerToggleFlightEvent implements Listener {
                         cancelWingFlapSoundTask(player);
 
                     } else {
-                        player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS, 0.5f, 1.2f);
+                        Flight.playWingFlapSound(player);
                     }
                 }, 1, 15));
 

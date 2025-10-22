@@ -8,9 +8,11 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3d;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,119 +25,187 @@ public class Flight {
     private static final Map<Player, Boolean> energyDepletion = new HashMap<>();
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
     private static final Map<Player, Vector> lastPosition = new HashMap<>();
+    private static final Map<Player, Integer> riseCooldown = new HashMap<>();
 
     public static void init() {
-        Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), Flight::tick, 0, 0);
+    }
 
-            for (Player player : Bukkit.getOnlinePlayers()) {
+    private static void tick() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
 
-                setupFlight(player);
+            setupFlight(player);
 
-                if (isGonnaTouchGround(player) && !inFlightGameMode(player)) player.setAllowFlight(false);
+            if (isGonnaTouchGround(player) && !inFlightGameMode(player)) player.setAllowFlight(false);
 
-                energy.putIfAbsent(player, energyCapacity);
+            energy.putIfAbsent(player, energyCapacity);
 
-                // Get bossbar (even if it's null)
-                NamespacedKey namespacedKey = NamespacedKey.fromString("dreamvisitor:" + player.getUniqueId().toString().toLowerCase() + "-energy", Dreamvisitor.getPlugin());
-                assert namespacedKey != null;
-                KeyedBossBar bossBar = Bukkit.getBossBar(namespacedKey);
+            // Get bossbar (even if it's null)
+            NamespacedKey namespacedKey = NamespacedKey.fromString("dreamvisitor:" + player.getUniqueId().toString().toLowerCase() + "-energy", Dreamvisitor.getPlugin());
+            assert namespacedKey != null;
+            KeyedBossBar bossBar = Bukkit.getBossBar(namespacedKey);
 
-                if (energy.get(player) < energyCapacity) {
+            if (energy.get(player) < energyCapacity) {
 
-                    if (!player.isFlying() || inFlightGameMode(player)) {
-                        // Regenerate energy if not flying or in creative/spectator mode
-                        try {
-                            energy.compute(player, (k, i) -> i + 1);
-                        } catch (NullPointerException e) {
-                            energy.put(player, energyCapacity);
-                        }
-                    }
-
-                    if (energy.get(player) > energyCapacity) energy.put(player, energyCapacity);
-
-                    if (bossBar == null) { // Create bossbar if it's null
-                        bossBar = Bukkit.createBossBar(namespacedKey, "Energy", BarColor.GREEN, BarStyle.SEGMENTED_10);
-                        bossBar.addPlayer(player);
-                    }
-
-                    bossBar.setVisible(!inFlightGameMode(player));
-
-                    // Set progress
-                    bossBar.setProgress(energy.get(player) / energyCapacity);
-
-                    // Remove player from flight if energy runs out
-                    if (energy.get(player) <= 0) {
-                        // Set bossbar to red if it's depleted
-                        bossBar.setColor(BarColor.RED);
-                        setPlayerDepleted(player, true);
-                        if (player.isFlying()) {
-                            player.setFlying(false);
-                            player.setGliding(true);
-                            player.setAllowFlight(false);
-                        }
-                    }
-
-                    // Set bossbar to green if it reaches reactivation point
-                    if (isPlayerDepleted(player) && energy.get(player) >= reactivationPoint) {
-                        bossBar.setColor(BarColor.GREEN);
-                        setPlayerDepleted(player, false);
-                        setupFlight(player);
-                    }
-
-                } else if (bossBar != null) {
-                    // Remove bossbar if it's full
-                    bossBar.removePlayer(player);
-                    bossBar.setVisible(false);
-                    Bukkit.removeBossBar(namespacedKey);
-                }
-
-                final Input input = player.getCurrentInput();
-
-                if (player.isFlying() && !inFlightGameMode(player)) {
-                    // Remove energy if flying
+                if (!player.isFlying() || inFlightGameMode(player)) {
+                    // Regenerate energy if not flying or in creative/spectator mode
                     try {
-                        Double energy = Flight.energy.get(player);
-                        Vector lastLoc = lastPosition.get(player);
-                        Vector currentLoc = player.getLocation().toVector();
+                        // If the player is wearing elytra, regenerate 4x
+                        // If also gliding, only 2x
+                        int addition;
+                        if (isPlayerWearingElytra(player)) {
+                            if (player.isGliding()) addition = 2;
+                            else addition = 4;
+                        }
+                        else {
+                            addition = 1;
+                        }
 
-                        // Check planar movement
-                        double movement2d = 0;
-                        // If pressing movement key, remove 1
-                        if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) movement2d = 1;
-                        // If sprinting, multiply that by 2
-                        if (player.isSprinting()) movement2d *= 2;
-                        // If not actually moving, don't remove energy
-                        if (lastLoc != null && Objects.equals(currentLoc.getX(), lastLoc.getX()) && Objects.equals(currentLoc.getZ(), lastLoc.getZ()))
-                            movement2d = 0;
-
-                        // Check vertical movement
-                        double movementY = 0;
-                        // If pressing jump, remove 1
-                        if (input.isJump()) movementY = 1;
-                        // If not actually moving up, don't remove energy
-                        if (lastLoc != null && Objects.equals(currentLoc.getY(), lastLoc.getY())) movementY = 0;
-
-                        // Get multiplication factors from config
-                        final double flightEnergyDepletionXYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionXYMultiplier");
-                        final double flightEnergyDepletionYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionYMultiplier");
-                        // Calculate the total energy to remove
-                        final double energyToRemove = movement2d * flightEnergyDepletionXYMultiplier + movementY * flightEnergyDepletionYMultiplier;
-
-                        // Calculate what the player's energy should be
-                        energy -= energyToRemove;
-
-                        // Ensure energy is not below zero
-                        if (energy < 0) energy = 0.0;
-                        // Save new energy state to player
-                        Flight.energy.put(player, energy);
-                        Flight.lastPosition.put(player, currentLoc);
+                        energy.compute(player, (k, i) -> i + addition);
                     } catch (NullPointerException e) {
-                        // If the energy for the player doesn't exist for some reason, set it to full
                         energy.put(player, energyCapacity);
                     }
                 }
+
+                if (energy.get(player) > energyCapacity) energy.put(player, energyCapacity);
+
+                bossBar = configureBossbar(player, bossBar, namespacedKey);
+
+                // Remove player from flight if energy runs out
+                if (energy.get(player) <= 0) {
+
+                    setPlayerDepleted(player, true);
+                    if (player.isFlying()) {
+                        player.setFlying(false);
+                        player.setGliding(true);
+                        player.setAllowFlight(false);
+                    }
+                }
+
+                // Set bossbar to green if it reaches reactivation point
+                if (isPlayerDepleted(player) && energy.get(player) >= reactivationPoint) {
+                    bossBar.setColor(BarColor.GREEN);
+                    setPlayerDepleted(player, false);
+                    setupFlight(player);
+                }
+
+            } else if (bossBar != null) {
+                // Remove bossbar if it's full
+                bossBar.removePlayer(player);
+                bossBar.setVisible(false);
+                Bukkit.removeBossBar(namespacedKey);
             }
-        }, 0, 0);
+
+            final Input input = player.getCurrentInput();
+
+            if (player.isFlying() && !inFlightGameMode(player)) {
+                // Remove energy if flying
+                try {
+                    Double energy = Flight.energy.get(player);
+                    Vector lastLoc = lastPosition.get(player);
+                    Vector currentLoc = player.getLocation().toVector();
+
+                    // Check planar movement
+                    double movement2d = 0;
+                    // If pressing movement key, remove 1
+                    if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) movement2d = 1;
+                    // If sprinting, multiply that by 2
+                    if (player.isSprinting()) movement2d *= 2;
+                    // If not actually moving, don't remove energy
+                    if (lastLoc != null && Objects.equals(currentLoc.getX(), lastLoc.getX()) && Objects.equals(currentLoc.getZ(), lastLoc.getZ()))
+                        movement2d = 0;
+
+                    // Check vertical movement
+                    double movementY = 0;
+                    // If pressing jump, remove 1
+                    if (input.isJump()) movementY = 1;
+                    // If not actually moving up, don't remove energy
+                    if (lastLoc != null && Objects.equals(currentLoc.getY(), lastLoc.getY())) movementY = 0;
+
+                    // Get multiplication factors from config
+                    final double flightEnergyDepletionXYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionXYMultiplier");
+                    final double flightEnergyDepletionYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionYMultiplier");
+
+                    // Armor points penalty
+                    final double armorPenalty;
+                    if (isPlayerEquipmentHeavy(player)) armorPenalty = 1;
+                    else armorPenalty = 0;
+
+                    // Calculate the total energy to remove
+                    final double energyToRemove = movement2d * flightEnergyDepletionXYMultiplier + movementY * flightEnergyDepletionYMultiplier + armorPenalty;
+
+                    // Calculate what the player's energy should be
+                    energy -= energyToRemove;
+
+                    // Ensure energy is not below zero
+                    if (energy < 0) energy = 0.0;
+                    // Save new energy state to player
+                    Flight.energy.put(player, energy);
+                    Flight.lastPosition.put(player, currentLoc);
+                } catch (NullPointerException e) {
+                    // If the energy for the player doesn't exist for some reason, set it to full
+                    energy.put(player, energyCapacity);
+                }
+            } else if (player.isGliding() && isPlayerWearingElytra(player)) {
+
+                if (input.isJump() && riseCooldown.get(player) == 0 && !isFlightRestricted(player) && !isPlayerDepleted(player)) {
+                    final Vector velocity = player.getVelocity();
+
+                    // Add a bit of velocity based on facing direction
+                    final Vector addedVelocity = player.getLocation().getDirection().normalize();
+                    addedVelocity.multiply(0.15);
+                    final Vector newVelocity = velocity.clone().add(addedVelocity);
+
+                    // Set new velocity
+                    player.setVelocity(newVelocity);
+
+                    riseCooldown.put(player, 15);
+                    playWingFlapSound(player);
+                    energy.put(player, energy.get(player) - 50);
+                    if (energy.get(player) < 0) energy.put(player, (double) 0);
+                }
+            }
+
+            riseCooldown.putIfAbsent(player, 0);
+            if (riseCooldown.get(player) > 0) riseCooldown.put(player, riseCooldown.get(player) - 1);
+            if (!player.isGliding()) riseCooldown.put(player, 15);
+        }
+    }
+
+    @NotNull
+    private static KeyedBossBar configureBossbar(Player player, KeyedBossBar bossBar, NamespacedKey namespacedKey) {
+        if (bossBar == null) { // Create bossbar if it's null
+
+            // Yellow if player is not wearing elytra, green if they are
+            BarColor color = BarColor.YELLOW;
+            if (isPlayerWearingElytra(player)) color = BarColor.GREEN;
+
+            bossBar = Bukkit.createBossBar(namespacedKey, "Energy", color, BarStyle.SEGMENTED_10);
+            bossBar.addPlayer(player);
+        }
+
+        bossBar.setVisible(!inFlightGameMode(player));
+
+        BarColor color = BarColor.YELLOW;
+        // Set bossbar to red if it's depleted
+        if (isPlayerDepleted(player)) color = BarColor.RED;
+        else {
+            if (!isPlayerEquipmentHeavy(player) && isPlayerWearingElytra(player)) color = BarColor.GREEN;
+        }
+        bossBar.setColor(color);
+
+        // Set progress
+        bossBar.setProgress(energy.get(player) / energyCapacity);
+        return bossBar;
+    }
+
+    public static boolean isPlayerEquipmentHeavy(@NotNull Player player) {
+        return Objects.requireNonNull(player.getAttribute(Attribute.ARMOR)).getValue() >= 12;
+    }
+
+    public static boolean isPlayerWearingElytra(@NotNull Player player) {
+        ItemStack chestplate = player.getInventory().getChestplate();
+        return (chestplate != null && chestplate.getType().equals(Material.ELYTRA));
     }
 
     /**
@@ -245,5 +315,9 @@ public class Flight {
         boolean overlapsPoint5 = (traceResult5 != null);
 
         return (overlapsPoint1 || overlapsPoint2 || overlapsPoint3 || overlapsPoint4 || overlapsPoint5);
+    }
+
+    public static void playWingFlapSound(@NotNull Player player) {
+        player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS, 0.5f, 1.2f);
     }
 }

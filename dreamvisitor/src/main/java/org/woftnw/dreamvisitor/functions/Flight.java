@@ -1,112 +1,229 @@
 package org.woftnw.dreamvisitor.functions;
 
-import org.bukkit.Input;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.damage.DamageSource;
-import org.bukkit.damage.DamageType;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.woftnw.dreamvisitor.Dreamvisitor;
-import org.woftnw.dreamvisitor.data.Config;
-import org.woftnw.dreamvisitor.data.PlayerMemory;
 import org.woftnw.dreamvisitor.data.PlayerUtility;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.NamespacedKey;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.woftnw.dreamvisitor.data.type.DVUser;
-import org.woftnw.dreamvisitor.util.ConfigKey;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class Flight {
-    public static double energyCapacity = Config.get(ConfigKey.FLIGHT_ENERGY_CAPACITY);
-    public static double reactivationPoint = Config.get(ConfigKey.FLIGHT_REGENERATION_POINT);
+    public static double energyCapacity = Dreamvisitor.getPlugin().getConfig().getInt("flightEnergyCapacity");
+    public static double reactivationPoint = Dreamvisitor.getPlugin().getConfig().getInt("flightRegenerationPoint");
     public static final Map<Player, Double> energy = new HashMap<>();
     private static final Map<Player, Boolean> energyDepletion = new HashMap<>();
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
-    private static final Map<Player, Boolean> falling = new HashMap<>();
     private static final Map<Player, Vector> lastPosition = new HashMap<>();
-    private static final Map<Player, Float> fallDistance = new HashMap<>();
+    private static final Map<Player, Integer> riseCooldown = new HashMap<>();
 
     public static void init() {
-        Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
-
-            for (Player player : Bukkit.getOnlinePlayers()) {
-
-                DVUser user = PlayerUtility.getUser(player);
-
-                // If player does not have the dreamvisitor.fly permission, disable flight if not in creative
-                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && !inFlightGameMode(player)) || (user.isFlightDisabled() && !inFlightGameMode(player))) {
-                    player.setAllowFlight(false);
-                } else setupFlight(player);
-
-                energy.putIfAbsent(player, energyCapacity);
-
-                // Get bossbar (even if it's null)
-                NamespacedKey namespacedKey = NamespacedKey.fromString("dreamvisitor:" + player.getUniqueId().toString().toLowerCase() + "-energy", Dreamvisitor.getPlugin());
-                assert namespacedKey != null;
-                KeyedBossBar bossBar = Bukkit.getBossBar(namespacedKey);
-
-                if (energy.get(player) < energyCapacity) {
-
-                    if (!player.isFlying() || inFlightGameMode(player)) {
-                        // Regenerate energy if not flying or in creative/spectator mode
-                        try {
-                            // If player is not falling or gliding (they are on the ground), regenerate twice as fast
-                            if (!falling.get(player) && !player.isGliding()) energy.compute(player, (k, i) -> i + 2);
-                            else energy.compute(player, (k, i) -> i + 1);
-                        } catch (NullPointerException e) {
-                            energy.put(player, energyCapacity);
-                        }
-                    }
-
-                    if (energy.get(player) > energyCapacity) energy.put(player, energyCapacity);
-
-                    if (bossBar == null) { // Create bossbar if it's null
-                        bossBar = Bukkit.createBossBar(namespacedKey, "Energy", BarColor.GREEN, BarStyle.SEGMENTED_10);
-                        bossBar.addPlayer(player);
-                    }
-
-                    bossBar.setVisible(!inFlightGameMode(player));
-
-                    // Set progress
-                    bossBar.setProgress(energy.get(player) / energyCapacity);
-
-                    // Remove player from flight if energy runs out
-                    if (energy.get(player) <= 0) {
-                        // Set bossbar to red if it's depleted
-                        bossBar.setColor(BarColor.RED);
-                        setPlayerDepleted(player, true);
-                        if (player.isFlying()) {
-                            player.setFlying(false);
-                            player.setGliding(true);
-                            player.setAllowFlight(false);
-                        }
-                    }
-
-                    // Set bossbar to green if it reaches reactivation point
-                    if (isPlayerDepleted(player) && energy.get(player) >= reactivationPoint) {
-                        bossBar.setColor(BarColor.GREEN);
-                        setPlayerDepleted(player, false);
-                        setupFlight(player);
-                    }
-
-                } else if (bossBar != null) {
-                    // Remove bossbar if it's full
-                    bossBar.removePlayer(player);
-                    bossBar.setVisible(false);
-                    Bukkit.removeBossBar(namespacedKey);
-                }
-            }
-        }, 0, 0);
+        Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), Flight::tick, 0, 0);
     }
 
+
+    private static void tick() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+
+            setupFlight(player);
+
+            if (isGonnaTouchGround(player) && !inFlightGameMode(player)) player.setAllowFlight(false);
+
+            energy.putIfAbsent(player, energyCapacity);
+
+            // Get bossbar (even if it's null)
+            NamespacedKey namespacedKey = NamespacedKey.fromString("dreamvisitor:" + player.getUniqueId().toString().toLowerCase() + "-energy", Dreamvisitor.getPlugin());
+            assert namespacedKey != null;
+            KeyedBossBar bossBar = Bukkit.getBossBar(namespacedKey);
+
+            if (energy.get(player) < energyCapacity) {
+
+                if (!player.isFlying() || inFlightGameMode(player)) {
+                    // Regenerate energy if not flying or in creative/spectator mode
+                    try {
+                        // If the player is wearing elytra, regenerate 4x
+                        // If also gliding, only 2x
+                        int addition;
+                        if (isPlayerWearingElytra(player)) {
+                            if (player.isGliding()) addition = 2;
+                            else addition = 4;
+                        }
+                        else {
+                            addition = 1;
+                        }
+
+                        energy.compute(player, (k, i) -> i + addition);
+                    } catch (NullPointerException e) {
+                        energy.put(player, energyCapacity);
+                    }
+                }
+
+                // Cap energy value at the capacity.
+                if (energy.get(player) > energyCapacity) energy.put(player, energyCapacity);
+
+                bossBar = configureBossbar(player, bossBar, namespacedKey);
+
+                // Remove player from flight if energy runs out
+                if (energy.get(player) <= 0) {
+
+                    setPlayerDepleted(player, true);
+                    if (player.isFlying()) {
+                        player.setFlying(false);
+                        player.setGliding(true);
+                        player.setAllowFlight(false);
+                    }
+                }
+
+                // Set bossbar to green if it reaches reactivation point
+                if (isPlayerDepleted(player) && energy.get(player) >= reactivationPoint) {
+                    bossBar.setColor(BarColor.GREEN);
+                    setPlayerDepleted(player, false);
+                    setupFlight(player);
+                }
+
+            } else if (bossBar != null) {
+                // Remove bossbar if it's full
+                bossBar.removePlayer(player);
+                bossBar.setVisible(false);
+                Bukkit.removeBossBar(namespacedKey);
+            }
+
+            final Input input = player.getCurrentInput();
+
+            if (player.isFlying() && !inFlightGameMode(player)) {
+                // Remove energy if flying
+                try {
+                    Double energy = Flight.energy.get(player);
+                    Vector lastLoc = lastPosition.get(player);
+                    Vector currentLoc = player.getLocation().toVector();
+
+                    // Check planar movement
+                    double movement2d = 0;
+                    // If pressing movement key, remove 1
+                    if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) movement2d = 1;
+                    // If sprinting, multiply that by 2
+                    if (player.isSprinting()) movement2d *= 2;
+                    // If not actually moving, don't remove energy
+                    if (lastLoc != null && Objects.equals(currentLoc.getX(), lastLoc.getX()) && Objects.equals(currentLoc.getZ(), lastLoc.getZ()))
+                        movement2d = 0;
+
+                    // Check vertical movement
+                    double movementY = 0;
+                    // If pressing jump, remove 1
+                    if (input.isJump()) movementY = 1;
+                    // If not actually moving up, don't remove energy
+                    if (lastLoc != null && Objects.equals(currentLoc.getY(), lastLoc.getY())) movementY = 0;
+
+                    // Get multiplication factors from config
+                    final double flightEnergyDepletionXYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionXYMultiplier");
+                    final double flightEnergyDepletionYMultiplier = Dreamvisitor.getPlugin().getConfig().getDouble("flightEnergyDepletionYMultiplier");
+
+                    // Armor points penalty
+                    final double armorPenalty;
+                    if (isPlayerEquipmentHeavy(player)) armorPenalty = 1;
+                    else armorPenalty = 0;
+
+                    // Calculate the total energy to remove
+                    final double energyToRemove = movement2d * flightEnergyDepletionXYMultiplier + movementY * flightEnergyDepletionYMultiplier + armorPenalty;
+
+                    // Calculate what the player's energy should be
+                    energy -= energyToRemove;
+
+                    // Ensure energy is not below zero
+                    if (energy < 0) energy = 0.0;
+                    // Save new energy state to player
+                    Flight.energy.put(player, energy);
+                    Flight.lastPosition.put(player, currentLoc);
+                } catch (NullPointerException e) {
+                    // If the energy for the player doesn't exist for some reason, set it to full
+                    energy.put(player, energyCapacity);
+                }
+            } else if (player.isGliding() && isPlayerWearingElytra(player)) {
+
+                if (input.isJump() && riseCooldown.get(player) == 0 && !isFlightRestricted(player) && !isPlayerDepleted(player)) {
+                    final Vector velocity = player.getVelocity();
+
+                    // Add a bit of velocity based on facing direction
+                    final Vector addedVelocity = player.getLocation().getDirection().normalize();
+                    addedVelocity.multiply(0.15);
+                    final Vector newVelocity = velocity.clone().add(addedVelocity);
+
+                    // Set new velocity
+                    player.setVelocity(newVelocity);
+
+                    riseCooldown.put(player, 15);
+                    playWingFlapSound(player);
+                    energy.put(player, energy.get(player) - 50);
+                    if (energy.get(player) < 0) energy.put(player, (double) 0);
+                }
+            }
+
+            riseCooldown.putIfAbsent(player, 0);
+            if (riseCooldown.get(player) > 0) riseCooldown.put(player, riseCooldown.get(player) - 1);
+            if (!player.isGliding()) riseCooldown.put(player, 15);
+        }
+    }
+
+    @NotNull
+    private static KeyedBossBar configureBossbar(Player player, KeyedBossBar bossBar, NamespacedKey namespacedKey) {
+        if (bossBar == null) { // Create bossbar if it's null
+
+            // Yellow if player is not wearing elytra, green if they are
+            BarColor color = BarColor.YELLOW;
+            if (isPlayerWearingElytra(player)) color = BarColor.GREEN;
+
+            bossBar = Bukkit.createBossBar(namespacedKey, "Energy", color, BarStyle.SEGMENTED_10);
+            bossBar.addPlayer(player);
+        }
+
+        bossBar.setVisible(!inFlightGameMode(player));
+
+        BarColor color = BarColor.YELLOW;
+        // Set bossbar to red if it's depleted
+        if (isPlayerDepleted(player)) color = BarColor.RED;
+        else {
+            if (!isPlayerEquipmentHeavy(player) && isPlayerWearingElytra(player)) color = BarColor.GREEN;
+        }
+        bossBar.setColor(color);
+
+        // Set progress
+        bossBar.setProgress(energy.get(player) / energyCapacity);
+        return bossBar;
+    }
+
+    /**
+     * Check whether a player is heavy because of too much equipment.
+     * @param player the player to check.
+     * @return true if the player has at least 12 armor points, false otherwise.
+     */
+    public static boolean isPlayerEquipmentHeavy(@NotNull Player player) {
+        return Objects.requireNonNull(player.getAttribute(Attribute.ARMOR)).getValue() >= 12;
+    }
+
+    /**
+     * Check whether a player is wearing elytra.
+     * @param player the player to check.
+     * @return true if the chest is equipped with elytra, false otherwise.
+     */
+    public static boolean isPlayerWearingElytra(@NotNull Player player) {
+        ItemStack chestplate = player.getInventory().getChestplate();
+        return (chestplate != null && chestplate.getType().equals(Material.ELYTRA));
+    }
+
+    /**
+     * Check if a player is depleted (indicated red energy bar).
+     * @param player the player to check.
+     * @return true if the player is depleted, false otherwise
+     */
     public static boolean isPlayerDepleted(Player player) {
         return (energyDepletion.computeIfAbsent(player, k -> false));
     }
@@ -141,111 +258,76 @@ public class Flight {
 
     }
 
+    /**
+     * Allow the player to fly if appropriate. This method will NOT allow flight if the player does not have permission,
+     * is in a region where they can't fly, is depleted of energy, disabled flight themselves, or is about to touch the
+     * ground.
+     *
+     * @param player the player to set up flight for.
+     */
     public static void setupFlight(@NotNull Player player) {
-        // Re-enable flight if it gets disabled by game mode change
-        // Dreamvisitor.debug("FlightNotAllowed: " + !player.getAllowFlight() + " Permission: " + player.hasPermission("dreamvisitor.fly") + " NotRestricted: " + !isFlightRestricted(player) + " NotDepleted: " + !isPlayerDepleted(player) + " NotDisabled: " + !PlayerUtility.getPlayerMemory(player.getUniqueId()).flightDisabled);
-        if (!player.getAllowFlight() && player.hasPermission("dreamvisitor.fly") && !isFlightRestricted(player) && !isPlayerDepleted(player) && !PlayerUtility.getUser(player).isFlightDisabled()) {
-            Messager.debug("All requirements met for flight.");
-            Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> player.setAllowFlight(true), 1);
-        }
+        boolean alreadyAllowedFlight = player.getAllowFlight();
+        if (alreadyAllowedFlight) return;
+        boolean hasPermissionToFly = player.hasPermission("dreamvisitor.fly");
+        if (!hasPermissionToFly) return;
+        if (isFlightRestricted(player)) return;
+        if (isPlayerDepleted(player)) return;
+        boolean playerDisabledOwnFlight = PlayerUtility.getUser(player.getUniqueId()).isFlightDisabled();
+        if (playerDisabledOwnFlight) return;
+        if (isGonnaTouchGround(player)) return;
+
+        Messager.debug("All requirements met for flight.");
+        player.setAllowFlight(true);
+//        Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> player.setAllowFlight(true), 1);
+
     }
 
     /**
      * Whether a player is in a flight-enabled game mode like Creative or Spectator.
+     *
+     * @param player the player to check.
+     * @return true if in Creative or Spectator, false otherwise.
      */
     public static boolean inFlightGameMode(@NotNull Player player) {
         return (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR);
     }
 
-    public static void tick() {
+    /**
+     * Whether the player will touch the ground on the next tick based on their current position and velocity.
+     *
+     * @param player the player to check
+     * @return true if they will hit the ground, false otherwise
+     */
+    public static boolean isGonnaTouchGround(@NotNull Player player) {
 
-        for (final Player player : Bukkit.getOnlinePlayers()) {
-            final Input input = player.getCurrentInput();
+        Vector velocity = player.getVelocity();
+        double hitboxWidth = Objects.requireNonNull(player.getAttribute(Attribute.SCALE)).getValue() * 0.6;
+        Location centerPoint = player.getLocation();
+        World world = player.getWorld();
 
-            if (player.isFlying() && !inFlightGameMode(player)) {
-                // Remove energy if flying
-                try {
-                    Double energy = Flight.energy.get(player);
-                    Vector lastLoc = lastPosition.get(player);
-                    Vector currentLoc = player.getLocation().toVector();
+        if (velocity.getY() >= -0.08) return false;
 
-                    // Check planar movement
-                    double movement2d = 0;
-                    // If pressing movement key, remove 1
-                    if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) movement2d = 1;
-                    // If sprinting, multiply that by 2
-                    if (player.isSprinting()) movement2d *= 2;
-                    // If not actually moving, don't remove energy
-                    if (lastLoc != null && Objects.equals(currentLoc.getX(), lastLoc.getX()) && Objects.equals(currentLoc.getZ(), lastLoc.getZ())) movement2d = 0;
+        Location point1 = centerPoint.clone().add((hitboxWidth / 2), 0, (hitboxWidth / 2));
+        Location point2 = centerPoint.clone().add(-(hitboxWidth / 2), 0, (hitboxWidth / 2));
+        Location point3 = centerPoint.clone().add((hitboxWidth / 2), 0, -(hitboxWidth / 2));
+        Location point4 = centerPoint.clone().add(-(hitboxWidth / 2), 0, -(hitboxWidth / 2));
 
-                    // Check vertical movement
-                    double movementY = 0;
-                    // If pressing jump, remove 1
-                    if (input.isJump()) movementY = 1;
-                    // If not actually moving up, don't remove energy
-                    if (lastLoc != null && Objects.equals(currentLoc.getY(), lastLoc.getY())) movementY = 0;
+        RayTraceResult traceResult1 = world.rayTraceBlocks(point1, velocity, 1);
+        RayTraceResult traceResult2 = world.rayTraceBlocks(point2, velocity, 1);
+        RayTraceResult traceResult3 = world.rayTraceBlocks(point3, velocity, 1);
+        RayTraceResult traceResult4 = world.rayTraceBlocks(point4, velocity, 1);
+        RayTraceResult traceResult5 = world.rayTraceBlocks(centerPoint, velocity, 1);
 
-                    // Get multiplication factors from config
-                    final double flightEnergyDepletionXYMultiplier = Config.get(ConfigKey.FLIGHT_ENERGY_DEPLETION_X_Z_MULTIPLIER);
-                    final double flightEnergyDepletionYMultiplier = Config.get(ConfigKey.FLIGHT_ENERGY_DEPLETION_Y_MULTIPLIER);
-                    // Calculate the total energy to remove
-                    final double energyToRemove = movement2d * flightEnergyDepletionXYMultiplier + movementY * flightEnergyDepletionYMultiplier;
+        boolean overlapsPoint1 = (traceResult1 != null);
+        boolean overlapsPoint2 = (traceResult2 != null);
+        boolean overlapsPoint3 = (traceResult3 != null);
+        boolean overlapsPoint4 = (traceResult4 != null);
+        boolean overlapsPoint5 = (traceResult5 != null);
 
-                    // Calculate what the player's energy should be
-                    energy -= energyToRemove;
-
-                    // Ensure energy is not below zero
-                    if (energy < 0) energy = 0.0;
-                    // Save new energy state to player
-                    Flight.energy.put(player, energy);
-                    Flight.lastPosition.put(player, currentLoc);
-                } catch (NullPointerException e) {
-                    // If the energy for the player doesn't exist for some reason, set it to full
-                    energy.put(player, energyCapacity);
-                }
-            } else if (!isFlightRestricted(player) && !isPlayerDepleted(player)) {
-
-                // This is a reimplementation of fall damage because enabling flight disables fall damage.
-
-                // If the player is not flying (but is able to), check falling
-                if (player.getFallDistance() > 0 && !falling.get(player) && !player.isFlying()) {
-                    // If the player is falling, record that
-                    falling.put(player, true);
-                } else if (player.getFallDistance() == 0) {
-                    // If not, check if they hit ground or are flying
-                    if (player.isFlying()) {
-                        // If flying, mark not falling
-                        falling.put(player, false);
-                    } else {
-                        // FALL DAMAGER TIME
-                        int damage = calculateFallDamage(
-                                fallDistance.get(player),
-                                Objects.requireNonNull(player.getAttribute(Attribute.SAFE_FALL_DISTANCE)).getValue(),
-                                Objects.requireNonNull(player.getAttribute(Attribute.FALL_DAMAGE_MULTIPLIER)).getValue()
-                        );
-                        player.damage(damage, DamageSource.builder(DamageType.FALL).build());
-                        falling.put(player, false);
-                    }
-                }
-                fallDistance.put(player, player.getFallDistance());
-            }
-        }
+        return (overlapsPoint1 || overlapsPoint2 || overlapsPoint3 || overlapsPoint4 || overlapsPoint5);
     }
 
-    /**
-     * Calculates fall damage using the formula:
-     * fallDamage = Max(0, Ceiling[(fallDistance − safeFallDistance) × fallDamageMultiplier])
-     *
-     * @param fallDistance The total distance the entity has fallen (in meters or game units).
-     * @param safeFallDistance The distance that can be fallen without taking any damage.
-     * @param fallDamageMultiplier The multiplier applied to the damage taken per unit over the safe distance.
-     * @return The total fall damage (rounded up, never less than 0).
-     */
-    public static int calculateFallDamage(double fallDistance, double safeFallDistance, double fallDamageMultiplier) {
-        double excessFall = fallDistance - safeFallDistance;
-        double rawDamage = excessFall * fallDamageMultiplier;
-
-        // Ensure damage is not negative and round up to nearest whole number
-        return (int) Math.max(0, Math.ceil(rawDamage));
+    public static void playWingFlapSound(@NotNull Player player) {
+        player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS, 0.5f, 1.2f);
     }
 }

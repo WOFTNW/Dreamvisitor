@@ -1,8 +1,18 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import org.bukkit.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Input;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -12,11 +22,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector3d;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 
 public class Flight {
     public static double energyCapacity = Dreamvisitor.getPlugin().getConfig().getInt("flightEnergyCapacity");
@@ -35,6 +43,13 @@ public class Flight {
         for (Player player : Bukkit.getOnlinePlayers()) {
 
             setupFlight(player);
+
+            boolean playerDisabledFlight = PlayerUtility.getPlayerMemory(player.getUniqueId()).flightDisabled;
+            // stop gliding when the player takes elytra off
+            if (playerDisabledFlight && !inFlightGameMode(player) && !isPlayerWearingElytra(player)) {
+                player.setGliding(false);
+            }
+
 
             if (isGonnaTouchGround(player) && !inFlightGameMode(player)) player.setAllowFlight(false);
 

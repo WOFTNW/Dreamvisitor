@@ -267,6 +267,10 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Initializing invTemplates.yml");
             InvTemplates.init();
 
+            // Init Music Manager
+            debug("Initializing music manager");
+            new MusicManager().init();
+
             // LuckPerms API
             RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
             if (provider != null)

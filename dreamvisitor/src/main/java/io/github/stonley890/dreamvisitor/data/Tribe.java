@@ -15,7 +15,8 @@ public enum Tribe {
     SAND,
     SEA,
     SILK,
-    SKY;
+    SKY,
+    HUMAN;
 
     @NotNull
     private String name = "Undefined.";
@@ -33,6 +34,7 @@ public enum Tribe {
         SEA.name = "Sea";
         SILK.name = "Silk";
         SKY.name = "Sky";
+        HUMAN.name = "Human";
 
         HIVE.color = ChatColor.GOLD;
         ICE.color = ChatColor.AQUA;
@@ -44,6 +46,7 @@ public enum Tribe {
         SEA.color = ChatColor.BLUE;
         SILK.color = ChatColor.LIGHT_PURPLE;
         SKY.color = ChatColor.DARK_RED;
+        HUMAN.color = ChatColor.GRAY;
     }
 
     /**
@@ -63,9 +66,7 @@ public enum Tribe {
      */
     @NotNull
     @Contract(pure = true)
-    public String getTeamName() {
-        return name + "Wing";
-    }
+    public String getTeamName() { return this == HUMAN ? name : name + "Wing"; }
 
     /**
      * Get the color of this tribe.

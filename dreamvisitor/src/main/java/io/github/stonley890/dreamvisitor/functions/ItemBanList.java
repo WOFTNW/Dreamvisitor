@@ -46,20 +46,24 @@ public class ItemBanList implements Listener {
         }
     }
 
+    public static boolean isItemBanned(@NotNull ItemStack item, @NotNull ItemStack[] banList, boolean ignoreData) {
+        for(ItemStack bannedItem : banList) {
+            if(ignoreData) {
+                if(item.getType() != bannedItem.getType()) continue;
+            } else if(!item.isSimilar(bannedItem)) continue;
+            return true;
+        }
+        return false;
+    }
+
     private static void removeItems(Player player, @NotNull ItemStack[] items, boolean ignoreData) {
-        for (ItemStack item : items) {
-            if (item == null) continue;
-            Dreamvisitor.debug("Checking against item " + item.getType());
-            for (ItemStack content : player.getInventory().getContents()) {
-                if (content == null) continue;
-                Dreamvisitor.debug("Checking player item " + content.getType());
-                Dreamvisitor.debug("Ignore data? " + ignoreData);
-                if (ignoreData) {
-                    Dreamvisitor.debug("Types:" + content.getType() + " and " + item.getType());
-                    if (content.getType() != item.getType()) continue;
-                } else if (!content.isSimilar(item)) continue;
+        for (ItemStack content : player.getInventory().getContents()) {
+            if (content == null) continue;
+            Dreamvisitor.debug("Checking player item " + content.getType());
+            Dreamvisitor.debug("Ignore data? " + ignoreData);
+            if(isItemBanned(content, items, ignoreData)) {
                 player.getInventory().remove(content);
-                Bot.sendLog("Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
+                Bot.sendLog("Removed " + content.getType().name() + " (" + Objects.requireNonNull(content.getItemMeta()).getDisplayName() + ") from " + player.getName());
             }
         }
     }

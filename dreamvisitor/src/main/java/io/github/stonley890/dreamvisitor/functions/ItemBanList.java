@@ -3,9 +3,11 @@ package io.github.stonley890.dreamvisitor.functions;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -36,6 +38,18 @@ public class ItemBanList implements Listener {
 
         if (event.getInventory().equals(ItemBanList.componentsInv) || event.getInventory().equals(ItemBanList.componentlessInv)) {
             ItemBanList.saveItems();
+        }
+    }
+
+    @EventHandler
+    public void onCraftItem(CraftItemEvent event) {
+        ItemStack result = event.getInventory().getResult();
+        HumanEntity player = event.getWhoClicked();
+        if(result == null) return;
+        if(player.hasPermission("dreamvisitor.itembanlist.bypass")) return;
+        if(isItemBanned(result, badItemsComponents, false) || isItemBanned(result, badItemsComponentless, true)) {
+            Bot.sendLog("Prevented crafting of banned item " + result.getType().name() + " by player " + player.getName() + ".");
+            event.setCancelled(true);
         }
     }
 

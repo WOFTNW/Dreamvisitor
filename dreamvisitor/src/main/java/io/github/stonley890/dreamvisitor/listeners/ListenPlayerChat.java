@@ -8,10 +8,7 @@ import java.util.regex.Pattern;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
-import io.github.stonley890.dreamvisitor.data.BadWords;
-import io.github.stonley890.dreamvisitor.data.PlayerMemory;
-import io.github.stonley890.dreamvisitor.data.PlayerTribe;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.functions.Chatback;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -85,7 +82,11 @@ public class ListenPlayerChat implements Listener {
         operator, send message
         */
 
-        String tribeIcon = PlayerTribe.getTribeOfPlayer(player.getUniqueId()).getIcon(); // this line is giving a weird IDE error saying that it could possibly lead to a NullPointerException, but i dont see how that's even possible..? everything here is @NotNull. Whatever
+        Tribe playerTribe = PlayerTribe.getTribeOfPlayer(player.getUniqueId());
+        String tribeIcon = "\uD83D\uDC09"; // Dragon emoji by default
+        if (playerTribe != null) {
+            tribeIcon = playerTribe.getIcon();
+        }
         String chatMessage = tribeIcon + " **" + Bot.escapeMarkdownFormatting(player.getName()) + "**: " + event.getMessage();
 
 

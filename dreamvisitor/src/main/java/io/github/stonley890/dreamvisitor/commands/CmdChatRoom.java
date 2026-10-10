@@ -50,7 +50,7 @@ public class CmdChatRoom implements DVCommand {
 									if (playerInRoomBeforeJoin == 1) playerSingOrPlur = "player";
 
 									// e.g. Joined room "jma" with 5 other players.
-									sender.sendMessage(Dreamvisitor.PREFIX + "Joined room \"" + room + "\" with " + playerInRoomBeforeJoin + " other " + playerSingOrPlur + ".");
+									sender.sendMessage(Dreamvisitor.PREFIX + "Joined room \"" + room + "\" with " + playerInRoomBeforeJoin + " other " + playerSingOrPlur + ". Run " + ChatColor.AQUA + "/chatroom exit" + ChatColor.RESET + " to return to main chat.");
 								}),
 						new CommandAPICommand("exit")
 								.withHelp("Exit chat room", "Exit any chat room you are currently in and return to the main chat.")

@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
+import dev.jorel.commandapi.CommandAPI;
 import io.github.stonley890.dreamvisitor.data.*;
+import io.github.stonley890.dreamvisitor.functions.ChatRoomUtility;
 import io.github.stonley890.dreamvisitor.functions.Chatback;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -75,6 +78,36 @@ public class ListenPlayerChat implements Listener {
                 return;
             }
         }
+
+		// Check if this player is in a chat room.
+		PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+		String chatRoom = memory.chatRoom;
+	    if (chatRoom != null) {
+			// Cancel the message broadcast.
+			event.setCancelled(true);
+
+			ArrayList<? extends Player> playersInRoom = ChatRoomUtility.getPlayersInRoom(chatRoom);
+			@NotNull
+			String playerName = player.getName();
+
+			// Get essentials nickname, if possible.
+			Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+			if (ess != null) {
+				User user = ess.getUser(player);
+				String nickname = user.getFormattedNickname();
+				if (nickname != null) playerName = nickname;
+			}
+
+			String chatRoomMessage = ChatColor.LIGHT_PURPLE + "[" + chatRoom + "] " + ChatColor.RESET + playerName + ChatColor.RESET + ": " + message;
+			// Send to all players in the same chat room.
+			for (Player chatRoomParticipant : playersInRoom) {
+				chatRoomParticipant.sendMessage(chatRoomMessage);
+			}
+
+			Dreamvisitor.getPlugin().getLogger().log(Level.INFO, player.getName() + " said in chatroom \"" + chatRoom + "\": " + message);
+
+			return;
+		}
         
         /*
         Send chat messages to Discord

@@ -6,6 +6,7 @@ import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerTribe;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Tribe;
+import io.github.stonley890.dreamvisitor.functions.ChatRoomUtility;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.luckperms.api.model.user.User;
@@ -23,6 +24,12 @@ public class ListenPlayerJoin implements Listener {
     public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
 
         final Player player = event.getPlayer();
+
+		String playerChatRoom = ChatRoomUtility.getPlayerChatRoom(player);
+	    if (playerChatRoom != null) {
+			ChatRoomUtility.removePlayerFromRoom(player);
+			player.sendMessage(Dreamvisitor.PREFIX + "You were in a chat room on your last session. Run " + ChatColor.AQUA + "/chatroom enter " + playerChatRoom + ChatColor.RESET + " to rejoin it.");
+		}
 
         // Edit player list name if staff
         final User lpUser = Dreamvisitor.getLuckPerms().getUserManager().getUser(player.getUniqueId());

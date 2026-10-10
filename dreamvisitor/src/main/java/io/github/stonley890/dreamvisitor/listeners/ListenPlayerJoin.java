@@ -11,6 +11,9 @@ import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.luckperms.api.model.user.User;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,7 +31,17 @@ public class ListenPlayerJoin implements Listener {
 		String playerChatRoom = ChatRoomUtility.getPlayerChatRoom(player);
 	    if (playerChatRoom != null) {
 			ChatRoomUtility.removePlayerFromRoom(player);
-			player.sendMessage(Dreamvisitor.PREFIX + "You were in a chat room on your last session. Run " + ChatColor.AQUA + "/chatroom enter " + playerChatRoom + ChatColor.RESET + " to rejoin it.");
+
+			String joinCommand = "/chatroom enter " + playerChatRoom;
+			TextComponent joinButton = new TextComponent("here");
+			joinButton.setColor(ChatColor.AQUA);
+			ClickEvent joinButtonClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, joinCommand);
+			joinButton.setClickEvent(joinButtonClickEvent);
+
+			ComponentBuilder builder = new ComponentBuilder();
+			builder.append(Dreamvisitor.PREFIX).append("You were in a chat room on your last session. Click ").append(joinButton).append(" or run ").reset().append(joinCommand).color(ChatColor.AQUA).append(" to rejoin it.").reset();
+
+			player.spigot().sendMessage(builder.build());
 		}
 
         // Edit player list name if staff

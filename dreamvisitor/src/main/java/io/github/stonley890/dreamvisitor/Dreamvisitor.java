@@ -214,6 +214,7 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdVelocity());
             commands.add(new CmdSchedule());
             commands.add(new CmdInvTemplate());
+			commands.add(new CmdChatRoom());
 
             debug("Initializing commands...");
             CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));

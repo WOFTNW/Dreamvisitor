@@ -40,8 +40,13 @@ public class PlayerMemory {
     public boolean sandbox;
     @Nullable
     public String currentInventoryTemplate;
+	/**
+	 * The chat room this player is in, or null if none.
+	 */
+	@Nullable
+	public String chatRoom;
 
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
     public static @NotNull PlayerMemory getFromFileConfig(@NotNull FileConfiguration fileConfig) {
         PlayerMemory memory = new PlayerMemory();
         memory.discordEnabled = fileConfig.getBoolean("discordToggled");
@@ -61,6 +66,7 @@ public class PlayerMemory {
 
         memory.sandbox = fileConfig.getBoolean("sandbox");
         memory.currentInventoryTemplate = fileConfig.getString("currentInventoryTemplate");
+		memory.chatRoom = fileConfig.getString("chatRoom");
 
         return memory;
     }
@@ -77,6 +83,7 @@ public class PlayerMemory {
         fileConfig.set("autoRadio", autoRadio);
         fileConfig.set("sandbox", sandbox);
         fileConfig.set("currentInventoryTemplate", currentInventoryTemplate);
+		fileConfig.set("chatRoom", chatRoom);
 
         return fileConfig;
     }

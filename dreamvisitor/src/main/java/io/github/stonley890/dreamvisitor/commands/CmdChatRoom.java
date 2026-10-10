@@ -1,9 +1,11 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.LongArgument;
+import dev.jorel.commandapi.arguments.PlayerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
@@ -14,6 +16,9 @@ import io.github.stonley890.dreamvisitor.functions.Chatback;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.units.qual.A;
@@ -23,10 +28,10 @@ import java.io.IOException;
 import java.util.*;
 
 public class CmdChatRoom implements DVCommand {
-    @NotNull
-    @Override
-    public ExecutableCommand<?, ?> getCommand() {
-        return new CommandAPICommand("chatroom")
+	@NotNull
+	@Override
+	public ExecutableCommand<?, ?> getCommand() {
+		return new CommandAPICommand("chatroom")
 				.withPermission(CommandPermission.fromString("dreamvisitor.chatroom"))
 				.withSubcommands(
 						new CommandAPICommand("enter")
@@ -90,7 +95,52 @@ public class CmdChatRoom implements DVCommand {
 									List<String> playerNames = playersInRoom.stream().map(Player::getName).toList();
 
 									sender.sendMessage(Dreamvisitor.PREFIX + String.join(", ", playerNames));
+								}),
+						new CommandAPICommand("invite")
+								.withHelp("Invite a player", "Invite a player to your chat room.")
+								.withPermission(CommandPermission.fromString("dreamvisitor.chatroom.invite"))
+								.withArguments(
+										new PlayerArgument("player")
+								)
+								.executesPlayer((sender, args) -> {
+
+									Player invitedPlayer = (Player) args.get("player");
+
+									if (invitedPlayer == null) {
+										throw CommandAPI.failWithString("That player is null. This should never happen :(");
+									}
+
+									String chatRoom = ChatRoomUtility.getPlayerChatRoom(sender);
+
+									if (chatRoom == null) {
+										throw CommandAPI.failWithString("You are not currently in a chat room. Try /chatroom enter <room>");
+									}
+
+									ComponentBuilder builder = new ComponentBuilder();
+
+									String joinCommand = "/chatroom enter " + chatRoom;
+
+									TextComponent joinButton = new TextComponent("here");
+									joinButton.setColor(ChatColor.AQUA);
+									ClickEvent joinButtonClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, joinCommand);
+									joinButton.setClickEvent(joinButtonClickEvent);
+
+									builder
+											.append(Dreamvisitor.PREFIX)
+											.append(sender.getName())
+											.append(" invited you to join the \"")
+											.append(chatRoom)
+											.append("\" chat room. Click ")
+											.append(joinButton)
+											.append(" or run ").reset()
+											.append(joinCommand).color(ChatColor.AQUA)
+											.append(" to join.").reset();
+
+									invitedPlayer.spigot().sendMessage(builder.build());
+
+
+									sender.sendMessage(Dreamvisitor.PREFIX + "Sent invite to " + invitedPlayer.getName() + ".");
 								})
 				);
-    }
+	}
 }

@@ -39,7 +39,13 @@ public class ListenPlayerJoin implements Listener {
 			joinButton.setClickEvent(joinButtonClickEvent);
 
 			ComponentBuilder builder = new ComponentBuilder();
-			builder.append(Dreamvisitor.PREFIX).append("You were in a chat room on your last session. Click ").append(joinButton).append(" or run ").reset().append(joinCommand).color(ChatColor.AQUA).append(" to rejoin it.").reset();
+			builder
+					.append(Dreamvisitor.PREFIX)
+					.append("You were in a chat room on your last session. Click ")
+					.append(joinButton)
+					.append(" or run ").reset()
+					.append(joinCommand).color(ChatColor.AQUA)
+					.append(" to rejoin it.").reset();
 
 			player.spigot().sendMessage(builder.build());
 		}

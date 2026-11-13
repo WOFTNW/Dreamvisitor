@@ -196,3 +196,7 @@ lastInactiveTax: 0
 # This can be bypassed on a per-command basis by including the "max-players" argument.
 # Default: 0
 autoRestartMaxPlayers: 0
+
+# The ID of the Discord member role that allows users to send messages.
+# Default: 1515251998428102766
+memberRoleId: 1515251998428102766

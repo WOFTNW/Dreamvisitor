@@ -30,6 +30,7 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         List<DiscordCommand> addList = new ArrayList<>();
 
+		addList.add(new DCmdActivate());
         addList.add(new DCmdActivity());
         addList.add(new DCmdBroadcast());
         addList.add(new DCmdLink());

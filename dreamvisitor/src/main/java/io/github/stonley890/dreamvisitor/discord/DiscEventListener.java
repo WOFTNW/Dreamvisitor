@@ -48,12 +48,15 @@ public class DiscEventListener extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         User user = event.getAuthor();
+		Member member = event.getMember();
+		Guild guild = event.getGuild();
         MessageChannel channel = event.getChannel();
-        String username = event.getMessage().getContentRaw();
+		Message eventMessage = event.getMessage();
+	    String username = eventMessage.getContentRaw();
 
         // Delete poll results
-        if (event.getMessage().getEmbeds().stream().anyMatch((embed) -> embed.getType() == EmbedType.fromKey("poll_result"))) {
-            event.getMessage().delete().queue();
+        if (eventMessage.getEmbeds().stream().anyMatch((embed) -> embed.getType() == EmbedType.fromKey("poll_result"))) {
+            eventMessage.delete().queue();
         }
 
         Dreamvisitor plugin = Dreamvisitor.getPlugin();
@@ -76,8 +79,8 @@ public class DiscEventListener extends ListenerAdapter {
                     if (Infraction.hasBan(user.getIdLong())) {
                         builder.setColor(Color.RED).setTitle("You aren't allowed.")
                                 .setDescription("You aren't allowed to add accounts to the whitelist. Ask a staff member for help.");
-                        event.getMessage().replyEmbeds(builder.build()).queue();
-                        event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+                        eventMessage.replyEmbeds(builder.build()).queue();
+                        eventMessage.addReaction(Emoji.fromFormatted("❌")).queue();
                         return;
                     }
 
@@ -91,9 +94,9 @@ public class DiscEventListener extends ListenerAdapter {
                         builder.setTitle("❌ `" + username + "` could not be found!")
                                 .setDescription("Make sure you type your username exactly as shown in the bottom-right corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
                                 .setColor(Color.RED);
-                        event.getMessage().replyEmbeds(builder.build()).queue();
+                        eventMessage.replyEmbeds(builder.build()).queue();
 
-                        event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+                        eventMessage.addReaction(Emoji.fromFormatted("❌")).queue();
                         Dreamvisitor.debug("Failed whitelist.");
                     } else {
 
@@ -114,9 +117,9 @@ public class DiscEventListener extends ListenerAdapter {
                                 builder.setTitle("☑️ `" + username + "` is already whitelisted!")
                                         .setDescription("Check <#914620824332435456> for the server address and version.")
                                         .setColor(Color.BLUE);
-                                event.getMessage().replyEmbeds(builder.build()).queue();
+                                eventMessage.replyEmbeds(builder.build()).queue();
 
-                                event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
+                                eventMessage.addReaction(Emoji.fromFormatted("☑️")).queue();
                                 Dreamvisitor.debug("Resolved.");
                             } else {
                                 Dreamvisitor.debug("Player is not whitelisted.");
@@ -129,13 +132,19 @@ public class DiscEventListener extends ListenerAdapter {
                                 builder.setTitle("✅ `" + username + "` has been whitelisted!")
                                         .setDescription("Check <#914620824332435456> for the server address and version.")
                                         .setColor(Color.GREEN);
-                                event.getMessage().replyEmbeds(builder.build()).queue();
+                                eventMessage.replyEmbeds(builder.build()).queue();
 
-                                event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
+                                eventMessage.addReaction(Emoji.fromFormatted("✅")).queue();
 
                                 // Report this to system log channel
                                 Whitelist.report(username, uuid, event.getAuthor());
                             }
+							Role memberRole = guild.getRoleById(Dreamvisitor.getPlugin().getConfig().getLong("memberRoleId"));
+
+							// Add the member role
+							if (memberRole != null && member != null) {
+								guild.addRoleToMember(member, memberRole).queue();
+							}
                         } catch (IOException e) {
                             channel.sendMessage("There was a problem accessing the whitelist file. Please try again later.").queue();
                             if (Dreamvisitor.debugMode) throw new RuntimeException();
@@ -150,9 +159,9 @@ public class DiscEventListener extends ListenerAdapter {
                     builder.setTitle("⚠️ `" + username + "` contains illegal characters!")
                             .setDescription("Please send only your username in this channel. Usernames are alphanumeric and cannot contain spaces. Move conversation or questions elsewhere.")
                             .setColor(Color.YELLOW);
-                    event.getMessage().replyEmbeds(builder.build()).queue();
+                    eventMessage.replyEmbeds(builder.build()).queue();
 
-                    event.getMessage().addReaction(Emoji.fromFormatted("⚠")).queue();
+                    eventMessage.addReaction(Emoji.fromFormatted("⚠")).queue();
                 }
             }
         } catch (InsufficientPermissionException e) {
@@ -167,7 +176,7 @@ public class DiscEventListener extends ListenerAdapter {
 
                 List<String> badWords = BadWords.getBadWords();
 
-                Message chatMessage = event.getMessage();
+                Message chatMessage = eventMessage;
 
                 for (String badWord : badWords) {
 
@@ -180,14 +189,14 @@ public class DiscEventListener extends ListenerAdapter {
                 }
 
                 // Build message
-                Member author = event.getMessage().getMember();
+                Member author = eventMessage.getMember();
                 assert author != null;
 
                 ComponentBuilder message = new ComponentBuilder();
 
                 // include reply if one exists
                 String playerRepliedTo = null;
-                MessageReference messageReference = event.getMessage().getMessageReference();
+                MessageReference messageReference = eventMessage.getMessageReference();
                 if (messageReference != null) {
                     Message reference = messageReference.resolve().complete();
                     if (reference != null) {
@@ -215,9 +224,9 @@ public class DiscEventListener extends ListenerAdapter {
                 TextComponent authorText = new TextComponent(author.getEffectiveName());
                 authorText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(author.getUser().getName())));
 
-                TextComponent content = new TextComponent(event.getMessage().getContentRaw());
+                TextComponent content = new TextComponent(eventMessage.getContentRaw());
                 content.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("↱ Reply")));
-                content.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/chatback " + event.getMessage().getId()));
+                content.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/chatback " + eventMessage.getId()));
 
                 message.append("[Discord] ").color(ChatColor.BLUE).append("<").color(ChatColor.GRAY).append(authorText).append("> ").retain(ComponentBuilder.FormatRetention.FORMATTING)
                         .append(content);
@@ -247,7 +256,7 @@ public class DiscEventListener extends ListenerAdapter {
 
                 Dreamvisitor.debug("Sending console command from log channel...");
 
-                String message = event.getMessage().getContentRaw();
+                String message = eventMessage.getContentRaw();
 
                 // Running commands from log channel
                 Runnable runCommand = new BukkitRunnable() {
@@ -257,7 +266,7 @@ public class DiscEventListener extends ListenerAdapter {
                 Bukkit.getScheduler().runTask(plugin, runCommand);
 
             }
-        } else if (event.getMessage().getContentRaw().contains(Bot.getJda().getSelfUser().getAsMention())) {
+        } else if (eventMessage.getContentRaw().contains(Bot.getJda().getSelfUser().getAsMention())) {
 
             String[] responses = getResponses(event);
 
